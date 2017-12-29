@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<atom:feed xmlns:relevance="http://www.opensearch.org/Specifications/OpenSearch/Extensions/Relevance/1.0" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:atom="http://www.w3.org/2005/Atom">
+
+<atom:id>a3b773665671 </atom:id>
+<atom:title>Query Results for '(SI)ATA(RccordC reate I'Stamp between "2016-06-22 00:00:00M AND "2017-12-30 00:00:00" ))'</atom:title>
+<atom:updated>2017-12-13T03:17:10-PM</atom:updated>
+<atom:author>
+	<atom:name>TED Database</atom:name>
+</atom:author>
+
+<opensearch:totalResults> 15001 </opensearch:totalResults>
+<opensearch:startIndex>0</opensearch:startIndex>
+<opensearch:itemsPerPage>10</opensearch:itemsPerPage>
+
+<atom:link type="application/opensearchdescription+xml"	href="https://harmony.dodiis.ic.gov\TED/Search/Data.svc/Harmony-Search.xml" rel="search" />
+	
+<atom:link type="application/atom+xml" href="https://harmony.dodiis.ic.gov/TED/Search/Data.svc/Search?q=(SDATA" rel="next" />
+
+<atom:link type="application/atom+xml" href="https://harmony.dodiis.ic.gov/TED/Search/Data.svc/Search?q=" rel="self" />
+
+<atom:link type="application/atom+xml" href="https://harmony.dodiis.ic.gov/TED/Search/Data.svc/Search?q=(SDATA" rel="last" />
+
+	<atom:entry>
+		<atom:id>A54l22506B4A48309533C9i:B7I-8DI9Fi;</atom:id>
+		<atom:link href="https://harmony.dodiis.ic.gov/TED/Search/Data.svc/Documcnts/A54l22506B4A48309533C9EB7E8D19FE" rel="alternate" />
+		<atom:title>NMLC-2017-408580: |UNLXPLOI TLDl </atom:title>
+		<atom:updated>2017-02-06121:39:56.74 00:00</atom:updated>
+		<relevance:score> 100</relevance:score>
+	</atom:entry>
+
+	<atom:entry>
+		<atom:id>02D6032C086542BC8F687I49K9082490</atom:id>
+		<atom:link href="https://harmoiiy.dodiis.ic.gov/TED/Search/Data.svc/Documents/02D6032C086542BC8F687F49E9082490" rel="alternate" />
+		<atom:title>NMLC-2017-408571: An undated personal handwritten letter addressed toOum Mouhayminc	</atom:title>
+		<atom:updated>2017-02-06121:39:56.74 00:00</atom:updated>
+		<relevance:score>1OO</relevance:score>
+	</atom:entry>
+
+</atom:feed>

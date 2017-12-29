@@ -1,12 +1,14 @@
 package logging
 
 import (
+	"net/http"
+	"time"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"strings"
-	"github.com/util"
+	"github.com/go-martini/martini"
 )
 
 const (
@@ -22,7 +24,8 @@ const (
 
 var (
 	//LogLevelConfig is the level set by the env
-	logLevelConfig = util.GetSetEnv(logLevelEnv, "WARN")
+	logLevelConfig = "WARN"
+	httplog = log.New(os.Stdout, "", 0)
 )
 
 var (
@@ -128,4 +131,20 @@ func Info(formattedString string, params ...interface{}) {
 //Debug log
 func Debug(formattedString string, params ...interface{}) {
 	out.Log(LDebug, debugPrefix+formattedString, params...)
+}
+
+//Logging handles logging requests to stdout
+//this function is trigger during the request init
+func MartiniLogging(r *http.Request, w http.ResponseWriter, c martini.Context) {
+	t := time.Now()
+	c.Next()
+	remoteIP := r.RemoteAddr
+	if f := r.Header.Get("X-Forwarded-For"); len(f) > 0 {
+		remoteIP = strings.Split(f, ", ")[0]
+	}
+	agent := r.UserAgent()
+	if agent == "" {
+		agent = "unknown"
+	}
+	httplog.Printf("%v ~ %s ~ %s ~ %s ~ %d ~ %s ~ %s", time.Now().UTC().Format(time.RFC3339), remoteIP, r.Method, r.RequestURI, w.(martini.ResponseWriter).Status(), time.Since(t), agent)
 }

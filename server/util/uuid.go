@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 )
 
-// Generates a pseudo-random UUID string
+// GenUUID Generates a pseudo-random UUID string
 func GenUUID() (string, error) {
 	uuid := make([]byte, 16)
 	n, err := rand.Read(uuid)
