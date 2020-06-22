@@ -1,0 +1,6 @@
+name = ""
+log_to_file = false
+log_to_stdout = false
+log_directory = "logs/"
+config_directory = "configs/"
+template_directory = "templates/"

@@ -1,0 +1,317 @@
+[[tunnel_options]]
+  name = "England PoP"
+  username = ""
+  point_of_presence = 1
+  point_of_entry = 0
+
+  [[tunnel_options.nodes]]
+    cloud_provider = "Azure"
+    region = "West US"
+    image_name = "debian linux"
+    public_ip = ""
+    private_ip = ""
+    private_subnet = "172.16.14.0/24"
+    virtual_subnet = "172.16.20.0/28"
+    ssh_ips = ["0.0.0.0/0"]
+    ssh_port = "34724"
+    vpn_ips = ["0.0.0.0/0"]
+    vpn_ports = ["500", "4500"]
+    web_ips = [""]
+    web_ports = [""]
+    allow_all_traffic_out = false
+    ipv6_accept_template = "rules_accept.v6"
+    ipv6_accept_rules = [""]
+    ipv4_accept_template = "rules_accept.v4"
+    ipv4_accept_rules = [""]
+    ipv6_drop_template = "rules_drop.v6"
+    ipv6_drop_rules = [""]
+    ipv4_drop_template = "rules_drop.v4"
+    ipv4_drop_rules = [""]
+    ipsec_config_template = "ipsec.conf"
+    ipsec_config = [""]
+    ipsec_secrets_template = "ipsec.secrets"
+    ipsec_secrets = [""]
+    [tunnel_options.nodes.cloud_config]
+      computer_name = ""
+      network_security_group = ""
+      virtual_network = ""
+      disk_name = ""
+      public_ip_address = ""
+      network_interface = ""
+      storage_account = ""
+
+  [[tunnel_options.nodes]]
+    cloud_provider = "AWS"
+    region = "eu-west-2a"
+    image_name = "arch linux"
+    public_ip = ""
+    private_ip = ""
+    private_subnet = "192.168.76.0/24"
+    virtual_subnet = ""
+    ssh_ips = ["0.0.0.0/0"]
+    ssh_port = "3489"
+    vpn_ips = [""]
+    vpn_ports = ["500", "4500"]
+    web_ips = ["0.0.0.0/0"]
+    web_ports = ["80", "443"]
+    allow_all_traffic_out = true
+    ipv6_accept_template = "rules_accept.v6"
+    ipv6_accept_rules = [""]
+    ipv4_accept_template = "rules_accept.v4"
+    ipv4_accept_rules = [""]
+    ipv6_drop_template = "rules_drop.v6"
+    ipv6_drop_rules = [""]
+    ipv4_drop_template = "rules_drop.v4"
+    ipv4_drop_rules = [""]
+    ipsec_config_template = "ipsec.conf"
+    ipsec_config = [""]
+    ipsec_secrets_template = "ipsec.secrets"
+    ipsec_secrets = [""]
+    [tunnel_options.nodes.cloud_config]
+      vpc_id = ""
+      subnet_id = ""
+      route_table_id = ""
+      internet_gateway_id = ""
+      instance_id = ""
+      volume_id = ""
+      security_group_id = ""
+      elastic_ip_allocation_id = ""
+      key_pair_name = ""
+
+[[tunnel_options]]
+  name = "Singapore PoP"
+  username = ""
+  point_of_presence = 1
+  point_of_entry = 0
+
+  [[tunnel_options.nodes]]
+    cloud_provider = "Azure"
+    region = "East US"
+    image_name = "debian linux"
+    public_ip = ""
+    private_ip = ""
+    private_subnet = "10.32.84.0/24"
+    virtual_subnet = "10.32.90.0/28"
+    ssh_ips = ["0.0.0.0/0"]
+    ssh_port = "34937"
+    vpn_ips = ["0.0.0.0/0"]
+    vpn_ports = ["500", "4500"]
+    web_ips = [""]
+    web_ports = [""]
+    allow_all_traffic_out = false
+    ipv6_accept_template = "rules_accept.v6"
+    ipv6_accept_rules = [""]
+    ipv4_accept_template = "rules_accept.v4"
+    ipv4_accept_rules = [""]
+    ipv6_drop_template = "rules_drop.v6"
+    ipv6_drop_rules = [""]
+    ipv4_drop_template = "rules_drop.v4"
+    ipv4_drop_rules = [""]
+    ipsec_config_template = "ipsec.conf"
+    ipsec_config = [""]
+    ipsec_secrets_template = "ipsec.secrets"
+    ipsec_secrets = [""]
+    [tunnel_options.nodes.cloud_config]
+      computer_name = ""
+      network_security_group = ""
+      virtual_network = ""
+      disk_name = ""
+      public_ip_address = ""
+      network_interface = ""
+      storage_account = ""
+
+  [[tunnel_options.nodes]]
+    cloud_provider = "AWS"
+    region = "ap-southeast-1a"
+    image_name = "arch linux"
+    public_ip = ""
+    private_ip = ""
+    private_subnet = "192.168.55.0/24"
+    virtual_subnet = ""
+    ssh_ips = ["0.0.0.0/0"]
+    ssh_port = "32858"
+    vpn_ips = [""]
+    vpn_ports = ["500", "4500"]
+    web_ips = ["0.0.0.0/0"]
+    web_ports = ["80", "443"]
+    allow_all_traffic_out = true
+    ipv6_accept_template = "rules_accept.v6"
+    ipv6_accept_rules = [""]
+    ipv4_accept_template = "rules_accept.v4"
+    ipv4_accept_rules = [""]
+    ipv6_drop_template = "rules_drop.v6"
+    ipv6_drop_rules = [""]
+    ipv4_drop_template = "rules_drop.v4"
+    ipv4_drop_rules = [""]
+    ipsec_config_template = "ipsec.conf"
+    ipsec_config = [""]
+    ipsec_secrets_template = "ipsec.secrets"
+    ipsec_secrets = [""]
+    [tunnel_options.nodes.cloud_config]
+      vpc_id = ""
+      subnet_id = ""
+      route_table_id = ""
+      internet_gateway_id = ""
+      instance_id = ""
+      volume_id = ""
+      security_group_id = ""
+      elastic_ip_allocation_id = ""
+      key_pair_name = ""
+
+[[tunnel_options]]
+  name = "Australia PoP"
+  username = ""
+  point_of_presence = 1
+  point_of_entry = 0
+
+  [[tunnel_options.nodes]]
+    cloud_provider = "Azure"
+    region = "France Central"
+    image_name = "debian linux"
+    public_ip = ""
+    private_ip = ""
+    private_subnet = "10.33.56.0/24"
+    virtual_subnet = "10.33.60.0/28"
+    ssh_ips = ["0.0.0.0/0"]
+    ssh_port = "32547"
+    vpn_ips = ["0.0.0.0/0"]
+    vpn_ports = ["500", "4500"]
+    web_ips = [""]
+    web_ports = [""]
+    allow_all_traffic_out = false
+    ipv6_accept_template = "rules_accept.v6"
+    ipv6_accept_rules = [""]
+    ipv4_accept_template = "rules_accept.v4"
+    ipv4_accept_rules = [""]
+    ipv6_drop_template = "rules_drop.v6"
+    ipv6_drop_rules = [""]
+    ipv4_drop_template = "rules_drop.v4"
+    ipv4_drop_rules = [""]
+    ipsec_config_template = "ipsec.conf"
+    ipsec_config = [""]
+    ipsec_secrets_template = "ipsec.secrets"
+    ipsec_secrets = [""]
+    [tunnel_options.nodes.cloud_config]
+      computer_name = ""
+      network_security_group = ""
+      virtual_network = ""
+      disk_name = ""
+      public_ip_address = ""
+      network_interface = ""
+      storage_account = ""
+
+  [[tunnel_options.nodes]]
+    cloud_provider = "AWS"
+    region = "ap-southeast-2a"
+    image_name = "arch linux"
+    public_ip = ""
+    private_ip = ""
+    private_subnet = "10.30.60.0/24"
+    virtual_subnet = ""
+    ssh_ips = ["0.0.0.0/0"]
+    ssh_port = "47836"
+    vpn_ips = [""]
+    vpn_ports = ["500", "4500"]
+    web_ips = ["0.0.0.0/0"]
+    web_ports = ["80", "443"]
+    allow_all_traffic_out = true
+    ipv6_accept_template = "rules_accept.v6"
+    ipv6_accept_rules = [""]
+    ipv4_accept_template = "rules_accept.v4"
+    ipv4_accept_rules = [""]
+    ipv6_drop_template = "rules_drop.v6"
+    ipv6_drop_rules = [""]
+    ipv4_drop_template = "rules_drop.v4"
+    ipv4_drop_rules = [""]
+    ipsec_config_template = "ipsec.conf"
+    ipsec_config = [""]
+    ipsec_secrets_template = "ipsec.secrets"
+    ipsec_secrets = [""]
+    [tunnel_options.nodes.cloud_config]
+      vpc_id = ""
+      subnet_id = ""
+      route_table_id = ""
+      internet_gateway_id = ""
+      instance_id = ""
+      volume_id = ""
+      security_group_id = ""
+      elastic_ip_allocation_id = ""
+      key_pair_name = ""
+
+[[tunnel_options]]
+  name = "India PoP"
+  username = ""
+  point_of_presence = 1
+  point_of_entry = 0
+
+  [[tunnel_options.nodes]]
+    cloud_provider = "Azure"
+    region = "West Europe"
+    image_name = "debian linux"
+    public_ip = ""
+    private_ip = ""
+    private_subnet = "192.168.7.0/24"
+    virtual_subnet = "192.168.10.0/28"
+    ssh_ips = ["0.0.0.0/0"]
+    ssh_port = "37225"
+    vpn_ips = ["0.0.0.0/0"]
+    vpn_ports = ["500", "4500"]
+    web_ips = [""]
+    web_ports = [""]
+    allow_all_traffic_out = false
+    ipv6_accept_template = "rules_accept.v6"
+    ipv6_accept_rules = [""]
+    ipv4_accept_template = "rules_accept.v4"
+    ipv4_accept_rules = [""]
+    ipv6_drop_template = "rules_drop.v6"
+    ipv6_drop_rules = [""]
+    ipv4_drop_template = "rules_drop.v4"
+    ipv4_drop_rules = [""]
+    ipsec_config_template = "ipsec.conf"
+    ipsec_config = [""]
+    ipsec_secrets_template = "ipsec.secrets"
+    ipsec_secrets = [""]
+    [tunnel_options.nodes.cloud_config]
+      computer_name = ""
+      network_security_group = ""
+      virtual_network = ""
+      disk_name = ""
+      public_ip_address = ""
+      network_interface = ""
+      storage_account = ""
+
+  [[tunnel_options.nodes]]
+    cloud_provider = "Azure"
+    region = "West India"
+    image_name = "debian linux"
+    public_ip = ""
+    private_ip = ""
+    private_subnet = "172.16.111.0/24"
+    virtual_subnet = ""
+    ssh_ips = ["0.0.0.0/0"]
+    ssh_port = "39658"
+    vpn_ips = [""]
+    vpn_ports = ["500", "4500"]
+    web_ips = ["0.0.0.0/0"]
+    web_ports = ["80", "443"]
+    allow_all_traffic_out = true
+    ipv6_accept_template = "rules_accept.v6"
+    ipv6_accept_rules = [""]
+    ipv4_accept_template = "rules_accept.v4"
+    ipv4_accept_rules = [""]
+    ipv6_drop_template = "rules_drop.v6"
+    ipv6_drop_rules = [""]
+    ipv4_drop_template = "rules_drop.v4"
+    ipv4_drop_rules = [""]
+    ipsec_config_template = "ipsec.conf"
+    ipsec_config = [""]
+    ipsec_secrets_template = "ipsec.secrets"
+    ipsec_secrets = [""]
+    [tunnel_options.nodes.cloud_config]
+      computer_name = ""
+      network_security_group = ""
+      virtual_network = ""
+      disk_name = ""
+      public_ip_address = ""
+      network_interface = ""
+      storage_account = ""

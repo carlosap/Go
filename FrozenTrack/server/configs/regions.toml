@@ -1,0 +1,587 @@
+# Amazon Web Services Regions and Zones
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "us-east-1"
+  region_description = "North America"
+  location = "Virginia, USA"
+  node_type = "tunnel"
+  active = true
+  zones = [
+    "us-east-1a",
+    "us-east-1b",
+    "us-east-1c",
+    "us-east-1d",
+    "us-east-1e",
+    "us-east-1f"
+  ]
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "us-east-2"
+  region_description = "North America"
+  location = "Ohio, USA"
+  node_type = "tunnel"
+  active = true
+  zones = [
+    "us-east-2a",
+    "us-east-2b",
+    "us-east-2c"
+  ]
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "us-west-1"
+  region_description = "North America"
+  location = "California, USA"
+  node_type = "tunnel"
+  active = true
+  zones = [
+    "us-west-1a",
+    "us-west-1c"
+  ]
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "us-west-2"
+  region_description = "North America"
+  location = "Oregon, USA"
+  node_type = "tunnel"
+  active = true
+  zones = [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+  ]
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "ap-south-1"
+  region_description = "Asia"
+  location = "Mumbai, India"
+  node_type = "tunnel"
+  active = true
+  zones = [
+    "ap-south-1a",
+    "ap-south-1b"
+  ]
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "ap-northeast-2"
+  region_description = "Asia"
+  location = "Seoul, South Korea"
+  node_type = "tunnel"
+  active = true
+  zones = [
+    "ap-northeast-2a",
+    "ap-northeast-2c"
+  ]
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "ap-southeast-1"
+  region_description = "Asia"
+  location = "Singapore"
+  node_type = "tunnel"
+  active = true
+  zones = [
+    "ap-southeast-1a",
+    "ap-southeast-1b",
+    "ap-southeast-1c"
+  ]
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "ap-southeast-2"
+  region_description = "Australia"
+  location = "Sydney, Australia"
+  node_type = "tunnel"
+  active = true
+  zones = [
+    "ap-southeast-2a",
+    "ap-southeast-2b",
+    "ap-southeast-2c"
+  ]
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "ap-northeast-1"
+  region_description = "Asia"
+  location = "Tokyo, Japan"
+  node_type = "safe space"
+  active = true
+  zones = [
+    "ap-northeast-1a",
+    "ap-northeast-1b",
+    "ap-northeast-1c",
+    "ap-northeast-1d"
+  ]
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "ca-central-1"
+  region_description = "North America"
+  location = "Montreal, Canada"
+  node_type = "tunnel"
+  active = true
+  zones = [
+    "ca-central-1a",
+    "ca-central-1b"
+  ]
+
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "eu-central-1"
+  region_description = "Europe"
+  location = "Frankfurt, Germany"
+  node_type = "tunnel"
+  active = true
+  zones = [
+    "eu-central-1a",
+    "eu-central-1b",
+    "eu-central-1c"
+  ]
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "eu-west-1"
+  region_description = "Europe"
+  location = "Ireland"
+  node_type = "tunnel"
+  active = true
+  zones = [
+    "eu-west-1a",
+    "eu-west-1b",
+    "eu-west-1c"
+  ]
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "eu-west-2"
+  region_description = "Europe"
+  location = "London, England"
+  node_type = "tunnel"
+  active = true
+  zones = [
+    "eu-west-2a",
+    "eu-west-2b",
+    "eu-west-2c"
+  ]
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "eu-west-3"
+  region_description = "Europe"
+  location = "Paris, France"
+  node_type = "tunnel"
+  active = true
+  zones = [
+    "eu-west-3a",
+    "eu-west-3b",
+    "eu-west-3c"
+  ]
+
+[[regions_and_zones]]
+  provider = "aws"
+  region_name = "sa-east-1"
+  region_description = "South America"
+  location = "Sao Paulo, Brazil"
+  node_type = "tunnel"
+  active = true
+  zones = [
+    "sa-east-1a",
+    "sa-east-1c"
+  ]
+
+# Google Compute Engine Regions and Zones
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "northamerica-northeast1"
+  region_description = "North America"
+  location = "Montreal, Canada"
+  node_type = "tunnel"
+  active = false
+  zones = [
+    "northamerica-northeast1-a",
+    "northamerica-northeast1-b",
+    "northamerica-northeast1-c"
+  ]
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "us-central1"
+  region_description = "North America"
+  location = "Council Bluffs, Iowa, USA"
+  node_type = "tunnel"
+  active = false
+  zones = [
+    "us-central1-a",
+    "us-central1-b",
+    "us-central1-c",
+    "us-central1-f"
+  ]
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "us-west1"
+  region_description = "North America"
+  location = "The Dalles, Oregon, USA"
+  node_type = "tunnel"
+  active = false
+  zones = [
+    "us-west1-a",
+    "us-west1-b",
+    "us-west1-c"
+  ]
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "us-east4"
+  region_description = "North America"
+  location = "Ashburn, Virginia, USA"
+  node_type = "tunnel"
+  active = false
+  zones = [
+    "us-east4-a",
+    "us-east4-b",
+    "us-east4-c"
+  ]
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "us-east1"
+  region_description = "North America"
+  location = "Moncks Corner, South Carolina, USA"
+  node_type = "tunnel"
+  active = false
+  zones = [
+    "us-east1-b",
+    "us-east1-c",
+    "us-east1-d"
+  ]
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "southamerica-east1"
+  region_description = "South America"
+  location = "São Paulo, Brazil"
+  node_type = "tunnel"
+  active = false
+  zones = [
+    "southamerica-east1-a",
+    "southamerica-east1-b",
+    "southamerica-east1-c"
+  ]
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "europe-west1"
+  region_description = "Europe"
+  location = "St. Ghislain, Belgium"
+  node_type = "tunnel"
+  active = false
+  zones = [
+    "europe-west1-b",
+    "europe-west1-c",
+    "europe-west1-d"
+  ]
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "europe-west2"
+  region_description = "Europe"
+  location = "London, UK"
+  node_type = "tunnel"
+  active = false
+  zones = [
+    "europe-west2-a",
+    "europe-west2-b",
+    "europe-west2-c"
+  ]
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "europe-west3"
+  region_description = "Europe"
+  location = "Frankfurt, Germany"
+  node_type = "tunnel"
+  active = false
+  zones = [
+    "europe-west3-a",
+    "europe-west3-b",
+    "europe-west3-c"
+  ]
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "europe-west4"
+  region_description = "Europe"
+  location = "Eemshaven, Netherlands"
+  node_type = "tunnel"
+  active = false
+  zones = [
+    "europe-west4-a",
+    "europe-west4-b",
+    "europe-west4-c"
+  ]
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "asia-south1"
+  region_description = "Asia"
+  location = "Mumbai, India"
+  node_type = "tunnel"
+  active = false
+  zones = [
+    "asia-south1-a",
+    "asia-south1-b",
+    "asia-south1-c"
+  ]
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "asia-southeast1"
+  region_description = "Asia"
+  location = "Jurong West, Singapore"
+  node_type = "tunnel"
+  active = false
+  zones = [
+    "asia-southeast1-a",
+    "asia-southeast1-b"
+  ]
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "asia-east1"
+  region_description = "Asia"
+  location = "Changhua County, Taiwan"
+  node_type = "tunnel"
+  active = false
+  zones = [
+    "asia-east1-a",
+    "asia-east1-b",
+    "asia-east1-c"
+  ]
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "asia-northeast1"
+  region_description = "Asia"
+  location = "Tokyo, Japan"
+  node_type = "safe space"
+  active = false
+  zones = [
+    "asia-northeast1-a",
+    "asia-northeast1-b",
+    "asia-northeast1-c"
+  ]
+
+[[regions_and_zones]]
+  provider = "gce"
+  region_name = "australia-southeast1"
+  region_description = "Australia"
+  location = "Sydney, Australia"
+  node_type = "tunnel"
+  active = false
+  zones = [
+    "australia-southeast1-a",
+    "australia-southeast1-b",
+    "australia-southeast1-c"
+  ]
+
+# Azure Cloud Regions and Zones
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "Australia East"
+  region_description = "Australia"
+  location = "New South Wales, Australia"
+  node_type = "tunnel"
+  active = true
+  zones =["Australia East"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "Australia Southeast"
+  region_description = "Australia"
+  location = "Victoria, Australia"
+  node_type = "tunnel"
+  active = true
+  zones =["Australia Southeast"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "Brazil South"
+  region_description = "South America"
+  location = "Sao Paulo State, Brazil"
+  node_type = "tunnel"
+  active = true
+  zones =["Brazil South"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "Canada Central"
+  region_description = "North America"
+  location = "Toronto, Canada"
+  node_type = "tunnel"
+  active = true
+  zones =["Canada Central"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "Canada East"
+  region_description = "North America"
+  location = "Quebec City, Canada"
+  node_type = "tunnel"
+  active = true
+  zones =["Canada East"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "Central India"
+  region_description = "Asia"
+  location = "Pune, India"
+  node_type = "tunnel"
+  active = true
+  zones =["Central India"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "Central US"
+  region_description = "North America"
+  location = "Iowa, USA"
+  node_type = "tunnel"
+  active = true
+  zones =["Central US"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "East Asia"
+  region_description = "Asia"
+  location = "Hong Kong"
+  node_type = "safe space"
+  active = true
+  zones =["East Asia"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "East US"
+  region_description = "North America"
+  location = "Virginia, USA"
+  node_type = "tunnel"
+  active = true
+  zones =[
+    "East US",
+    "East US 2"
+  ]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "France Central"
+  region_description = "Europe"
+  location = "Paris, France"
+  node_type = "tunnel"
+  active = true
+  zones =["France Central"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "Japan East"
+  region_description = "Asia"
+  location = "Tokyo, Japan"
+  node_type = "safe space"
+  active = true
+  zones =["Japan East"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "Japan West"
+  region_description = "Asia"
+  location = "Osaka, Japan"
+  node_type = "safe space"
+  active = true
+  zones =["Japan West"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "Korea Central"
+  region_description = "Asia"
+  location = "Seoul, South Korea"
+  node_type = "tunnel"
+  active = true
+  zones =["Korea Central"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "North Central US"
+  region_description = "North America"
+  location = "Illinois, USA"
+  node_type = "tunnel"
+  active = true
+  zones =["North Central US"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "North Europe"
+  region_description = "Europe"
+  location = "Ireland"
+  node_type = "tunnel"
+  active = true
+  zones =["North Europe"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "South Central US"
+  region_description = "North America"
+  location = "Texas, USA"
+  node_type = "tunnel"
+  active = true
+  zones =["South Central US"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "South India"
+  region_description = "Asia"
+  location = "Chennai, India"
+  node_type = "tunnel"
+  active = true
+  zones =["South India"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "Southeast Asia"
+  region_description = "Asia"
+  location = "Singapore"
+  node_type = "tunnel"
+  active = true
+  zones =["Southeast Asia"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "UK South"
+  region_description = "Europe"
+  location = "London, UK"
+  node_type = "tunnel"
+  active = true
+  zones =["UK South"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "UK West"
+  region_description = "Europe"
+  location = "Cardiff, UK"
+  node_type = "tunnel"
+  active = true
+  zones =["UK West"]
+
+[[regions_and_zones]]
+  provider = "azure"
+  region_name = "West Central US"
+  region_description = "North America"
+  location = "Wyoming, USA"
+  node_type = "tunnel"
+  active = true
+  zones =["West Central US"]
