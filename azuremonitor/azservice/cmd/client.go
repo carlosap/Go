@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/aagon00/CommonMarket/elysiumlocalization/localizationservice/config"
+	"github.com/Go/azuremonitor/azservice/config"
 )
 
 type Client struct {
@@ -58,7 +58,7 @@ func (c *Client) getHeadLineNews(ip *IpapiResponse) (*HeadLineNews, error) {
 	long := fmt.Sprintf("%f", ip.Longitude)
 
 	url := fmt.Sprintf("%s%s", c.AppConfig.News.URL, ip.CountryCode)
-	fmt.Println("News URL: ", url)
+	//fmt.Println("News URL: ", url)
 	err := n.doHeadLineNewsRequest(url, c.AppConfig.News.Key, lat, long, ip.IP)
 	if err != nil {
 		return n, err
@@ -92,7 +92,7 @@ func executeRequest(req *http.Request, options map[string]string) ([]byte, error
 		return nil, err
 	}
 
-	fmt.Printf("body: %s\n", string(body))
+	//fmt.Printf("body: %s\n", string(body))
 	return body, nil
 }
 

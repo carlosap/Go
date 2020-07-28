@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/aagon00/CommonMarket/elysiumlocalization/localizationservice/cmd"
+	"github.com/Go/azuremonitor/azservice/cmd"
 )
 
 func main() {
