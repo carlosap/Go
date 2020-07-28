@@ -28,16 +28,5 @@
     "description_line1": "Access current weather data for any location including over 200,000 cities",
     "description_line2": "Current weather is frequently updated based on global models and data from more than 40,000 weather stations",
     "description_line3": ""
-  },
-  "news": {
-    "name": "News API",
-    "url": "https://edaemonnews.cognitiveservices.azure.com/bing/v7.0/news/search?q=&count=20&cc=",
-    "key": "9ee00989a64643f6a9d53be12d6ed3c2",
-    "command": "news",
-    "command_comments": "Search the web for news articles by country code",
-    "description_line1": "Results include details like authoritative image of the news article",
-    "description_line2": "related news and categories, provider info, article URL, and date added.",
-    "description_line3": ""
   }
-
 }

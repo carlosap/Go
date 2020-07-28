@@ -52,20 +52,6 @@ func (c *Client) getWeather(ip *IpapiResponse) (*Weather, error) {
 	return w, nil
 }
 
-func (c *Client) getHeadLineNews(ip *IpapiResponse) (*HeadLineNews, error) {
-	n := &HeadLineNews{}
-	lat := fmt.Sprintf("%f", ip.Latitude)
-	long := fmt.Sprintf("%f", ip.Longitude)
-
-	url := fmt.Sprintf("%s%s", c.AppConfig.News.URL, ip.CountryCode)
-	//fmt.Println("News URL: ", url)
-	err := n.doHeadLineNewsRequest(url, c.AppConfig.News.Key, lat, long, ip.IP)
-	if err != nil {
-		return n, err
-	}
-
-	return n, nil
-}
 
 // loads the application configurations
 func loadConfig(filename string) (*config.AppConfig, error) {

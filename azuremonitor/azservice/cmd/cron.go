@@ -29,8 +29,8 @@ func init() {
 func setScheduleCronCommand() (*cobra.Command, error) {
 
 	cmd := &cobra.Command{
-		Use:   "auto",
-		Short: "Runs endless sequenses of API discoveries (ip, weather, headlines, etc..)",
+		Use:   "start",
+		Short: "Runs endless sequenses of API discoveries (ip, weather, forecast, etc..)",
 		Long: `Scheduler that runs every hour to refresh latest API responses.
 `,
 	}
@@ -52,62 +52,59 @@ func setScheduleCronCommand() (*cobra.Command, error) {
 			delta := time.Now().Sub(startTime)
 			clearTerminal()
 			fmt.Printf("[%d] auto discovery running since: [%vhr]:[%vmin]:[%vsec]\n", ctr, delta.Hours(), delta.Minutes(), delta.Seconds())
-			ip, err := IpInfo.getIpInfo(true)
-			if err != nil {
-				fmt.Printf("Warning: ip info failed. Check internet connection %v\n", err)
-			}
-			ip.Print()
-			err = ip.clientIpInfoResponse()
-			if err != nil {
-				fmt.Printf("ip socket response:::%v\n", err)
-			}
 
+			ip := sendIpInfo(IpInfo)
 			if len(ip.IP) > 0 {
-
-				w := &Weather{}
-				w, err = w.getWeather(ip)
-				if err != nil {
-					fmt.Printf("Warning: ip info failed. retrieve weather %v\n", err)
-				}
-
-				w.Print()
-				err := w.clientWeatherResponse()
-				if err != nil {
-					fmt.Printf("Warnning: weather response:::%v\n", err)
-				}
-
-				f := &ForeCast{}
-				f, err = f.getForeCast(ip)
-				if err != nil {
-					fmt.Printf("forecast failed. retrieve forecast %v\n", err)
-				}
-
-				f.Print()
-				err = f.clientForecastResponse()
-				if err != nil {
-					fmt.Printf("forecast response:::%v\n", err)
-				}
-
-				n := &HeadLineNews{}
-				n, err = n.getHeadLineNews(ip)
-				if err != nil {
-					fmt.Printf("retrieve news %v\n", err)
-				}
-
-				n.Print()
-				err = n.clientNewsResponse()
-				if err != nil {
-					fmt.Printf("news response:::%v\n", err)
-				}
+				sendWeather(ip)
+				sendForecast(ip)
 			}
-
 		})
 
 		c.Start()
-		//fmt.Scanln()
 		startServer()
 		return nil
 	}
 
 	return cmd, nil
+}
+
+func sendIpInfo(IpInfo *IpapiResponse) *IpapiResponse {
+	ip, err := IpInfo.getIpInfo(true)
+	if err != nil {
+		fmt.Printf("Warning: ip info failed. Check internet connection %v\n", err)
+	}
+	ip.Print()
+	err = ip.clientIpInfoResponse()
+	if err != nil {
+		fmt.Printf("ip socket response:::%v\n", err)
+	}
+	return ip
+}
+
+func sendWeather(ip *IpapiResponse) {
+	w := &Weather{}
+	w, err := w.getWeather(ip)
+	if err != nil {
+		fmt.Printf("Warning: ip info failed. retrieve weather %v\n", err)
+	}
+
+	w.Print()
+	err = w.clientWeatherResponse()
+	if err != nil {
+		fmt.Printf("Warnning: weather response:::%v\n", err)
+	}
+}
+
+func sendForecast(ip *IpapiResponse) {
+	f := &ForeCast{}
+	f, err := f.getForeCast(ip)
+	if err != nil {
+		fmt.Printf("forecast failed. retrieve forecast %v\n", err)
+	}
+
+	f.Print()
+	err = f.clientForecastResponse()
+	if err != nil {
+		fmt.Printf("forecast response:::%v\n", err)
+	}
 }

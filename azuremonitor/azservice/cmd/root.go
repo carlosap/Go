@@ -124,13 +124,11 @@ func startServer() {
 	router.HandleFunc("/weather", weatherHandler).Methods("POST")
 	router.HandleFunc("/forecast", forecastHandler).Methods("POST")
 	router.HandleFunc("/ip", ipInfoHandler).Methods("POST")
-	router.HandleFunc("/news", newsHandler).Methods("POST")
 	router.HandleFunc("/ws", wsHandle)
 	go doBroadcast()
 	go doBroadcastWeather()
 	go doBroadcastForecast()
 	go doBroadcastIpInfo()
-	go doBroadcastNews()
 	log.Fatal(http.ListenAndServe(":5000", router))
 }
 
