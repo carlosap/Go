@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<div id="msg"></div>
+<script>
+    //npm install -g live-server
+    //curl -H "Accept: application/json" -d "{\"msg\": \"hello from termianl66454\"}" -X POST localhost:5000/messanger
+    let msgEl = document.getElementById("msg");
+    let socket = new WebSocket("ws://localhost:3000/ws");
+    console.log("attempting websocket connection");
+    socket.onopen = () => {
+        console.log("successfully connected");
+        socket.send('hi from client');
+    };
+
+    socket.onclose = (event) => {
+        console.log("socket closed connection: ", event);
+    };
+
+    const update = () => {
+        socket.onmessage = (event) => {
+            msgEl.textContent = event.data;
+            //console.log(msg)
+        };
+    };
+
+    socket.onerror = (error) => {
+        console.log("Socket Error: ", error)
+    };
+    window.setTimeout(update);
+</script>
+</body>
+</html>
