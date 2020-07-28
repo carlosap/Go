@@ -2,7 +2,7 @@
   "ip": {
     "name": "Ip API",
     "url": "http://api.ipapi.com",
-    "key": "07df4e39065fa7fb03c2ba89ba80566f",
+    "key": "",
     "command": "ip",
     "command_comments": "Retrieves ip address, city , timezone, geolocation, country, etc",
     "description_line1": "An API to find your location, city, ip address, timezone,",
@@ -12,7 +12,7 @@
   "weather": {
     "name": "Open Weather API",
     "url": "https://api.openweathermap.org/data/2.5",
-    "key": "ed9e48845a3ad5c5090bcf25ac0e5a6f",
+    "key": "",
     "command": "weather",
     "command_comments": "Get current weather",
     "description_line1": "Access current weather data for any location including over 200,000 cities",
@@ -22,7 +22,7 @@
   "forecast": {
     "name": "Open Weather API",
     "url": "https://api.openweathermap.org/data/2.5",
-    "key": "ed9e48845a3ad5c5090bcf25ac0e5a6f",
+    "key": "",
     "command": "forecast",
     "command_comments": "Get weather forecast",
     "description_line1": "Access current weather data for any location including over 200,000 cities",
