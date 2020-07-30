@@ -4,16 +4,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	externalip "github.com/glendc/go-external-ip"
-	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
-	"github.com/spf13/cobra"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/exec"
 	"runtime"
+
+	externalip "github.com/glendc/go-external-ip"
+	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
+	"github.com/spf13/cobra"
 )
 
 type MessageToken struct {
@@ -133,7 +134,9 @@ func startServer() {
 }
 
 func homePageHandle(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Home page")
+	//funciton there you read the index.html
+	//take that out string
+	fmt.Fprintf(w, "<strong>Home page</strong>")
 }
 
 func writer(msg *MessageToken) {

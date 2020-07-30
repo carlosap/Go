@@ -2,3 +2,4 @@
 /logs
 *.exe
 ipinfo.json
+config.json

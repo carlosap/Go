@@ -53,6 +53,7 @@ func (c *Client) getWeather(ip *IpapiResponse) (*Weather, error) {
 }
 
 
+
 // loads the application configurations
 func loadConfig(filename string) (*config.AppConfig, error) {
 
@@ -78,7 +79,7 @@ func executeRequest(req *http.Request, options map[string]string) ([]byte, error
 		return nil, err
 	}
 
-	//fmt.Printf("body: %s\n", string(body))
+	fmt.Printf("body: %s\n", string(body))
 	return body, nil
 }
 
