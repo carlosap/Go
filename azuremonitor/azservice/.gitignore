@@ -3,3 +3,4 @@
 *.exe
 ipinfo.json
 config.json
+/config.json
