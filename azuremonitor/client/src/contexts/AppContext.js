@@ -7,25 +7,6 @@ let socket = null;
 const AppContextProvider = (props) => {
 
     const [isConnection, setConnection] = useState(false);
-    // const [weather, setWeather] = useReducer(appReducer, {}, () => {
-    //     const data = localStorage.getItem('weather');
-    //     return data ? JSON.parse(data) : {}
-    // });
-
-    // const [forecast, setForecast] = useReducer(appReducer, {}, () => {
-    //     const data = localStorage.getItem('forecast');
-    //     return data ? JSON.parse(data) : {}
-    // });
-
-    // const [ipinfo, setIpInfo] = useReducer(appReducer, {}, () => {
-    //     const data = localStorage.getItem('ipinfo');
-    //     return data ? JSON.parse(data) : {}
-    // });
-
-    // const [news, setNews] = useReducer(appReducer, {}, () => {
-    //     const data = localStorage.getItem('news');
-    //     return data ? JSON.parse(data) : {}
-    // });
 
     const [state, dispatch] = useReducer(appReducer, {}, () => {
         const weather = localStorage.getItem('weather');
