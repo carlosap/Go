@@ -3,34 +3,34 @@ import {makeStyles} from '@material-ui/core/styles'
 import {Divider, Typography, Paper} from '@material-ui/core';
 
 const useStyles = makeStyles({
-    title:{
+   amountText: {
 
-    },
+   }
 })
 
 const AnalyticsWidget = (props) => {
     const styles = useStyles()
 
     return (
-        <Paper style={{padding:'10px'}} elevation={3}>
-            <div>
-                <Typography color='primary' variant='h6'>
+        <Paper elevation={3}>
+            <div style={{padding:'10px'}}>
+                <Typography style={{marginBottom: '10px'}} color='primary' variant='h6'>
                     {props.title}
                 </Typography>
-            </div>
-            <Divider style={{marginBottom: '10px'}}/>
-            <div>
-                <Typography>
-                    ${props.amount}
-                </Typography>
+
+                <Divider style={{marginBottom: '10px'}}/>
+
+                <div style={{textAlign:'center'}}>  
+                    <Typography color='textPrimary' variant='h4'>
+                        ${props.amount}
+                    </Typography>
+                </div>
             </div>
 
-            <div style={{marginBottom: '10px', paddingLeft: '-10px'}} >
-                <Divider/>
-            </div>
+            <Divider />
 
-            <div>
-                <Typography>
+            <div style={{padding:'10px'}}>
+                <Typography color='textSecondary' variant="subtitle2">
                     {props.description}
                 </Typography>
             </div>

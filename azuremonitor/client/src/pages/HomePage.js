@@ -42,6 +42,7 @@ const HomePage = () => {
                             description="This is the current cost of all of the current resources being used"
                         />
                     </div>
+
                     <div className={styles.widget}>
                         <AnalyticsWidget 
                             title="Savings From Optimization" 
@@ -49,6 +50,7 @@ const HomePage = () => {
                             description="This is the current cost of all of the current resources being used"
                         />
                     </div>
+                    
                     <div className={styles.widget}>
                         <AnalyticsWidget 
                             title="Cost after Optimization" 
