@@ -3,6 +3,7 @@ import {makeStyles} from '@material-ui/core/styles'
 import {Grid} from "@material-ui/core"
 
 import AnalyticsWidget from '../components/AnalyticsWidget'
+import ResourcesTable from '../components/ResourcesTable'
 import Logo from "../assets/images/Honeywell-Logo-17.jpg"
 
 const useStyles = makeStyles({
@@ -28,7 +29,7 @@ const HomePage = () => {
 
     return (
 
-        <Grid style={{padding:'10px'}}container>
+        <Grid style={{padding:'10px'}} container spacing={2}>
             <Grid style={{display:'flex'}} sm={12} item justify="space-between">
                 <div>
                     <img className={styles.logo} src={Logo} alt={"logo"} width={270}></img>
@@ -59,6 +60,10 @@ const HomePage = () => {
                         />
                     </div>
                 </div>
+            </Grid>
+
+            <Grid style={{padding:'30px'}} item sm={12}>
+                <ResourcesTable/>
             </Grid>
         </Grid>
     )
