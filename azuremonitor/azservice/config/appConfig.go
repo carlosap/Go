@@ -49,6 +49,25 @@ type AppConfig struct {
 		SubscriptionID   string `json:"subscription_id"`
 		TenantID         string `json:"tenant_id"`
 	} `json:"resources"`
+	SubscriptionInfo struct {
+		Command          string `json:"command"`
+		CommandComments  string `json:"command_comments"`
+		DescriptionLine1 string `json:"description_line1"`
+		DescriptionLine2 string `json:"description_line2"`
+		DescriptionLine3 string `json:"description_line3"`
+		Name             string `json:"name"`
+		URL              string `json:"url"`
+		SubscriptionID   string `json:"subscription_id"`
+	} `json:"subscriptioninfo"`
+	RecommendationList struct {
+		Command          string `json:"command"`
+		CommandComments  string `json:"command_comments"`
+		DescriptionLine1 string `json:"description_line1"`
+		DescriptionLine2 string `json:"description_line2"`
+		DescriptionLine3 string `json:"description_line3"`
+		Name             string `json:"name"`
+		URL              string `json:"url"`
+	} `json:"recommendationlist"`
 	Weather struct {
 		Command          string `json:"command"`
 		CommandComments  string `json:"command_comments"`
