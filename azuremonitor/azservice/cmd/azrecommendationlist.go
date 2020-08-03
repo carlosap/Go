@@ -2,20 +2,23 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"net/http"
-	"fmt"
 	"os"
-	"strings"
+	"time"
 )
 
 type RecommendationList struct {
-	Value []Value `json:"value"`
+	Value []RecommendationValue `json:"value"`
 }
-type Properties struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
+
+type RecommendationValue struct {
+	Properties Properties `json:"properties,omitempty"`
+	ID         string     `json:"id"`
+	Type       string     `json:"type"`
+	Name       string     `json:"name"`
 }
 type SupportedValues struct {
 	RecommendationCategory string       `json:"recommendationCategory"`
@@ -26,41 +29,25 @@ type SupportedValues struct {
 	Properties             []Properties `json:"properties"`
 }
 type Properties struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 	DisplayName         string            `json:"displayName"`
 	DependsOn           []string          `json:"dependsOn"`
 	ApplicableScenarios []string          `json:"applicableScenarios"`
 	SupportedValues     []SupportedValues `json:"supportedValues"`
+
+	//adding additional fields to support recommendaitons by subscription
+	Category             string             `json:"category"`
+	Impact               string             `json:"impact"`
+	ImpactedField        string             `json:"impactedField"`
+	ImpactedValue        string             `json:"impactedValue"`
+	LastUpdated          time.Time          `json:"lastUpdated"`
+	RecommendationTypeID string             `json:"recommendationTypeId"`
+	ShortDescription     ShortDescription   `json:"shortDescription"`
+	ExtendedProperties   ExtendedProperties `json:"extendedProperties"`
+	ResourceMetadata     ResourceMetadata   `json:"resourceMetadata"`
 }
-type SupportedValues struct {
-	ID          string `json:"id"`
-	DisplayName string `json:"displayName"`
-}
-type Properties struct {
-	DisplayName         string            `json:"displayName"`
-	ApplicableScenarios []string          `json:"applicableScenarios"`
-	SupportedValues     []SupportedValues `json:"supportedValues"`
-}
-type Properties struct {
-	DisplayName     string            `json:"displayName"`
-	SupportedValues []SupportedValues `json:"supportedValues"`
-}
-type Properties struct {
-	DisplayName         string            `json:"displayName"`
-	ApplicableScenarios []string          `json:"applicableScenarios"`
-	SupportedValues     []SupportedValues `json:"supportedValues"`
-}
-type Value struct {
-	Properties Properties `json:"properties,omitempty"`
-	ID         string     `json:"id"`
-	Type       string     `json:"type"`
-	Name       string     `json:"name"`
-	Properties Properties `json:"properties,omitempty"`
-	Properties Properties `json:"properties,omitempty"`
-	Properties Properties `json:"properties,omitempty"`
-	Properties Properties `json:"properties,omitempty"`
-	Properties Properties `json:"properties,omitempty"`
-	Properties Properties `json:"properties,omitempty"`
-}
+
 
 func init() {
 
@@ -141,7 +128,95 @@ func (r *RecommendationList) Print() {
 	fmt.Println("----------------------------------------")
 
 	for i := 0; i < len(r.Value); i++ {
+
 		recommendaiton := r.Value[i]
-		for x := 0; x < len(recommendaiton.Properties.)
+		switch recommendaiton.Properties.DisplayName {
+		case "Recommendation Type":
+			printRecommendationTypes(recommendaiton)
+		case "Category":
+			printRecommendationCategory(recommendaiton)
+		case "Impact":
+			printRecommendationImpact(recommendaiton)
+		case "Supported Resource Type":
+			printRecommendationResource(recommendaiton)
+		case "Level":
+			printRecommendationLevel(recommendaiton)
+		case "Status":
+			printRecommendationStatus(recommendaiton)
+		case "Initiated By":
+			printRecommendationInitiatedBy(recommendaiton)
+		default:
+			fmt.Printf("default: a is %s\n", recommendaiton.Properties.DisplayName)
+		}
+
+	}
+}
+
+func printRecommendationTypes(recommendaiton RecommendationValue) {
+	fmt.Printf("Name: %s\n", recommendaiton.Properties.DisplayName)
+	fmt.Println("----------------------------------------\n")
+	for x := 0; x < len(recommendaiton.Properties.SupportedValues); x++ {
+		v := recommendaiton.Properties.SupportedValues[x]
+		fmt.Printf("Category [%s] Impact [%s] Type [%s] - %s\n", v.RecommendationCategory, v.RecommendationImpact, v.SupportedResourceType, v.DisplayName)
+	}
+}
+
+func printRecommendationCategory(recommendaiton RecommendationValue) {
+	fmt.Println("----------------------------------------\n")
+	fmt.Printf("Name: %s\n", recommendaiton.Properties.DisplayName)
+	fmt.Println("----------------------------------------\n")
+	for x := 0; x < len(recommendaiton.Properties.SupportedValues); x++ {
+		v := recommendaiton.Properties.SupportedValues[x]
+		fmt.Printf("ID [%s] - [%s]\n", v.ID, v.DisplayName)
+	}
+}
+
+func printRecommendationImpact(recommendaiton RecommendationValue) {
+	fmt.Println("----------------------------------------\n")
+	fmt.Printf("Name: %s\n", recommendaiton.Properties.DisplayName)
+	fmt.Println("----------------------------------------\n")
+	for x := 0; x < len(recommendaiton.Properties.SupportedValues); x++ {
+		v := recommendaiton.Properties.SupportedValues[x]
+		fmt.Printf("ID [%s] - [%s]\n", v.ID, v.DisplayName)
+	}
+}
+
+func printRecommendationResource(recommendaiton RecommendationValue) {
+	fmt.Println("----------------------------------------\n")
+	fmt.Printf("Name: %s\n", recommendaiton.Properties.DisplayName)
+	fmt.Println("----------------------------------------\n")
+	for x := 0; x < len(recommendaiton.Properties.SupportedValues); x++ {
+		v := recommendaiton.Properties.SupportedValues[x]
+		fmt.Printf("ID [%s] - [%s]\n", v.ID, v.DisplayName)
+	}
+}
+
+func printRecommendationLevel(recommendaiton RecommendationValue) {
+	fmt.Println("----------------------------------------\n")
+	fmt.Printf("Name: %s\n", recommendaiton.Properties.DisplayName)
+	fmt.Println("----------------------------------------\n")
+	for x := 0; x < len(recommendaiton.Properties.SupportedValues); x++ {
+		v := recommendaiton.Properties.SupportedValues[x]
+		fmt.Printf("ID [%s] - [%s]\n", v.ID, v.DisplayName)
+	}
+}
+
+func printRecommendationStatus(recommendaiton RecommendationValue) {
+	fmt.Println("----------------------------------------\n")
+	fmt.Printf("Name: %s\n", recommendaiton.Properties.DisplayName)
+	fmt.Println("----------------------------------------\n")
+	for x := 0; x < len(recommendaiton.Properties.SupportedValues); x++ {
+		v := recommendaiton.Properties.SupportedValues[x]
+		fmt.Printf("ID [%s] - [%s]\n", v.ID, v.DisplayName)
+	}
+}
+
+func printRecommendationInitiatedBy(recommendaiton RecommendationValue) {
+	fmt.Println("----------------------------------------\n")
+	fmt.Printf("Name: %s\n", recommendaiton.Properties.DisplayName)
+	fmt.Println("----------------------------------------\n")
+	for x := 0; x < len(recommendaiton.Properties.SupportedValues); x++ {
+		v := recommendaiton.Properties.SupportedValues[x]
+		fmt.Printf("ID [%s] - [%s]\n", v.ID, v.DisplayName)
 	}
 }
