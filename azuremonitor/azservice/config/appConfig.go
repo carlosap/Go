@@ -77,6 +77,15 @@ type AppConfig struct {
 		Name             string `json:"name"`
 		URL              string `json:"url"`
 	} `json:"recommendation"`
+	ResourceGroups struct {
+		Command          string `json:"command"`
+		CommandComments  string `json:"command_comments"`
+		DescriptionLine1 string `json:"description_line1"`
+		DescriptionLine2 string `json:"description_line2"`
+		DescriptionLine3 string `json:"description_line3"`
+		Name             string `json:"name"`
+		URL              string `json:"url"`
+	} `json:"resourcegroups"`
 	Weather struct {
 		Command          string `json:"command"`
 		CommandComments  string `json:"command_comments"`
