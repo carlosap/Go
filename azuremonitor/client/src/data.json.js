@@ -9,13 +9,11 @@ const data =
                     {
                         resourceName: "cs210032000a0f50565",
                         type: "Storage Account",
-                        consumption: "Consumption description 1",
+                        consumption: "Storage Being Used: 24%",
                         usage: 20000,
-                        savings: 5000,
+                        savings: 4000,
                         recommendations: [
-                            "Recommendation #1",
-                            "Recommendation #1.1",
-                            "Recommendation #1.2",
+                            "Only 24% of your storage is being used. You could save $xxx.xx/month if you switch to a smaller max storage size.",
                         ]
                     }
                 ]
@@ -26,13 +24,12 @@ const data =
                     {
                         resourceName: "DefaultWorkspace-bb07e91d-a908-4fe4-a04e-40cf2d4b0603-EUS",
                         type: "Log Analytics workspace",
-                        consumption: "Consumption description 3",
+                        consumption: "58gb",
                         usage: 30000,
                         savings: 1000,
                         recommendations: [
-                            "Recommendation #3",
-                            "Recommendation #3.1",
-                            "Recommendation #3.2"
+                            "On average, we are logging 58 GB per day and are currently on the 200 GB per day plan. You could save $xx.xx/day if you lower your capacity.",
+                            "On average, you are using 3203 notifications per month. If you switch to the pay as you go plan, you could save $xx.xxx"
                         ]
                     },
                     {
@@ -42,7 +39,7 @@ const data =
                         usage: 40010,
                         savings: 3000,
                         recommendations: [
-                            "Recommendation #4"
+                            
                         ]
                     },
                 ]
@@ -69,7 +66,8 @@ const data =
                         usage: 40010,
                         savings: 3000,
                         recommendations: [
-                            "Recommendation #4"
+                            "On average, only 32% of CPU is being used. You could save $xx.xx if you lower XXXX to XXXX",
+                            "Only 16% of storage is being used. You could save $xx.xxx if you lower storage to XXXX"
                         ]
                     },
                     {
@@ -79,8 +77,7 @@ const data =
                         usage: 50000,
                         savings: 5000,
                         recommendations: [
-                            "Recommendation #5",
-                            "Recommendation #5.1"
+                            
                         ]
                     },
                     {
@@ -90,19 +87,9 @@ const data =
                         usage: 50000,
                         savings: 5000,
                         recommendations: [
-                            "Recommendation #5",
-                            "Recommendation #5.1"
-                        ]
-                    },
-                    {
-                        resourceName: "elysium-nsg",
-                        type: "Network Security Group",
-                        consumption: "Consumption description 5",
-                        usage: 50000,
-                        savings: 5000,
-                        recommendations: [
-                            "Recommendation #5",
-                            "Recommendation #5.1"
+                           "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam",
+                           "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam",
+                           "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, "
                         ]
                     },
                     {
@@ -112,7 +99,7 @@ const data =
                         usage: 50000,
                         savings: 5000,
                         recommendations: [
-                            "Recommendation #5",
+                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam",
                             "Recommendation #5.1"
                         ]
                     },

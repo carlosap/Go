@@ -29,12 +29,6 @@ const BarChart = (props) => {
 		}]
 	}
 
-	const options = {
-		title: {
-			display:true,
-			text: 'Cost Comparison'    
-		},
-	}
 	return (
 		<Pie
 			height={130}

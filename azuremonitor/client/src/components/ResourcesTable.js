@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 import {withStyles} from '@material-ui/core/styles'
 import {Table, TableHead, TableBody, TableRow, TableCell} from '@material-ui/core'
 import {Box, IconButton, Collapse, Paper, Typography} from '@material-ui/core'
-import RecommendationToolTip from './RecommendationToolTip'
+import Recommendations from './Recommendations'
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import SubdirectoryArrowRightIcon from '@material-ui/icons/SubdirectoryArrowRight';
@@ -88,7 +88,7 @@ const ResourceGroups = (props) => {
 																<BorderlessCell align='center' style={styles.padding}>${resource.usage}</BorderlessCell>
 																<BorderlessCell align='center' style={styles.padding}>${resource.savings}</BorderlessCell>
 																<BorderlessCell align='center' style={styles.padding}>
-																	<RecommendationToolTip recommendations={resource.recommendations}/>
+																	<Recommendations recommendations={resource.recommendations}/>
 																</BorderlessCell>
 															</TableRow>
 													)
@@ -100,7 +100,7 @@ const ResourceGroups = (props) => {
 															<TableCell align='center' style={styles.padding}>${resource.usage}</TableCell>
 															<TableCell align='center' style={styles.padding}>${resource.savings}</TableCell>
 															<TableCell align='center' style={styles.padding}>
-																<RecommendationToolTip recommendations={resource.recommendations}/>
+																<Recommendations recommendations={resource.recommendations}/>
 															</TableCell>
 													</TableRow>
 												)
