@@ -24,13 +24,12 @@ const Recommendations = (props) => {
                         {`${recommendations.length} Optimization(s) Available`}
                     </Typography>
                     {recommendations.length > 0 ? 
-                        recommendations.map(rec => (
-                            <Typography style={{marginBottom:'4px'}} color="textPrimary">{`- ${rec}`}</Typography>
+                        recommendations.map((rec, idx) => (
+                            <Typography key={idx} style={{marginBottom:'4px'}} color="textPrimary">{`- ${rec}`}</Typography>
                         ))
                     : 
                         <Typography> This area has no optimizations available </Typography>
                     }
-                    
                     
                 </DialogContent>
                 <DialogActions style={{alignSelf:'center'}}>
