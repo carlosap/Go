@@ -1,16 +1,7 @@
 import React from 'react'
-import {makeStyles} from '@material-ui/core/styles'
 import {Divider, Typography, Paper} from '@material-ui/core';
 
-const useStyles = makeStyles({
-   amountText: {
-
-   }
-})
-
 const AnalyticsWidget = (props) => {
-    const styles = useStyles()
-
     return (
         <Paper elevation={3}>
             <div style={{padding:'10px'}}>

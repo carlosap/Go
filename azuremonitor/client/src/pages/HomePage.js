@@ -7,6 +7,8 @@ import ResourcesTable from '../components/ResourcesTable'
 import Graph1 from '../components/Graph1'
 import Logo from '../assets/images/Honeywell-Logo-17.jpg'
 
+import data from "../data.json"
+
 const useStyles = makeStyles({
     logo: {
         maxWidth: "100%",
@@ -31,7 +33,7 @@ const HomePage = () => {
     return (
 
         <Grid style={{padding:'10px'}} container spacing={2}>
-            <Grid style={{display:'flex'}} sm={12} item justify='space-between'>
+            <Grid style={{display:'flex', justifyContent:'space-between'}} sm={12} item>
                 <div>
                     <img className={styles.logo} src={Logo} alt={'logo'} width={270}></img>
                 </div>
@@ -47,7 +49,7 @@ const HomePage = () => {
 
                     <div className={styles.widget}>
                         <AnalyticsWidget 
-                            title='Savings From Optimization'
+                            title='Savings w/ Optimization'
                             amount={10000000}
                             description='This is the current cost of all of the current resources being used'
                         />
@@ -64,7 +66,7 @@ const HomePage = () => {
             </Grid>
 
             <Grid style={{padding:'30px'}} item sm={12}>
-                <ResourcesTable/>
+                <ResourcesTable data={data}/>
             </Grid>
 
             <Grid style={{paddingLeft:'30px', paddingRight:'30px'}} container item sm={12} spacing={2}>

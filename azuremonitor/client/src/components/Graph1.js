@@ -1,5 +1,4 @@
 import React  from 'react';
-import {makeStyles} from '@material-ui/core/styles'
 import {Line} from 'react-chartjs-2';
 
 const data = {
