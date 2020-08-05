@@ -2,6 +2,10 @@ import React from 'react'
 import {Divider, Typography, Paper} from '@material-ui/core';
 
 const AnalyticsWidget = (props) => {
+    const numberWithCommas = (num) => {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
     return (
         <Paper elevation={3}>
             <div style={{padding:'10px'}}>
@@ -12,8 +16,8 @@ const AnalyticsWidget = (props) => {
                 <Divider style={{marginBottom: '10px'}}/>
 
                 <div style={{textAlign:'center'}}>  
-                    <Typography color='textPrimary' variant='h4'>
-                        ${props.amount}
+                    <Typography style={{fontWeight:'bold'}} color='textPrimary' variant='h4'>
+                        ${numberWithCommas(props.amount)}
                     </Typography>
                 </div>
             </div>
