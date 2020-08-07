@@ -7,7 +7,19 @@ const NavbarRoutes = {
     routes: [
         {
             path: "/home",
-            name: "Home",
+            name: "Cost",
+            icon: "",
+            component: HomePage
+        },
+        {
+            path: "/home",
+            name: "Security",
+            icon: "",
+            component: HomePage
+        },
+        {
+            path: "/home",
+            name: "High Availability",
             icon: "",
             component: HomePage
         },

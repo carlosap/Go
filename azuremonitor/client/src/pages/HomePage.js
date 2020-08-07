@@ -6,7 +6,7 @@ import AnalyticsWidget from '../components/AnalyticsWidget'
 import ResourcesTable from '../components/ResourcesTable'
 import LineGraph from '../components/LineGraph'
 import PieChart from '../components/PieChart'
-import Logo from '../assets/images/Honeywell-Logo-17.jpg'
+import Logo from '../assets/images/logo.png'
 
 import data from "../data.json"
 
