@@ -174,10 +174,17 @@ func (r ResourceGroupCost) Print() {
 				resourceType = pArray[len(pArray)-1]
 			}
 
+			if serviceName == "virtual machines" && resourceType == "virtualmachines" && len(costUSD) > 0 && chargeType == "usage" {
+				fmt.Println("***The sourceid is: ", resourceId)
+			}
+
+
 			if strings.Contains(resourceId, "/") {
 				pArray:= strings.Split(resourceId, "/")
 				resourceId = pArray[len(pArray)-1]
 			}
+
+
 
 			fmt.Printf("%s,%s,%s,$%s,%s,%s,%s,%s\n",resourceId, resourceGroupName, serviceName, costUSD,resourceType, resourceLocation, chargeType, meter )
 		}
