@@ -175,7 +175,13 @@ func (r ResourceGroupCost) Print() {
 			}
 
 			if serviceName == "virtual machines" && resourceType == "virtualmachines" && len(costUSD) > 0 && chargeType == "usage" {
-				fmt.Println("***The sourceid is: ", resourceId)
+				var vm = &ResourceUsageVirtualMachine{}
+				vm, err := vm.getVirtualMachineByResourceId(resourceId)
+				if err != nil {
+					fmt.Printf("Error: failed to retrieve vm resouce usage %v\n", err)
+				}
+				vm.Print()
+				//fmt.Println("***The sourceid is: ", resourceId)
 			}
 
 
