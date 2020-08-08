@@ -2,19 +2,14 @@ package cmd
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"log"
-	"net"
-	"net/http"
-	"os"
-	"os/exec"
-	"runtime"
-
-	externalip "github.com/glendc/go-external-ip"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/spf13/cobra"
+	"log"
+	"net/http"
+	"os"
+	"os/exec"
 )
 
 type MessageToken struct {
@@ -39,6 +34,9 @@ var upgrader = websocket.Upgrader{
 
 var clear map[string]func() //create a map for storing clear funcs
 func init() {
+	c := &Cache{}
+	c.init("./spartan.db")
+
 	clear = make(map[string]func()) //Initialize it
 	clear["linux"] = func() {
 		cmd := exec.Command("clear") //Linux example, its tested
@@ -67,56 +65,7 @@ func Execute() {
 	}
 }
 
-// returns internal ip and public ip
-// you can also get this information https://myexternalip.com/raw
-func getIP() ([]string, error) {
-	var ips []string
-	extIp := externalip.DefaultConsensus(nil, nil)
-	ipTemp, _ := extIp.ExternalIP()
-	if len(ipTemp.String()) > 0 {
-		ips = append(ips, ipTemp.String())
-	}
 
-	ifaces, err := net.Interfaces()
-	if err != nil {
-		return ips, err
-	}
-	for _, iface := range ifaces {
-		if iface.Flags&net.FlagUp == 0 {
-			continue // interface down
-		}
-		if iface.Flags&net.FlagLoopback != 0 {
-			continue // loopback interface
-		}
-		addrs, err := iface.Addrs()
-		if err != nil {
-			return ips, err
-		}
-		for _, addr := range addrs {
-			var ip net.IP
-			switch v := addr.(type) {
-			case *net.IPNet:
-				ip = v.IP
-				ips = append(ips, ip.String())
-				//fmt.Printf("ip net: %s\n", ip.String())
-			case *net.IPAddr:
-				ip = v.IP
-				//fmt.Printf("ip address: %s\n", ip.String())
-				ips = append(ips, ip.String())
-			}
-			if ip == nil || ip.IsLoopback() {
-				continue
-			}
-			ip = ip.To4()
-			if ip == nil {
-				continue // not an ipv4 address
-			}
-
-			return ips, nil
-		}
-	}
-	return ips, errors.New("no network connection detected")
-}
 
 func startServer() {
 	router := mux.NewRouter()
@@ -180,11 +129,3 @@ func msgHandler(w http.ResponseWriter, r *http.Request) {
 	go writer(&msg)
 }
 
-func clearTerminal() {
-	value, ok := clear[runtime.GOOS] //runtime.GOOS -> linux, windows, darwin etc.
-	if ok {                          //if we defined a clear func for that platform:
-		value() //we execute it
-	} else { //unsupported platform
-		panic("wrong platform")
-	}
-}

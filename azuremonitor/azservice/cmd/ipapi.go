@@ -102,7 +102,7 @@ func (ipInfo *IpapiResponse) getIpInfo(isCache bool) (*IpapiResponse, error) {
 			}
 		}
 	} else {
-		_ = clearIpInfoCache()
+		clearCache(cacheFile)
 		ipInfo, err = cl.getIPLocalization()
 		if err != nil {
 			return nil, err
@@ -113,7 +113,7 @@ func (ipInfo *IpapiResponse) getIpInfo(isCache bool) (*IpapiResponse, error) {
 		return nil, fmt.Errorf("No IP Address was captured from IPAPI")
 	}
 
-	_ = saveIpInfo(ipInfo)
+	_ = saveCache(cacheFile, ipInfo)
 
 	return ipInfo, nil
 }
@@ -199,20 +199,7 @@ func (ipInfo *IpapiResponse) doDiscoveryRequest(url string) error {
 	return nil
 }
 
-func saveIpInfo(ipInfo *IpapiResponse) error {
 
-	file, err := json.MarshalIndent(ipInfo, "", "")
-	if err != nil {
-		return fmt.Errorf("failed to marshal ip information %v\n", err)
-	}
-
-	err = ioutil.WriteFile(cacheFile, file, 0755)
-	if err != nil {
-		return fmt.Errorf("failed to save ip inforamtion %v\n", err)
-	}
-
-	return nil
-}
 
 func getIpInfoFromCache() *IpapiResponse {
 	data := &IpapiResponse{}
@@ -222,16 +209,7 @@ func getIpInfoFromCache() *IpapiResponse {
 	return data
 }
 
-func clearIpInfoCache() error {
-	err := os.Remove(cacheFile)
 
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	//fmt.Printf("clearing caching %s - successfully cleared\n", cacheFile)
-	return nil
-}
 
 //-------------------IpInfo Client Response ----------------------------------
 

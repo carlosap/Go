@@ -5,10 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
-	"strconv"
 	"strings"
-	"unicode/utf8"
 )
 
 type ResourceUsageVirtualMachine struct {
@@ -22,50 +19,43 @@ type ResourceUsageVirtualMachine struct {
 	} `json:"tables"`
 }
 
-const (
-	TB = 1000000000000
-	GB = 1000000000
-	MB = 1000000
-	KB = 1000
-)
+func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(id string, startD string,endD string) (*ResourceUsageVirtualMachine, error) {
+	c := &Cache{}
 
-var siFactors = map[string]float64{
-	"":  1e0,
-	"k": 1e3,
-	"M": 1e6, // Sometimes, M (Roman numeral) for thousands and MM for millions
-	"G": 1e9,
-	"T": 1e12,
-	"P": 1e15,
-	"E": 1e18,
-	"Z": 1e21,
-	"Y": 1e24,
-	"K": 1e3, // colloquial synonym for "k"
-	"B": 1e9, // colloquial synonym for "G"
+
+	//Validate
+	if id == "" || startD == "" || endD == "" {
+		return nil, fmt.Errorf("resource id name is required")
+	}
+
+	//Cache lookup
+	cKey := fmt.Sprintf("GetVirtualMachineByResourceId_%s_%s_%s",id, startD, endD)
+	cHashVal := c.Get(cKey)
+	if len(cHashVal) <= 0 {
+		//Execute Request
+		r, err := r.executeRequest(id, startD, endD, cKey)
+		if err != nil {
+			return r, err
+		}
+
+	} else {
+		//Load From Cache
+		err := LoadFromCache(cKey, r)
+		if err != nil {
+			fmt.Println("******WARNNING!!!!!!!!!MISSING FILE:::RESTORING WITH NEW REQUEST:::", err)
+			r, err := r.executeRequest(id, startD, endD, cKey)
+			if err != nil {
+				return r, err
+			}
+		}
+		//fmt.Println(r)
+	}
+
+	return r, nil
 }
 
-func parseNumber(s string) (float64, error) {
-	fmt.Println("the number sent: ", s)
-	f, err := strconv.ParseFloat(s, 64)
-	if err == nil {
-		return f, nil
-	}
-	r, size := utf8.DecodeLastRuneInString(s)
-	if r == utf8.RuneError {
-		return 0, err
-	}
-	symbol := s[len(s)-size : len(s)]
-	factor, ok := siFactors[symbol]
-	if !ok {
-		return 0, err
-	}
-	f, e := strconv.ParseFloat(s[:len(s)-len(symbol)], 64)
-	if e != nil {
-		return 0, err
-	}
-	return f * factor, nil
-}
+func (r *ResourceUsageVirtualMachine) executeRequest(id string, startD string, endD string, cKey string) (*ResourceUsageVirtualMachine, error) {
 
-func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(id string) (*ResourceUsageVirtualMachine, error) {
 	var at = &AccessToken{}
 	cl := Client{}
 	err := cl.New()
@@ -73,23 +63,14 @@ func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(id string) (
 		return nil, err
 	}
 
-	if len(id) <= 0 {
-		return nil, fmt.Errorf("resource id name is required")
-	}
-
 	at, err = at.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	// only 30-days increments
-	startD := "2020-07-01"
-	endD := "2020-07-30"
 	url := fmt.Sprintf("https://management.azure.com//subscriptions/%s/resourcegroups/" +
 		"defaultresourcegroup-eus/providers/microsoft.operationalinsights/workspaces/" +
 		"defaultworkspace-%s-eus/query?api-version=2017-10-01",cl.AppConfig.AccessToken.SubscriptionID, cl.AppConfig.AccessToken.SubscriptionID)
-
-
 
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
 	payload := strings.NewReader(fmt.Sprintf("{\"query\": \"let " +
@@ -143,75 +124,77 @@ func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(id string) (
 
 	err = json.Unmarshal(body,r)
 	if err != nil {
-		fmt.Println("recommendation list unmarshal body response: ", err)
+		return r, fmt.Errorf("recommendation list unmarshal body response: ", err)
+	}
+
+	//cached it
+	err = saveCache(cKey, r)
+	if err != nil {
+		return r, fmt.Errorf("error: failed to save to cache folder - %s: %v", cKey, err)
 	}
 
 	return r, nil
 }
 
 func (r ResourceUsageVirtualMachine) Print() {
-	dir := "cache"
-	_, err := os.Stat(dir)
-	if os.IsNotExist(err) {
-		fmt.Println("creating cache directory")
-		err := os.Mkdir(dir, 0755)
-		if err != nil {
-			fmt.Printf("os.Mkdir('%s') failed with '%s'\n", dir)
-		}
-	}
 
-
-
-	var strAvailableMemoryBytes  string
 	//var availableMemory float64
-	for i:= 0; i < len(r.Tables); i++ {
-		for x:= 0; x < len(r.Tables[i].Rows); x++ {
+	for i := 0; i < len(r.Tables); i++ {
+		for x := 0; x < len(r.Tables[i].Rows); x++ {
 			row := r.Tables[i].Rows[x]
-			switch x {
-			case 0:
-				//Raw is in Kilo Bytes - need to convert to MegaBytes
-				strTile := fmt.Sprintf("%v", row[0])
-				strAvailableMemoryBytes = fmt.Sprintf("%v", row[12])
-				n, err := parseNumber(strAvailableMemoryBytes)
-				if err != nil {
-					fmt.Printf("%q\t %g %v\n", strAvailableMemoryBytes, n, err)
-				}
+			strTile := fmt.Sprintf("%v", row[0])
+			switch strTile {
+			case "Available MBytes":
+				getVmAvailableMemory(row)
+			case "% Processor Time":
 
+			case "Avg. Disk sec/Transfer":
 
-				availableMemoryGb := n / GB
-				strDisplay := fmt.Sprintf("%v", availableMemoryGb)
-				strDisplay = strDisplay[0:3]
-				fmt.Printf("Available Memory: %s - %sGB [%gKB] \n", strTile,strDisplay, n) // round down
+			case "Disk Bytes/sec":
 
-			case 1:
+			case "Disk Transfers/sec":
 
+			case "Bytes Sent/sec":
+
+			case "Bytes Received/sec":
+				//cName := fmt.Sprintf("%v", row[0])
+				//timeGenerated := fmt.Sprintf("%v", row[1])
+				//minValue := fmt.Sprintf("%v", row[2])
+				//avgValue := fmt.Sprintf("%v", row[3])
+				//maxValue := fmt.Sprintf("%v", row[4])
+				//percentileValue_five := fmt.Sprintf("%v", row[5])
+				//percentileValue_ten := fmt.Sprintf("%v", row[6])
+				//percentileValue_fifty := fmt.Sprintf("%v", row[7])
+				//percentileValue_ninety := fmt.Sprintf("%v", row[8])
+				//percentile_Value_ninety_five := fmt.Sprintf("%v", row[9])
+
+				//summaryName := fmt.Sprintf("%v", row[10])
+				//sMinValue := fmt.Sprintf("%v", row[11])
+				//savgValue := fmt.Sprintf("%vMb", row[12])
+				//smaxValue := fmt.Sprintf("%v", row[13])
+				//sPercentileValue_five := fmt.Sprintf("%v", row[14])
+				//sPercentileValue_ten := fmt.Sprintf("%v", row[15])
+				//sPercentileValue_fifty := fmt.Sprintf("%v", row[16])
+				//sPercentileValue_ninety := fmt.Sprintf("%v", row[17])
+				//sPercentile_Value_ninety_five := fmt.Sprintf("%v", row[18])
 			}
-
-			//cName := fmt.Sprintf("%v", row[0])
-			//timeGenerated := fmt.Sprintf("%v", row[1])
-			//minValue := fmt.Sprintf("%v", row[2])
-			//avgValue := fmt.Sprintf("%v", row[3])
-			//maxValue := fmt.Sprintf("%v", row[4])
-			//percentileValue_five := fmt.Sprintf("%v", row[5])
-			//percentileValue_ten := fmt.Sprintf("%v", row[6])
-			//percentileValue_fifty := fmt.Sprintf("%v", row[7])
-			//percentileValue_ninety := fmt.Sprintf("%v", row[8])
-			//percentile_Value_ninety_five := fmt.Sprintf("%v", row[9])
-
-			//summaryName := fmt.Sprintf("%v", row[10])
-			//sMinValue := fmt.Sprintf("%v", row[11])
-			//savgValue := fmt.Sprintf("%vMb", row[12])
-			//smaxValue := fmt.Sprintf("%v", row[13])
-			//sPercentileValue_five := fmt.Sprintf("%v", row[14])
-			//sPercentileValue_ten := fmt.Sprintf("%v", row[15])
-			//sPercentileValue_fifty := fmt.Sprintf("%v", row[16])
-			//sPercentileValue_ninety := fmt.Sprintf("%v", row[17])
-			//sPercentile_Value_ninety_five := fmt.Sprintf("%v", row[18])
 		}
+
+	}
+}
+
+// interface raw is in Kilo Bytes - need to convert to MegaBytes
+func getVmAvailableMemory(row []interface{}) (float64, float64) {
+	m := fmt.Sprintf("%v", row[12])
+	kbValue, err := stringToFloat(m)
+	if err != nil {
+		fmt.Printf("%q\t %g %v\n", m, kbValue, err)
 	}
 
-
-
+	gbValue := kbValue / GB
+	strDisplay := fmt.Sprintf("%v", gbValue)
+	fmt.Printf("Available Memory: %sGB [%gKB] \n", strDisplay[0:3], kbValue)
+	return gbValue, kbValue
 }
 
 

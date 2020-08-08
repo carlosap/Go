@@ -148,6 +148,9 @@ func (r ResourceGroupCost) PrintHeader() {
 
 
 func (r ResourceGroupCost) Print() {
+	// only 30-days increments
+	startD := "2020-07-01"
+	endD := "2020-07-30"
 	for i := 0; i < len(r.Properties.Rows); i++ {
 		row := r.Properties.Rows[i]
 		//fmt.Printf("%v\n", row)
@@ -176,7 +179,7 @@ func (r ResourceGroupCost) Print() {
 
 			if serviceName == "virtual machines" && resourceType == "virtualmachines" && len(costUSD) > 0 && chargeType == "usage" {
 				var vm = &ResourceUsageVirtualMachine{}
-				vm, err := vm.getVirtualMachineByResourceId(resourceId)
+				vm, err := vm.getVirtualMachineByResourceId(resourceId, startD, endD)
 				if err != nil {
 					fmt.Printf("Error: failed to retrieve vm resouce usage %v\n", err)
 				}

@@ -4,3 +4,5 @@
 ipinfo.json
 config.json
 /config.json
+/cache/
+*.db
