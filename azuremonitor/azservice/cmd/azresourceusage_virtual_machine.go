@@ -143,40 +143,26 @@ func (r ResourceUsageVirtualMachine) Print() {
 		for x := 0; x < len(r.Tables[i].Rows); x++ {
 			row := r.Tables[i].Rows[x]
 			strTile := fmt.Sprintf("%v", row[0])
+			//fmt.Println("********",strTile)
+
+			//cpu
+			if strings.Contains(strTile, "rocessor Time") {
+				getCpuUtilization(row)
+			}
+
 			switch strTile {
 			case "Available MBytes":
 				getVmAvailableMemory(row)
-			case "% Processor Time":
-
 			case "Avg. Disk sec/Transfer":
-
+				getLogicalDiskLatency(row)
 			case "Disk Bytes/sec":
-
+				getDiskBytesPerSeconds(row)
 			case "Disk Transfers/sec":
-
+				getLogicalDiskIOPs(row)
 			case "Bytes Sent/sec":
-
+				getBytesSentRate(row)
 			case "Bytes Received/sec":
-				//cName := fmt.Sprintf("%v", row[0])
-				//timeGenerated := fmt.Sprintf("%v", row[1])
-				//minValue := fmt.Sprintf("%v", row[2])
-				//avgValue := fmt.Sprintf("%v", row[3])
-				//maxValue := fmt.Sprintf("%v", row[4])
-				//percentileValue_five := fmt.Sprintf("%v", row[5])
-				//percentileValue_ten := fmt.Sprintf("%v", row[6])
-				//percentileValue_fifty := fmt.Sprintf("%v", row[7])
-				//percentileValue_ninety := fmt.Sprintf("%v", row[8])
-				//percentile_Value_ninety_five := fmt.Sprintf("%v", row[9])
-
-				//summaryName := fmt.Sprintf("%v", row[10])
-				//sMinValue := fmt.Sprintf("%v", row[11])
-				//savgValue := fmt.Sprintf("%vMb", row[12])
-				//smaxValue := fmt.Sprintf("%v", row[13])
-				//sPercentileValue_five := fmt.Sprintf("%v", row[14])
-				//sPercentileValue_ten := fmt.Sprintf("%v", row[15])
-				//sPercentileValue_fifty := fmt.Sprintf("%v", row[16])
-				//sPercentileValue_ninety := fmt.Sprintf("%v", row[17])
-				//sPercentile_Value_ninety_five := fmt.Sprintf("%v", row[18])
+				getBytesReceivedRate(row)
 			}
 		}
 
@@ -193,10 +179,86 @@ func getVmAvailableMemory(row []interface{}) (float64, float64) {
 
 	gbValue := kbValue / GB
 	strDisplay := fmt.Sprintf("%v", gbValue)
-	fmt.Printf("Available Memory: %sGB [%gKB] \n", strDisplay[0:3], kbValue)
+	fmt.Printf("Available Memory Avg: %sGB [%gKB] \n", strDisplay[0:3], kbValue)
 	return gbValue, kbValue
 }
 
+func getCpuUtilization(row []interface{}) float64 {
+	parsedValue := fmt.Sprintf("%v", row[12])
+	value, err := stringToFloat(parsedValue)
+	if err != nil {
+		fmt.Printf("%q\t %g %v\n", parsedValue, value, err)
+	}
 
+	strDisplay := fmt.Sprintf("%v", value)
+	fmt.Printf("CPU Utilization Avg: %s%% \n", strDisplay[0:4])
+	return value
+}
 
+func getLogicalDiskLatency(row []interface{}) (float64, float64) {
+	//the parsed value is in MS
+	parsedValue := fmt.Sprintf("%v", row[12])
+	value, err := stringToFloat(parsedValue)
+	if err != nil {
+		fmt.Printf("%q\t %g %v\n", parsedValue, value, err)
+	}
+	msValue := value * 1000
+	strDisplay := fmt.Sprintf("%v", msValue)
+	fmt.Printf("Logical Disk Latency Avg: %sms [%g] \n", strDisplay[0:4], msValue)
+	return msValue, value
+}
 
+func getLogicalDiskIOPs(row []interface{}) float64 {
+	//the parsed value is in MS
+	parsedValue := fmt.Sprintf("%v", row[12])
+	value, err := stringToFloat(parsedValue)
+	if err != nil {
+		fmt.Printf("%q\t %g %v\n", parsedValue, value, err)
+	}
+
+	strDisplay := fmt.Sprintf("%v", value)
+	fmt.Printf("Logical Disk IOPs Avg: %s \n", strDisplay[0:4])
+	return value
+}
+
+func getDiskBytesPerSeconds(row []interface{}) (float64, float64) {
+
+	parsedValue := fmt.Sprintf("%v", row[12])
+	value, err := stringToFloat(parsedValue)
+	if err != nil {
+		fmt.Printf("%q\t %g %v\n", parsedValue, value, err)
+	}
+
+	gbValue := value / GB
+	strDisplay := fmt.Sprintf("%v", value)
+	fmt.Printf("Disk Bytes/sec Avg: %sGB [%gKB] \n", strDisplay[0:4], value)
+	return gbValue, value
+}
+
+func getBytesSentRate(row []interface{}) (float64, float64) {
+
+	parsedValue := fmt.Sprintf("%v", row[12])
+	value, err := stringToFloat(parsedValue)
+	if err != nil {
+		fmt.Printf("%q\t %g %v\n", parsedValue, value, err)
+	}
+
+	kbValue := value / KB
+	strDisplay := fmt.Sprintf("%v", kbValue)
+	fmt.Printf("Bytes Sent Rate Avg: %sKB [%g] \n", strDisplay[0:4], value)
+	return kbValue, value
+}
+
+func getBytesReceivedRate(row []interface{}) (float64, float64) {
+
+	parsedValue := fmt.Sprintf("%v", row[12])
+	value, err := stringToFloat(parsedValue)
+	if err != nil {
+		fmt.Printf("%q\t %g %v\n", parsedValue, value, err)
+	}
+
+	kbValue := value / KB
+	strDisplay := fmt.Sprintf("%v", kbValue)
+	fmt.Printf("Bytes Received Rate Avg: %sKB [%g] \n", strDisplay[0:4], value)
+	return kbValue, value
+}

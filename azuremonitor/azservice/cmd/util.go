@@ -42,7 +42,6 @@ var siFactors = map[string]float64{
 }
 
 func stringToFloat(s string) (float64, error) {
-	fmt.Println("the number sent: ", s)
 	f, err := strconv.ParseFloat(s, 64)
 	if err == nil {
 		return f, nil
