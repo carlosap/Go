@@ -47,12 +47,12 @@ func main() {
 
 	case "all":
 		pipe := NewPipeChannel()
-		IngestAzuremonitorAzuremonitor(pipe)
+		IngestApplication(pipe)
 		os.Exit(1)
 
 	case "azuremonitor":
 		pipe := NewPipeChannel()
-		go IngestAzuremonitorAzuremonitor(pipe)
+		go IngestApplication(pipe)
 		ok := writePipe(pipe)
 		if !ok {
 			os.Exit(1)
@@ -90,10 +90,10 @@ func removeWhiteSpaces(input string) string {
 }
 
 // IngestAzuremonitorAzuremonitor ingest azuremonitor' table
-func IngestAzuremonitorAzuremonitor(pipe chan interface{}) {
-	csvFile, _ := os.Open("azuremonitor.csv")
+func IngestApplication(pipe chan interface{}) {
+	csvFile, _ := os.Open("application.csv")
 	reader := csv.NewReader(bufio.NewReader(csvFile))
-	azuremonitor := &dbcontext.AzureMonitor{}
+	application := &dbcontext.Application{}
 
 	for {
 		line, err := reader.Read()
@@ -105,26 +105,29 @@ func IngestAzuremonitorAzuremonitor(pipe chan interface{}) {
 			return
 		}
 
-		if line[0] == "azuremonitor_id" {
+		if line[0] == "applicationID" {
 			log.Printf("..................")
 			continue
 		}
 
-		azuremonitor.AzuremonitorID = line[0]
-		azuremonitor.Name = &line[1]
-
-		hostname, err := strconv.Atoi(line[2])
+		id, err := strconv.Atoi(line[0])
 		if err != nil {
-			log.Fatalf("Error while casting hostname from csv file %v ", err)
+			log.Fatalf("Error while casting Grouprank from csv file %v ", err)
 		}
-		azuremonitor.Hostname = &hostname
+		application.Applicationid = id
+		application.SubscriptionID = &line[1]
+		application.Name = &line[2]
+		application.TenantID = &line[3]
+		application.GrantType = &line[4]
+		application.ClientID = &line[5]
+		application.ClientSecret = &line[6]
 
-		err = azuremonitor.Insert()
+		err = application.Insert()
 		if err != nil {
-			log.Printf("Warning::: Insert azuremonitor %v", err)
+			log.Printf("Warning::: Insert Application %v", err)
 		}
 
-		log.Printf("successfully entered a new azuremonitor...%s [%s]", azuremonitor.AzuremonitorID, *azuremonitor.Name)
+		log.Printf("successfully entered a new Application...%s [%s]", application.Applicationid, *application.Name)
 	}
 
 	// adding interrupts watcher

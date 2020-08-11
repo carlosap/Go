@@ -70,29 +70,33 @@ func (d *DbContext) Close() (err error) {
 //============================================Common Driver Requirements===================================
 //Columns matrix for querying columns db
 var Columns = struct {
-	AzuremonitorAzuremonitor struct {
-		AzuremonitorID, Name, Hostname, Lastmodified string
+	Application struct {
+		Applicationid, SubscriptionID, Name, TenantID, GrantType, ClientID, ClientSecret, Lastmodified string
 	}
 }{
-	AzuremonitorAzuremonitor: struct {
-		AzuremonitorID, Name, Hostname, Lastmodified string
+	Application: struct {
+		Applicationid, SubscriptionID, Name, TenantID, GrantType, ClientID, ClientSecret, Lastmodified string
 	}{
-		AzuremonitorID: "azuremonitor_id",
+		Applicationid:  "applicationid",
+		SubscriptionID: "subscription_id",
 		Name:           "name",
-		Hostname:       "hostname",
+		TenantID:       "tenant_id",
+		GrantType:      "grant_type",
+		ClientID:       "client_id",
+		ClientSecret:   "client_secret",
 		Lastmodified:   "lastmodified",
 	},
 }
 
 // Tables matrix for querying tables db
 var Tables = struct {
-	AzuremonitorAzuremonitor struct {
+	Application struct {
 		Name string
 	}
 }{
-	AzuremonitorAzuremonitor: struct {
+	Application: struct {
 		Name string
 	}{
-		Name: "azuremonitor.azuremonitor",
+		Name: "azmonitor.application",
 	},
 }

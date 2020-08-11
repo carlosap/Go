@@ -8,16 +8,16 @@ import (
 //============================================Functional Requirements ===================================
 
 //GetAll returns all the alias info table rows
-func (a AzureMonitor) GetAll() ([]AzureMonitor, error) {
+func (a Application) GetAll() ([]Application, error) {
 	db, err := NewDbContext()
 	if err != nil {
 		return nil, fmt.Errorf("error: failed to connect to db %v", err)
 	}
 
-	var aliases []AzureMonitor
+	var aliases []Application
 	err = db.Pgdb.Model(&aliases).Select()
 	if err != nil {
-		return nil, fmt.Errorf("error: failed to fetch all Authv2s %v", err)
+		return nil, fmt.Errorf("error: failed to fetch all Application %v", err)
 	}
 
 	_ = db.Close()
@@ -25,7 +25,7 @@ func (a AzureMonitor) GetAll() ([]AzureMonitor, error) {
 }
 
 //Insert
-func (a *AzureMonitor) Insert() error {
+func (a *Application) Insert() error {
 	db, err := NewDbContext()
 
 	if err != nil {
@@ -35,7 +35,7 @@ func (a *AzureMonitor) Insert() error {
 	err = db.Pgdb.Insert(a)
 
 	if err != nil {
-		return fmt.Errorf("error: failed insert AzureMonitor %v", err)
+		return fmt.Errorf("error: failed insert Application %v", err)
 	}
 
 	_ = db.Close()
@@ -43,7 +43,7 @@ func (a *AzureMonitor) Insert() error {
 }
 
 //Delete
-func (a *AzureMonitor) Delete() error {
+func (a *Application) Delete() error {
 	db, err := NewDbContext()
 
 	if err != nil {
@@ -53,7 +53,7 @@ func (a *AzureMonitor) Delete() error {
 	err = db.Pgdb.Delete(a)
 
 	if err != nil {
-		return fmt.Errorf("error: failed to delete AzureMonitor %v", err)
+		return fmt.Errorf("error: failed to delete Application %v", err)
 	}
 
 	_ = db.Close()
@@ -61,7 +61,7 @@ func (a *AzureMonitor) Delete() error {
 }
 
 //Update
-func (a *AzureMonitor) Update() error {
+func (a *Application) Update() error {
 	db, err := NewDbContext()
 
 	if err != nil {
@@ -71,7 +71,7 @@ func (a *AzureMonitor) Update() error {
 	err = db.Pgdb.Update(a)
 
 	if err != nil {
-		return fmt.Errorf("error: failed to update AzureMonitor %v", err)
+		return fmt.Errorf("error: failed to update Application %v", err)
 	}
 
 	_ = db.Close()
@@ -80,14 +80,18 @@ func (a *AzureMonitor) Update() error {
 
 //============================================Common Driver Requirements===================================
 // AliasInfo
-type AzureMonitor struct {
-	tableName struct{} `pg:"azuremonitor.azuremonitor,alias:t"`
+type Application struct {
+	tableName struct{} `pg:"azmonitor.application,alias:t"`
 
-	AzuremonitorID string     `pg:"azuremonitor_id,pk,type:uuid"`
+	Applicationid  int        `pg:"applicationid,pk"`
+	SubscriptionID *string    `pg:"subscription_id"`
 	Name           *string    `pg:"name"`
-	Hostname       *int       `pg:"hostname"`
+	TenantID       *string    `pg:"tenant_id"`
+	GrantType      *string    `pg:"grant_type"`
+	ClientID       *string    `pg:"client_id"`
+	ClientSecret   *string    `pg:"client_secret"`
 	Lastmodified   *time.Time `pg:"lastmodified"`
 }
 
 //AliasInfos
-type AzureMonitors []AzureMonitor
+type Applications []Application

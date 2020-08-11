@@ -70,7 +70,7 @@ var drivers = make(map[string]Driver)
 // TODO::Issue #254- pgmigrator get connectionstring from config .toml
 var Scheme = "postgres"
 
-const Schema = "azuremonitor"
+const Schema = "azmonitor"
 
 //var connectionString = "host=localhost port=5432 user=postgres password=password dbname=elysium sslmode=disable"
 var interrupts = true
