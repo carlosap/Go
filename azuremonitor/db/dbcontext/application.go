@@ -79,7 +79,7 @@ func (a *Application) Update() error {
 }
 
 //============================================Common Driver Requirements===================================
-// AliasInfo
+// application
 type Application struct {
 	tableName struct{} `pg:"azmonitor.application,alias:t"`
 

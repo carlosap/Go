@@ -73,6 +73,12 @@ var Columns = struct {
 	Application struct {
 		Applicationid, SubscriptionID, Name, TenantID, GrantType, ClientID, ClientSecret, Lastmodified string
 	}
+	Storageaccount struct {
+		Resourceid, Resourcegroup, Servicename, Cost, Resourcetype, Resourcelocation, Consumptiontype, Meter, Availability, Totaltransactions, E2elatency, Serverlantency, Failures, Capacity string
+	}
+	Virtualmachine struct {
+		Resourceid, Resourcegroup, Servicename, Cost, Resourcetype, Resource, Consumptiontype, Meter, Cpuutilization, Availablememory, Disklatency, Diskiops, Diskbytespersec, Networksentrate, Networkreceivedrate, Datecreated, Lastupdated string
+	}
 }{
 	Application: struct {
 		Applicationid, SubscriptionID, Name, TenantID, GrantType, ClientID, ClientSecret, Lastmodified string
@@ -86,6 +92,45 @@ var Columns = struct {
 		ClientSecret:   "client_secret",
 		Lastmodified:   "lastmodified",
 	},
+	Storageaccount: struct {
+		Resourceid, Resourcegroup, Servicename, Cost, Resourcetype, Resourcelocation, Consumptiontype, Meter, Availability, Totaltransactions, E2elatency, Serverlantency, Failures, Capacity string
+	}{
+		Resourceid:        "resourceid",
+		Resourcegroup:     "resourcegroup",
+		Servicename:       "servicename",
+		Cost:              "cost",
+		Resourcetype:      "resourcetype",
+		Resourcelocation:  "resourcelocation",
+		Consumptiontype:   "consumptiontype",
+		Meter:             "meter",
+		Availability:      "availability",
+		Totaltransactions: "totaltransactions",
+		E2elatency:        "e2elatency",
+		Serverlantency:    "serverlantency",
+		Failures:          "failures",
+		Capacity:          "capacity",
+	},
+	Virtualmachine: struct {
+		Resourceid, Resourcegroup, Servicename, Cost, Resourcetype, Resource, Consumptiontype, Meter, Cpuutilization, Availablememory, Disklatency, Diskiops, Diskbytespersec, Networksentrate, Networkreceivedrate, Datecreated, Lastupdated string
+	}{
+		Resourceid:          "resourceid",
+		Resourcegroup:       "resourcegroup",
+		Servicename:         "servicename",
+		Cost:                "cost",
+		Resourcetype:        "resourcetype",
+		Resource:            "resource",
+		Consumptiontype:     "consumptiontype",
+		Meter:               "meter",
+		Cpuutilization:      "cpuutilization",
+		Availablememory:     "availablememory",
+		Disklatency:         "disklatency",
+		Diskiops:            "diskiops",
+		Diskbytespersec:     "diskbytespersec",
+		Networksentrate:     "networksentrate",
+		Networkreceivedrate: "networkreceivedrate",
+		Datecreated:         "datecreated",
+		Lastupdated:         "lastupdated",
+	},
 }
 
 // Tables matrix for querying tables db
@@ -93,10 +138,26 @@ var Tables = struct {
 	Application struct {
 		Name string
 	}
+	Storageaccount struct {
+		Name string
+	}
+	Virtualmachine struct {
+		Name string
+	}
 }{
 	Application: struct {
 		Name string
 	}{
 		Name: "azmonitor.application",
+	},
+	Storageaccount: struct {
+		Name string
+	}{
+		Name: "azmonitor.storageaccount",
+	},
+	Virtualmachine: struct {
+		Name string
+	}{
+		Name: "azmonitor.virtualmachine",
 	},
 }
