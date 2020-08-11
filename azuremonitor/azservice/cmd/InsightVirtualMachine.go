@@ -9,6 +9,13 @@ import (
 )
 
 type ResourceUsageVirtualMachine struct {
+	CpuUtilization    string
+	MemoryAvailable    string
+	DiskLatency    	string
+	DiskIOPs    string
+	DiskBytes	string
+	NetworkSentRate string
+	NetworkReceivedRate string
 	Tables []struct {
 		Name    string `json:"name"`
 		Columns []struct {
@@ -46,7 +53,7 @@ func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(id string, s
 		//Load From Cache
 		err := LoadFromCache(cKey, r)
 		if err != nil {
-			fmt.Println("******WARNNING!!!!!!!!!MISSING FILE:::RESTORING WITH NEW REQUEST:::", err)
+			//fmt.Println("******WARNNING!!!!!!!!!MISSING FILE:::RESTORING WITH NEW REQUEST:::", err)
 			r, err := r.executeRequest(id, startD, endD, cKey,cl.AppConfig.AccessToken.SubscriptionID)
 			if err != nil {
 				return r, err
@@ -54,6 +61,8 @@ func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(id string, s
 		}
 		//fmt.Println(r)
 	}
+
+	r.setPerformanceValue()
 
 	return r, nil
 }
@@ -71,44 +80,41 @@ func (r *ResourceUsageVirtualMachine) executeRequest(id string, startD string, e
 		"defaultworkspace-%s-eus/query?api-version=2017-10-01",subscriptionId, subscriptionId)
 
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
-	payload := strings.NewReader(fmt.Sprintf("{\"query\": \"let " +
-		"startDateTime = datetime('%sT08:00:00.000Z');" +
-		"let endDateTime = datetime('%sT16:00:00.000Z');" +
-		"let trendBinSize = 8h;" +
-		"let maxListSize = 1000;" +
+	payload := strings.NewReader("{\"query\": \"let startDateTime = datetime('2020-07-01T08:00:00.000Z');" +
+		"let endDateTime = datetime('2020-07-30T16:00:00.000Z');" +
+		"let trendBinSize = 8h;let maxListSize = 1000;" +
 		"let cpuMemory = materialize(InsightsMetrics| where TimeGenerated between (startDateTime .. endDateTime)| " +
-		"where _ResourceId =~ '%s'| " +
+		"where _ResourceId =~ '/subscriptions/bb07e91d-a908-4fe4-a04e-40cf2d4b0603/resourcegroups/elysium_demo/providers/microsoft.compute/virtualmachines/elysium'| " +
 		"where Origin == 'vm.azm.ms'| where (Namespace == 'Processor' and Name == 'UtilizationPercentage') or (Namespace == 'Memory' and Name == 'AvailableMB')| " +
-		"project TimeGenerated, Name, Namespace, Val);let networkDisk = materialize(InsightsMetrics| where TimeGenerated between (startDateTime .. endDateTime)| " +
-		"where _ResourceId =~ '%s'| " +
+		"project TimeGenerated, Name, Namespace, Val);let networkDisk = materialize(InsightsMetrics| " +
+		"where TimeGenerated between (startDateTime .. endDateTime)| " +
+		"where _ResourceId =~ '/subscriptions/bb07e91d-a908-4fe4-a04e-40cf2d4b0603/resourcegroups/" +
+		"elysium_demo/providers/microsoft.compute/" +
+		"virtualmachines/elysium'| " +
 		"where Origin == 'vm.azm.ms'| " +
 		"where (Namespace == 'Network' and Name in ('WriteBytesPerSecond', 'ReadBytesPerSecond'))    " +
 		"or (Namespace == 'LogicalDisk' and Name in ('TransfersPerSecond', 'BytesPerSecond', 'TransferLatencyMs'))| " +
 		"extend ComputerId = iff(isempty(_ResourceId), Computer, _ResourceId)| " +
-		"summarize Val = sum(Val) by bin(TimeGenerated, 1m), ComputerId, Name, Namespace| project TimeGenerated, Name, Namespace, Val);" +
-		"let rawDataCached = cpuMemory| union networkDisk| extend Val = iif(Name in ('WriteLatencyMs', 'ReadLatencyMs', 'TransferLatencyMs'), Val/1000.0, Val)|" +
-		" project TimeGenerated,cName = case(Namespace == 'Processor' and Name == 'UtilizationPercentage', '% Processor Time'," +
-		"Namespace == 'Memory' and Name == 'AvailableMB','Available MBytes',Namespace == 'LogicalDisk' and Name == 'TransfersPerSecond', 'Disk Transfers/sec'," +
-		"Namespace == 'LogicalDisk' and Name == 'BytesPerSecond', 'Disk Bytes/sec',Namespace == 'LogicalDisk' " +
-		"and Name == 'TransferLatencyMs', 'Avg. Disk sec/Transfer',Namespace == 'Network' " +
-		"and Name == 'WriteBytesPerSecond', 'Bytes Sent/sec',Namespace == 'Network' " +
-		"and Name == 'ReadBytesPerSecond', 'Bytes Received/sec',Name)," +
-		"cValue = case(Val < 0, real(0),Val);rawDataCached| summarize min(cValue),avg(cValue),max(cValue)," +
-		"percentiles(cValue, 5, 10, 50, 90, 95) by bin(TimeGenerated, trendBinSize), cName| " +
-		"sort by TimeGenerated asc| summarize makelist(TimeGenerated, maxListSize)," +
-		"makelist(min_cValue, maxListSize),makelist(avg_cValue, maxListSize),makelist(max_cValue, maxListSize),makelist(percentile_cValue_5, maxListSize)," +
-		"makelist(percentile_cValue_10, maxListSize),makelist(percentile_cValue_50, maxListSize),makelist(percentile_cValue_90, maxListSize)," +
-		"makelist(percentile_cValue_95, maxListSize) " +
-		"by cName| join(rawDataCached    | summarize min(cValue), avg(cValue), max(cValue), " +
+		"summarize Val = sum(Val) by bin(TimeGenerated, 1m), " +
+		"ComputerId, Name, Namespace| project TimeGenerated, Name, Namespace, Val);" +
+		"let rawDataCached = cpuMemory| union networkDisk| " +
+		"extend Val = iif(Name in ('WriteLatencyMs', 'ReadLatencyMs', 'TransferLatencyMs'), Val/1000.0, Val)| " +
+		"project TimeGenerated,    cName = case(        Namespace == 'Processor' and Name == 'UtilizationPercentage', '% Processor Time'," +
+		"        Namespace == 'Memory' and Name == 'AvailableMB', 'Available MBytes',        " +
+		"Namespace == 'LogicalDisk' and Name == 'TransfersPerSecond', 'Disk Transfers/sec',        " +
+		"Namespace == 'LogicalDisk' and Name == 'BytesPerSecond', 'Disk Bytes/sec',        " +
+		"Namespace == 'LogicalDisk' and Name == 'TransferLatencyMs', 'Avg. Disk sec/Transfer',        " +
+		"Namespace == 'Network' and Name == 'WriteBytesPerSecond', 'Bytes Sent/sec',        " +
+		"Namespace == 'Network' and Name == 'ReadBytesPerSecond', 'Bytes Received/sec',        " +
+		"Name    ),    cValue = case(Val < 0, real(0),Val);rawDataCached| summarize min(cValue),    " +
+		"avg(cValue),    max(cValue),    percentiles(cValue, 5, 10, 50, 90, 95) by bin(TimeGenerated, trendBinSize), " +
+		"cName| sort by TimeGenerated asc| summarize makelist(TimeGenerated, maxListSize),    makelist(min_cValue, maxListSize)," +
+		"    makelist(avg_cValue, maxListSize),    makelist(max_cValue, maxListSize),    makelist(percentile_cValue_5, maxListSize),    " +
+		"makelist(percentile_cValue_10, maxListSize),    makelist(percentile_cValue_50, maxListSize),    " +
+		"makelist(percentile_cValue_90, maxListSize),    makelist(percentile_cValue_95, maxListSize) by cName| " +
+		"join(    rawDataCached    | summarize min(cValue), avg(cValue), max(cValue), " +
 		"percentiles(cValue, 5, 10, 50, 90, 95) by cName)on cName\"," +
-		"\"timespan\": \"%sT08:00:00.000Z/%sT16:00:00.000Z\"}",
-		startD,
-		endD,
-		id,
-		id,
-		startD,
-		endD,
-	))
+		"\"timespan\": \"2020-07-01T08:00:00.000Z/2020-07-30T16:00:00.000Z\"}")
 
 	client := &http.Client {}
 	req, _ := http.NewRequest("POST",url, payload)
@@ -125,6 +131,7 @@ func (r *ResourceUsageVirtualMachine) executeRequest(id string, startD string, e
 		return r, fmt.Errorf("recommendation list unmarshal body response: ", err)
 	}
 
+
 	//cached it
 	err = saveCache(cKey, r)
 	if err != nil {
@@ -134,33 +141,38 @@ func (r *ResourceUsageVirtualMachine) executeRequest(id string, startD string, e
 	return r, nil
 }
 
-func (r ResourceUsageVirtualMachine) Print() {
+func (r *ResourceUsageVirtualMachine) setPerformanceValue() {
 
 	//var availableMemory float64
+	//fmt.Printf("::::::::%v", r)
 	for i := 0; i < len(r.Tables); i++ {
 		for x := 0; x < len(r.Tables[i].Rows); x++ {
 			row := r.Tables[i].Rows[x]
 			strTile := fmt.Sprintf("%v", row[0])
-			//fmt.Println("********",strTile)
 
 			//cpu
 			if strings.Contains(strTile, "rocessor Time") {
-				getCpuUtilization(row)
+				_,r.CpuUtilization = getCpuUtilization(row)
 			}
 
 			switch strTile {
 			case "Available MBytes":
-				getVmAvailableMemory(row)
+			_, _, r.MemoryAvailable	= getVmAvailableMemory(row)
+				//getVmAvailableMemory(row)
 			case "Avg. Disk sec/Transfer":
-				getLogicalDiskLatency(row)
+			_,_,r.DiskLatency =	getLogicalDiskLatency(row)
+				//getLogicalDiskLatency(row)
 			case "Disk Bytes/sec":
-				getDiskBytesPerSeconds(row)
+			_,_,r.DiskBytes = getDiskBytesPerSeconds(row)
 			case "Disk Transfers/sec":
-				getLogicalDiskIOPs(row)
+			_,r.DiskIOPs =	getLogicalDiskIOPs(row)
+				//getLogicalDiskIOPs(row)
 			case "Bytes Sent/sec":
-				getBytesSentRate(row)
+			_, _, r.NetworkSentRate = getBytesSentRate(row)
+				//getBytesSentRate(row)
 			case "Bytes Received/sec":
-				getBytesReceivedRate(row)
+			_, _, r.NetworkReceivedRate = getBytesReceivedRate(row)
+				//getBytesReceivedRate(row)
 			}
 		}
 
@@ -168,7 +180,7 @@ func (r ResourceUsageVirtualMachine) Print() {
 }
 
 // interface raw is in Kilo Bytes - need to convert to MegaBytes
-func getVmAvailableMemory(row []interface{}) (float64, float64) {
+func getVmAvailableMemory(row []interface{}) (float64, float64, string) {
 	m := fmt.Sprintf("%v", row[12])
 	kbValue, err := stringToFloat(m)
 	if err != nil {
@@ -177,11 +189,12 @@ func getVmAvailableMemory(row []interface{}) (float64, float64) {
 
 	gbValue := kbValue / GB
 	strDisplay := fmt.Sprintf("%v", gbValue)
-	fmt.Printf("Available Memory Avg: %sGB [%gKB] \n", strDisplay[0:3], kbValue)
-	return gbValue, kbValue
+	strValue := fmt.Sprintf("%sGB", strDisplay[0:3])
+	//fmt.Printf("Available Memory Avg: %sGB [%gKB] \n", strDisplay[0:3], kbValue)
+	return gbValue, kbValue, strValue
 }
 
-func getCpuUtilization(row []interface{}) float64 {
+func getCpuUtilization(row []interface{}) (float64,string) {
 	parsedValue := fmt.Sprintf("%v", row[12])
 	value, err := stringToFloat(parsedValue)
 	if err != nil {
@@ -189,11 +202,12 @@ func getCpuUtilization(row []interface{}) float64 {
 	}
 
 	strDisplay := fmt.Sprintf("%v", value)
-	fmt.Printf("CPU Utilization Avg: %s%% \n", strDisplay[0:4])
-	return value
+	strValue := fmt.Sprintf("%s%%", strDisplay[0:4])
+	//fmt.Printf("CPU Utilization Avg: %s%% \n", strDisplay[0:4])
+	return value, strValue
 }
 
-func getLogicalDiskLatency(row []interface{}) (float64, float64) {
+func getLogicalDiskLatency(row []interface{}) (float64, float64, string) {
 	//the parsed value is in MS
 	parsedValue := fmt.Sprintf("%v", row[12])
 	value, err := stringToFloat(parsedValue)
@@ -202,11 +216,12 @@ func getLogicalDiskLatency(row []interface{}) (float64, float64) {
 	}
 	msValue := value * 1000
 	strDisplay := fmt.Sprintf("%v", msValue)
-	fmt.Printf("Logical Disk Latency Avg: %sms [%g] \n", strDisplay[0:4], msValue)
-	return msValue, value
+	strValue := fmt.Sprintf("%sms",strDisplay[0:4])
+	//fmt.Printf("Logical Disk Latency Avg: %sms [%g] \n", strDisplay[0:4], msValue)
+	return msValue, value, strValue
 }
 
-func getLogicalDiskIOPs(row []interface{}) float64 {
+func getLogicalDiskIOPs(row []interface{}) (float64, string) {
 	//the parsed value is in MS
 	parsedValue := fmt.Sprintf("%v", row[12])
 	value, err := stringToFloat(parsedValue)
@@ -215,11 +230,12 @@ func getLogicalDiskIOPs(row []interface{}) float64 {
 	}
 
 	strDisplay := fmt.Sprintf("%v", value)
-	fmt.Printf("Logical Disk IOPs Avg: %s \n", strDisplay[0:4])
-	return value
+	strValue := fmt.Sprintf("%s", strDisplay[0:4])
+	//fmt.Printf("Logical Disk IOPs Avg: %s \n", strDisplay[0:4])
+	return value, strValue
 }
 
-func getDiskBytesPerSeconds(row []interface{}) (float64, float64) {
+func getDiskBytesPerSeconds(row []interface{}) (float64, float64, string) {
 
 	parsedValue := fmt.Sprintf("%v", row[12])
 	value, err := stringToFloat(parsedValue)
@@ -229,11 +245,12 @@ func getDiskBytesPerSeconds(row []interface{}) (float64, float64) {
 
 	gbValue := value / GB
 	strDisplay := fmt.Sprintf("%v", value)
-	fmt.Printf("Disk Bytes/sec Avg: %sGB [%gKB] \n", strDisplay[0:4], value)
-	return gbValue, value
+	strValue := fmt.Sprintf("%sGB", strDisplay[0:4])
+	//fmt.Printf("Disk Bytes/sec Avg: %sGB [%gKB] \n", strDisplay[0:4], value)
+	return gbValue, value, strValue
 }
 
-func getBytesSentRate(row []interface{}) (float64, float64) {
+func getBytesSentRate(row []interface{}) (float64, float64, string) {
 
 	parsedValue := fmt.Sprintf("%v", row[12])
 	value, err := stringToFloat(parsedValue)
@@ -243,11 +260,12 @@ func getBytesSentRate(row []interface{}) (float64, float64) {
 
 	kbValue := value / KB
 	strDisplay := fmt.Sprintf("%v", kbValue)
-	fmt.Printf("Bytes Sent Rate Avg: %sKB [%g] \n", strDisplay[0:4], value)
-	return kbValue, value
+	//fmt.Printf("Bytes Sent Rate Avg: %sKB [%g] \n", strDisplay[0:4], value)
+	strValue := fmt.Sprintf("%sKB",strDisplay[0:4])
+	return kbValue, value, strValue
 }
 
-func getBytesReceivedRate(row []interface{}) (float64, float64) {
+func getBytesReceivedRate(row []interface{}) (float64, float64, string) {
 
 	parsedValue := fmt.Sprintf("%v", row[12])
 	value, err := stringToFloat(parsedValue)
@@ -257,6 +275,7 @@ func getBytesReceivedRate(row []interface{}) (float64, float64) {
 
 	kbValue := value / KB
 	strDisplay := fmt.Sprintf("%v", kbValue)
-	fmt.Printf("Bytes Received Rate Avg: %sKB [%g] \n", strDisplay[0:4], value)
-	return kbValue, value
+	strValue := fmt.Sprintf("%sKB", strDisplay[0:4])
+	//fmt.Printf("Bytes Received Rate Avg: %sKB [%g] \n", strDisplay[0:4], value)
+	return kbValue, value, strValue
 }

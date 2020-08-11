@@ -10,7 +10,6 @@ import (
 	"strings"
 )
 
-
 type ResourceGroupCost struct {
 	ID         string      `json:"id"`
 	Name       string      `json:"name"`
@@ -27,7 +26,6 @@ type ResourceGroupCost struct {
 		Rows [][]interface{} `json:"rows"`
 	} `json:"properties"`
 }
-
 
 func init() {
 
@@ -90,7 +88,6 @@ func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string, start
 		return nil, fmt.Errorf("resource group name, start date and end date are required")
 	}
 
-
 	cl := Client{}
 	err := cl.New()
 	if err != nil {
@@ -99,7 +96,7 @@ func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string, start
 
 	//Cache lookup
 	c := &Cache{}
-	cKey := fmt.Sprintf("%s_%s_GetResourceGroupCost_%s_%s",cl.AppConfig.AccessToken.SubscriptionID, resourceGroupName, startD, endD)
+	cKey := fmt.Sprintf("%s_%s_GetResourceGroupCost_%s_%s", cl.AppConfig.AccessToken.SubscriptionID, resourceGroupName, startD, endD)
 	cHashVal := c.Get(cKey)
 	if len(cHashVal) <= 0 {
 		//Execute Request
@@ -112,7 +109,7 @@ func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string, start
 		//Load From Cache
 		err := LoadFromCache(cKey, r)
 		if err != nil {
-			r, err := r.executeRequest(resourceGroupName, startD, endD, cKey,cl.AppConfig.AccessToken.SubscriptionID)
+			r, err := r.executeRequest(resourceGroupName, startD, endD, cKey, cl.AppConfig.AccessToken.SubscriptionID)
 			if err != nil {
 				return r, err
 			}
@@ -135,27 +132,27 @@ func (r *ResourceGroupCost) executeRequest(resourceGroupName string, startD stri
 		return nil, err
 	}
 
-	url := strings.Replace(cl.AppConfig.ResourceGroupCost.URL, "{{subscriptionID}}",subscriptionId, 1)
-	url = strings.Replace(url, "{{resourceGroup}}",resourceGroupName, 1)
+	url := strings.Replace(cl.AppConfig.ResourceGroupCost.URL, "{{subscriptionID}}", subscriptionId, 1)
+	url = strings.Replace(url, "{{resourceGroup}}", resourceGroupName, 1)
 
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
-	payload := strings.NewReader(fmt.Sprintf("{\"type\": \"ActualCost\",\"dataSet\": {\"granularity\": \"None\"," +
-		"\"aggregation\": {\"totalCost\": {\"name\": \"Cost\",\"function\": \"Sum\"}," +
-		"\"totalCostUSD\": {\"name\": \"CostUSD\",\"function\": \"Sum\"}}," +
-		"\"grouping\": [{\"type\": \"Dimension\",\"name\": \"ResourceId\"}," +
-		" {\"type\": \"Dimension\",\"name\": \"ResourceType\"}, {\"type\": \"Dimension\",\"name\": \"ResourceLocation\"}, " +
-		"{\"type\": \"Dimension\",\"name\": \"ChargeType\"}, {\"type\": \"Dimension\",\"name\": \"ResourceGroupName\"}, " +
-		"{\"type\": \"Dimension\",\"name\": \"PublisherType\"}, {\"type\": \"Dimension\",\"name\": \"ServiceName\"}, " +
-		"{\"type\": \"Dimension\",\"name\": \"Meter\"}],\"include\": [\"Tags\"]},\"timeframe\": \"Custom\"," +
-		"\"timePeriod\": {" +
-		"\"from\": \"%sT00:00:00+00:00\"," +
+	payload := strings.NewReader(fmt.Sprintf("{\"type\": \"ActualCost\",\"dataSet\": {\"granularity\": \"None\","+
+		"\"aggregation\": {\"totalCost\": {\"name\": \"Cost\",\"function\": \"Sum\"},"+
+		"\"totalCostUSD\": {\"name\": \"CostUSD\",\"function\": \"Sum\"}},"+
+		"\"grouping\": [{\"type\": \"Dimension\",\"name\": \"ResourceId\"},"+
+		" {\"type\": \"Dimension\",\"name\": \"ResourceType\"}, {\"type\": \"Dimension\",\"name\": \"ResourceLocation\"}, "+
+		"{\"type\": \"Dimension\",\"name\": \"ChargeType\"}, {\"type\": \"Dimension\",\"name\": \"ResourceGroupName\"}, "+
+		"{\"type\": \"Dimension\",\"name\": \"PublisherType\"}, {\"type\": \"Dimension\",\"name\": \"ServiceName\"}, "+
+		"{\"type\": \"Dimension\",\"name\": \"Meter\"}],\"include\": [\"Tags\"]},\"timeframe\": \"Custom\","+
+		"\"timePeriod\": {"+
+		"\"from\": \"%sT00:00:00+00:00\","+
 		"\"to\": \"%sT23:59:59+00:00\"}}",
 		startD,
 		endD,
 	))
 
-	client := &http.Client {}
-	req, _ := http.NewRequest("POST",url, payload)
+	client := &http.Client{}
+	req, _ := http.NewRequest("POST", url, payload)
 	req.Header.Add("Authorization", token)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
@@ -163,7 +160,7 @@ func (r *ResourceGroupCost) executeRequest(resourceGroupName string, startD stri
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 
-	err = json.Unmarshal(body,r)
+	err = json.Unmarshal(body, r)
 	if err != nil {
 		return r, fmt.Errorf("recommendation list unmarshal body response: ", err)
 	}
@@ -178,14 +175,12 @@ func (r *ResourceGroupCost) executeRequest(resourceGroupName string, startD stri
 }
 
 func (r ResourceGroupCost) PrintHeader() {
-	fmt.Println("Resource Group Consumption:")
-	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
-	fmt.Println("ResourceID,Resource Group,Service Name,Cost,Resource Type,Resource Location,Consumption Type,Meter")
-	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
+	fmt.Println("")
+
 }
 
-
 func (r ResourceGroupCost) Print() {
+
 	// only 30-days increments
 	startD := "2020-07-01"
 	endD := "2020-07-30"
@@ -211,15 +206,14 @@ func (r ResourceGroupCost) Print() {
 
 			//remove path
 			if strings.Contains(resourceType, "/") {
-				pArray:= strings.Split(resourceType, "/")
+				pArray := strings.Split(resourceType, "/")
 				resourceType = pArray[len(pArray)-1]
 			}
 
 			if strings.Contains(resourceId, "/") {
-				pArray:= strings.Split(resourceId, "/")
+				pArray := strings.Split(resourceId, "/")
 				resourceId = pArray[len(pArray)-1]
 			}
-
 
 			//Additional requests
 			if serviceName == "virtual machines" && resourceType == "virtualmachines" && len(costUSD) > 0 && chargeType == "usage" {
@@ -228,26 +222,39 @@ func (r ResourceGroupCost) Print() {
 				if err != nil {
 					fmt.Printf("Error: failed to retrieve vm resouce usage %v\n", err)
 				}
-				vm.Print()
+
+				fmt.Printf("Resource Group Consumption: %s-%s\n", serviceName, resourceType)
+				fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+				fmt.Println("ResourceID,Resource Group,Service Name,Cost,Resource Type,Resource Location,Consumption Type,Meter,CPU Utilization Avg,Available Memory,Logical Disk Latency,Disk IOPs,Disk Bytes/sec,Network Sent Rate, Network Received Rate")
+				fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+				fmt.Printf("%s,%s,%s,$%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",resourceId, resourceGroupName, serviceName, costUSD,resourceType, resourceLocation, chargeType, meter, vm.CpuUtilization, vm.MemoryAvailable, vm.DiskLatency, vm.DiskIOPs, vm.DiskBytes, vm.NetworkSentRate, vm.NetworkSentRate)
 			}
 
-			if serviceName == "storage" && resourceType == "storageaccounts" && chargeType == "usage" {
-				var stAccount = &ResourceUsageStorageAccount{}
-				stAccount, err := stAccount.getStorageAccountByResourceId(resourceId, "2020-08-03", "2020-08-10")
-				if err != nil {
-					fmt.Printf("Error: failed to retrieve vm resouce usage %v\n", err)
-				}
-				stAccount.Print()
-			}
+			//if serviceName == "storage" && resourceType == "storageaccounts" && chargeType == "usage" {
+			//	var stacc = &StorageAccountAvailability{}
+			//	stacc, err := stacc.getStorageAccountAvailability(resourceGroupName, resourceId, "2020-08-01", "2020-08-07")
+			//	if err != nil {
+			//		fmt.Printf("Error: failed to retrieve Availability resouce usage %v\n", err)
+			//	}
+			//
+			//	//var transaction = &StorageAccountTransaction{}
+			//	//transaction, err := transaction.getStorageAccountTransaction(resourceGroupName, resourceId, "2020-08-01", "2020-08-07")
+			//	//if err != nil {
+			//	//	fmt.Printf("Error: failed to retrieve Transaction resouce usage %v\n", err)
+			//	//}
+			//
+			//	fmt.Printf("Resource Group Consumption: %s-%s\n", serviceName, resourceType)
+			//	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
+			//	fmt.Println("ResourceID,Resource Group,Service Name,Cost,Resource Type,Resource Location,Consumption Type,Meter,Availability, Total Transactions,E2E Latency, Server Lantency, Failures,Capacity")
+			//	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
+			//	fmt.Printf("%s,%s,%s,$%s,%s,%s,%s,%s,%g%%,%g\n",
+			//		resourceId, resourceGroupName, serviceName, costUSD,
+			//		resourceType, resourceLocation, chargeType, meter,
+			//		stacc.getAvailability(),300.0) //transaction.getTransactions())
+			//}
 
 
-			fmt.Printf("%s,%s,%s,$%s,%s,%s,%s,%s\n",resourceId, resourceGroupName, serviceName, costUSD,resourceType, resourceLocation, chargeType, meter )
 		}
-
 
 	}
 }
-
-
-
-
