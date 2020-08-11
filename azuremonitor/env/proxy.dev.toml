@@ -1,0 +1,12 @@
+host = "localhost"
+port = "5432"
+user = "postgres"
+password = "password"
+name = "azuremonitor"
+sslmode = "disable"
+driver = "postgres"
+host_ip = "10.100.100.3"
+ab_server_ip = "localhost"
+ab_server_port = "8080"
+azuremonitor_front_end_port = "3000"
+debug_level = 0

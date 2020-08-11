@@ -1,0 +1,4 @@
+- Ingest scripts allows csv imports capabilities.
+- You should only use these files for Demo or Testing UI scenarios
+- Do not use this for productions.
+- Data is manage by devs for rapid development.
