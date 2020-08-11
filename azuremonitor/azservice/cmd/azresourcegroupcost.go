@@ -64,12 +64,14 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 			return err
 		}
 
+		startD := "2020-07-01"
+		endD := "2020-07-31"
 		if len(rgList) > 0 {
 			clearTerminal()
 			r.PrintHeader()
 			for i := 0; i < len(rgList); i++ {
 				rgName := rgList[i]
-				r, err = r.getResourceGroupCost(rgName)
+				r, err = r.getResourceGroupCost(rgName, startD, endD)
 				if err != nil {
 					return err
 				}
@@ -82,7 +84,45 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 	return cmd, nil
 }
 
-func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string) (*ResourceGroupCost, error) {
+func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string, startD string, endD string) (*ResourceGroupCost, error) {
+
+	if resourceGroupName == "" || startD == "" || endD == "" {
+		return nil, fmt.Errorf("resource group name, start date and end date are required")
+	}
+
+
+	cl := Client{}
+	err := cl.New()
+	if err != nil {
+		return nil, err
+	}
+
+	//Cache lookup
+	c := &Cache{}
+	cKey := fmt.Sprintf("%s_%s_GetResourceGroupCost_%s_%s",cl.AppConfig.AccessToken.SubscriptionID, resourceGroupName, startD, endD)
+	cHashVal := c.Get(cKey)
+	if len(cHashVal) <= 0 {
+		//Execute Request
+		r, err := r.executeRequest(resourceGroupName, startD, endD, cKey, cl.AppConfig.AccessToken.SubscriptionID)
+		if err != nil {
+			return r, err
+		}
+
+	} else {
+		//Load From Cache
+		err := LoadFromCache(cKey, r)
+		if err != nil {
+			r, err := r.executeRequest(resourceGroupName, startD, endD, cKey,cl.AppConfig.AccessToken.SubscriptionID)
+			if err != nil {
+				return r, err
+			}
+		}
+	}
+
+	return r, nil
+}
+
+func (r *ResourceGroupCost) executeRequest(resourceGroupName string, startD string, endD string, cKey string, subscriptionId string) (*ResourceGroupCost, error) {
 	var at = &AccessToken{}
 	cl := Client{}
 	err := cl.New()
@@ -90,20 +130,13 @@ func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string) (*Res
 		return nil, err
 	}
 
-	if len(resourceGroupName) <= 0 {
-		return nil, fmt.Errorf("resource group name is required")
-	}
-
 	at, err = at.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	startD := "2020-07-01"
-	endD := "2020-07-31"
-	url := strings.Replace(cl.AppConfig.ResourceGroupCost.URL, "{{subscriptionID}}",cl.AppConfig.AccessToken.SubscriptionID, 1)
+	url := strings.Replace(cl.AppConfig.ResourceGroupCost.URL, "{{subscriptionID}}",subscriptionId, 1)
 	url = strings.Replace(url, "{{resourceGroup}}",resourceGroupName, 1)
-	//fmt.Println(url)
 
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
 	payload := strings.NewReader(fmt.Sprintf("{\"type\": \"ActualCost\",\"dataSet\": {\"granularity\": \"None\"," +
@@ -129,11 +162,16 @@ func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string) (*Res
 	res, err := client.Do(req)
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
-	//fmt.Println(string(body))
 
 	err = json.Unmarshal(body,r)
 	if err != nil {
-		fmt.Println("recommendation list unmarshal body response: ", err)
+		return r, fmt.Errorf("recommendation list unmarshal body response: ", err)
+	}
+
+	//cached it
+	err = saveCache(cKey, r)
+	if err != nil {
+		return r, fmt.Errorf("error: failed to save to cache folder - %s: %v", cKey, err)
 	}
 
 	return r, nil
@@ -177,6 +215,13 @@ func (r ResourceGroupCost) Print() {
 				resourceType = pArray[len(pArray)-1]
 			}
 
+			if strings.Contains(resourceId, "/") {
+				pArray:= strings.Split(resourceId, "/")
+				resourceId = pArray[len(pArray)-1]
+			}
+
+
+			//Additional requests
 			if serviceName == "virtual machines" && resourceType == "virtualmachines" && len(costUSD) > 0 && chargeType == "usage" {
 				var vm = &ResourceUsageVirtualMachine{}
 				vm, err := vm.getVirtualMachineByResourceId(resourceId, startD, endD)
@@ -184,15 +229,16 @@ func (r ResourceGroupCost) Print() {
 					fmt.Printf("Error: failed to retrieve vm resouce usage %v\n", err)
 				}
 				vm.Print()
-				//fmt.Println("***The sourceid is: ", resourceId)
 			}
 
-
-			if strings.Contains(resourceId, "/") {
-				pArray:= strings.Split(resourceId, "/")
-				resourceId = pArray[len(pArray)-1]
+			if serviceName == "storage" && resourceType == "storageaccounts" && chargeType == "usage" {
+				var stAccount = &ResourceUsageStorageAccount{}
+				stAccount, err := stAccount.getStorageAccountByResourceId(resourceId, "2020-08-03", "2020-08-10")
+				if err != nil {
+					fmt.Printf("Error: failed to retrieve vm resouce usage %v\n", err)
+				}
+				stAccount.Print()
 			}
-
 
 
 			fmt.Printf("%s,%s,%s,$%s,%s,%s,%s,%s\n",resourceId, resourceGroupName, serviceName, costUSD,resourceType, resourceLocation, chargeType, meter )

@@ -20,20 +20,24 @@ type ResourceUsageVirtualMachine struct {
 }
 
 func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(id string, startD string,endD string) (*ResourceUsageVirtualMachine, error) {
-	c := &Cache{}
-
-
 	//Validate
 	if id == "" || startD == "" || endD == "" {
 		return nil, fmt.Errorf("resource id name is required")
 	}
 
+	cl := Client{}
+	err := cl.New()
+	if err != nil {
+		return nil, err
+	}
+
 	//Cache lookup
-	cKey := fmt.Sprintf("GetVirtualMachineByResourceId_%s_%s_%s",id, startD, endD)
+	c := &Cache{}
+	cKey := fmt.Sprintf("%s_%s_GetVirtualMachineByResourceId_%s_%s",cl.AppConfig.AccessToken.SubscriptionID, id, startD, endD)
 	cHashVal := c.Get(cKey)
 	if len(cHashVal) <= 0 {
 		//Execute Request
-		r, err := r.executeRequest(id, startD, endD, cKey)
+		r, err := r.executeRequest(id, startD, endD, cKey, cl.AppConfig.AccessToken.SubscriptionID)
 		if err != nil {
 			return r, err
 		}
@@ -43,7 +47,7 @@ func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(id string, s
 		err := LoadFromCache(cKey, r)
 		if err != nil {
 			fmt.Println("******WARNNING!!!!!!!!!MISSING FILE:::RESTORING WITH NEW REQUEST:::", err)
-			r, err := r.executeRequest(id, startD, endD, cKey)
+			r, err := r.executeRequest(id, startD, endD, cKey,cl.AppConfig.AccessToken.SubscriptionID)
 			if err != nil {
 				return r, err
 			}
@@ -54,23 +58,17 @@ func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(id string, s
 	return r, nil
 }
 
-func (r *ResourceUsageVirtualMachine) executeRequest(id string, startD string, endD string, cKey string) (*ResourceUsageVirtualMachine, error) {
+func (r *ResourceUsageVirtualMachine) executeRequest(id string, startD string, endD string, cKey string, subscriptionId string) (*ResourceUsageVirtualMachine, error) {
 
 	var at = &AccessToken{}
-	cl := Client{}
-	err := cl.New()
-	if err != nil {
-		return nil, err
-	}
-
-	at, err = at.getAccessToken()
+	at, err := at.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
 	url := fmt.Sprintf("https://management.azure.com//subscriptions/%s/resourcegroups/" +
 		"defaultresourcegroup-eus/providers/microsoft.operationalinsights/workspaces/" +
-		"defaultworkspace-%s-eus/query?api-version=2017-10-01",cl.AppConfig.AccessToken.SubscriptionID, cl.AppConfig.AccessToken.SubscriptionID)
+		"defaultworkspace-%s-eus/query?api-version=2017-10-01",subscriptionId, subscriptionId)
 
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
 	payload := strings.NewReader(fmt.Sprintf("{\"query\": \"let " +
