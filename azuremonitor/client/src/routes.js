@@ -1,4 +1,5 @@
 import HomePage from './pages/HomePage';
+import AnalysisPage from './pages/AnalysisPage'
 import React from 'react';
 import { Redirect } from "react-router-dom";
 
@@ -22,6 +23,13 @@ const NavbarRoutes = {
             name: "High Availability",
             icon: "",
             component: HomePage
+        },
+        {
+            path: "/analysis/:type/:id",
+            name: "Analysis",
+            icon: "",
+            hidden: true,
+            component: AnalysisPage
         },
         {
             path: "/",

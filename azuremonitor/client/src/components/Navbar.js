@@ -29,11 +29,13 @@ const Navbar = () => {
                 
                 <div className={styles.linksContainer}>
                     {NavbarRoutes.routes.map((menuItem, index) => (
-                        <Typography key={index} variant="subtitle1" >
-                            <Link to={menuItem.path} className={styles.menuItems}>
-                                {menuItem.name}
-                            </Link>
-                        </Typography>
+                        !menuItem.hidden && (
+                            <Typography key={index} variant="subtitle1" >
+                                <Link to={menuItem.path} className={styles.menuItems}>
+                                    {menuItem.name}
+                                </Link>
+                            </Typography>
+                        )
                     ))}
                 </div>
                 
