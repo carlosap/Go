@@ -3,12 +3,12 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Go/azuremonitor/db/dbcontext"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
-	"github.com/Go/azuremonitor/db/dbcontext"
 	"time"
 )
 
@@ -251,6 +251,12 @@ func (r ResourceGroupCost) Print() {
 				vmContext.Networksentrate = &vm.NetworkSentRate
 				vmContext.Networkreceivedrate = &vm.NetworkReceivedRate
 				vmContext.Consumptiontype = &chargeType
+				vmContext.Reportstartdate = &startDate
+				vmContext.Reportenddate = &endDate
+				var dataDictionary map[string]interface{}
+				d, _ := json.Marshal(&r)
+				_ = json.Unmarshal(d, &dataDictionary)
+				vmContext.Data = dataDictionary
 
 				err = vmContext.Insert()
 				if err != nil {
