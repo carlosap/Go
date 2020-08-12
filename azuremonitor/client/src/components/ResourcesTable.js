@@ -84,9 +84,8 @@ const ResourceGroups = (props) => {
 															<TableRow key={idx}>
 																<BorderlessCell style={styles.padding}>{resource.resourceName}</BorderlessCell>
 																<BorderlessCell align='center' style={styles.padding}>{resource.type}</BorderlessCell>
-																<BorderlessCell align='center' style={styles.padding}>{resource.consumption}</BorderlessCell>
-																<BorderlessCell align='center' style={styles.padding}>${resource.usage}</BorderlessCell>
-																<BorderlessCell align='center' style={styles.padding}>${resource.savings}</BorderlessCell>
+																<BorderlessCell align='center' style={styles.padding}>${resource.consumption}</BorderlessCell>
+																<BorderlessCell align='center' style={styles.padding}>{resource.savings}</BorderlessCell>
 																<BorderlessCell align='center' style={styles.padding}>
 																	<Recommendations recommendations={resource.recommendations}/>
 																</BorderlessCell>
@@ -96,9 +95,8 @@ const ResourceGroups = (props) => {
 													<TableRow key={idx}>
 															<TableCell style={styles.padding}>{resource.resourceName}</TableCell>
 															<TableCell align='center' style={styles.padding}>{resource.type}</TableCell>
-															<TableCell align='center' style={styles.padding}>{resource.consumption}</TableCell>
-															<TableCell align='center' style={styles.padding}>${resource.usage}</TableCell>
-															<TableCell align='center' style={styles.padding}>${resource.savings}</TableCell>
+															<TableCell align='center' style={styles.padding}>${resource.consumption}</TableCell>
+															<TableCell align='center' style={styles.padding}>{resource.savings}</TableCell>
 															<TableCell align='center' style={styles.padding}>
 																<Recommendations recommendations={resource.recommendations}/>
 															</TableCell>
