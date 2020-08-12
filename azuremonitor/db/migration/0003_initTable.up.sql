@@ -14,12 +14,12 @@ CREATE TABLE IF NOT EXISTS azmonitor.application (
 
 
 CREATE TABLE IF NOT EXISTS azmonitor.virtualmachine (
-  resourceID  varchar,
+  resourceID  varchar UNIQUE,
   resourceGroup varchar,
   serviceName varchar,
   cost varchar,
   resourceType varchar,
-  resource varchar,
+  resourceLocation varchar,
   consumptionType varchar,
   meter varchar,
   cpuUtilization varchar,
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS azmonitor.virtualmachine (
 
 
 CREATE TABLE IF NOT EXISTS azmonitor.storageaccount (
-  resourceID  varchar,
+  resourceID  varchar UNIQUE,
   resourceGroup varchar,
   serviceName varchar,
   cost varchar,
