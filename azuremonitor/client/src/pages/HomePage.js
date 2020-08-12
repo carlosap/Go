@@ -1,14 +1,16 @@
-import React  from 'react';
+import React, {useContext} from 'react'
+import { AppContext } from "../contexts/AppContext"
+
+// Import Material UI
 import {makeStyles} from '@material-ui/core/styles'
 import {Grid, Typography} from '@material-ui/core'
 
+// Import Componets
 import AnalyticsWidget from '../components/AnalyticsWidget'
 import ResourcesTable from '../components/ResourcesTable'
 import LineGraph from '../components/LineGraph'
 import PieChart from '../components/PieChart'
 import Logo from '../assets/images/logo.png'
-
-import data from "../MockData/resources.json"
 
 const useStyles = makeStyles({
     logo: {
@@ -30,9 +32,9 @@ const useStyles = makeStyles({
 
 const HomePage = () => {
     const styles = useStyles()
+    const {state, dispatch} = useContext(AppContext)
 
     return (
-
         <Grid style={{padding:'10px'}} container>
             <Grid style={{display:'flex', justifyContent:'space-between'}} sm={12} item>
                 <div>
@@ -67,7 +69,7 @@ const HomePage = () => {
             </Grid>
 
             <Grid style={{padding:'30px'}} item sm={12}>
-                <ResourcesTable data={data}/>
+                <ResourcesTable data={state.Resources} dispatch={dispatch}/>
             </Grid>
 
             <Grid style={{paddingLeft:'30px', paddingRight:'30px'}} container item sm={12} spacing={2}>

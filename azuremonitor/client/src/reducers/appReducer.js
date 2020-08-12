@@ -20,8 +20,15 @@ const QuestionsReducer = (state, action) => {
                     return question
                 })
             }
+        case 'SAVE_QUESTIONS': 
+            console.log(action.payload)
+            return {
+                ...state
+            }
+            break
         case 'RESET_STATE':
             return {
+                ...state,
                 Questions: VMQuestions
             }
         default:

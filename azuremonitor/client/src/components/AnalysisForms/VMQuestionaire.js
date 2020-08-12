@@ -6,7 +6,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 import Swal from 'sweetalert2'
 
 const VMQuestionaire = (props) => {
-    const {questions, dispatch} = props
+    const {resourceName, questions, state, dispatch} = props
 
     const handleChange = (event) => {
         let payload = {
@@ -44,6 +44,14 @@ const VMQuestionaire = (props) => {
             confirmButtonText: 'Yes, save my answers!'
         }).then((result) => {
             if (result.value) {
+                let payload = {
+                    subscription: props.location.state.subscription,
+                    recommendations: state.Questions,
+                    resourceName: resourceName
+                }
+
+                dispatch({type: 'SAVE_QUESTIONS', payload: payload})
+
                 Swal.fire(
                 'Saved!',
                 'Answers have been updated on home page.',

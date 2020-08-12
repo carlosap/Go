@@ -1,11 +1,17 @@
 import React, {useState} from 'react'
+
+// Import Material UI Components and Icons
 import {withStyles} from '@material-ui/core/styles'
 import {Table, TableHead, TableBody, TableRow, TableCell} from '@material-ui/core'
 import {Box, IconButton, Collapse, Paper, Typography} from '@material-ui/core'
-import Recommendations from './Recommendations'
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import SubdirectoryArrowRightIcon from '@material-ui/icons/SubdirectoryArrowRight';
+
+// Import Components
+import Recommendations from './Recommendations'
+import Edit from "./Edit"
+import Usages from "./Usages"
 
 const BorderlessCell = withStyles({
 	root: {
@@ -30,7 +36,7 @@ const CollapseRow = (props) => {
 
 // Wrapper Component for anything within resource groups
 const ResourceGroups = (props) => {
-	const {group} = props
+	const {group, subscription} = props
 	const [open, setOpen] = useState(false)
 	const styles = {
 		padding: {
@@ -43,7 +49,7 @@ const ResourceGroups = (props) => {
 			paddingLeft:'36px'
 		}
 	}
-	const headerTexts = ['Resource Name', 'Type', 'Consumption', 'Usage', 'Savings', 'Recommendations']
+	const headerTexts = ['Resource Name', 'Type', 'Consumption', 'Savings', 'Actions']
 	
 	return (
 		<React.Fragment>
@@ -87,7 +93,11 @@ const ResourceGroups = (props) => {
 																<BorderlessCell align='center' style={styles.padding}>${resource.consumption}</BorderlessCell>
 																<BorderlessCell align='center' style={styles.padding}>{resource.savings}</BorderlessCell>
 																<BorderlessCell align='center' style={styles.padding}>
-																	<Recommendations recommendations={resource.recommendations}/>
+																	<div style={{display:'flex', justifyContent:'center'}}>
+																		<Usages subscription={subscription} resource={resource}/>
+																		<Recommendations recommendations={resource.recommendations}/>
+																		<Edit subscription={subscription} resource={resource}/>
+																	</div>
 																</BorderlessCell>
 															</TableRow>
 													)
@@ -98,7 +108,11 @@ const ResourceGroups = (props) => {
 															<TableCell align='center' style={styles.padding}>${resource.consumption}</TableCell>
 															<TableCell align='center' style={styles.padding}>{resource.savings}</TableCell>
 															<TableCell align='center' style={styles.padding}>
-																<Recommendations recommendations={resource.recommendations}/>
+																<div style={{display:'flex', justifyContent:'center'}}>
+																	<Usages resource={resource}/>
+																	<Recommendations recommendations={resource.recommendations}/>
+																	<Edit subscription={subscription} resource={resource}/>
+																</div>															
 															</TableCell>
 													</TableRow>
 												)
@@ -140,7 +154,7 @@ const Subscriptions = (props) => {
 									</TableHead>
 									<TableBody>
 										{subscription.resourceGroups.map((group,i) => (
-											<ResourceGroups key={i} group={group}/>
+											<ResourceGroups subscription={subscription.subscriptionName} key={i} group={group}/>
 										))}
 									</TableBody>
 								</Table>
