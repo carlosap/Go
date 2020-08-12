@@ -40,8 +40,8 @@ const ResourceGroups = (props) => {
 	const [open, setOpen] = useState(false)
 	const styles = {
 		padding: {
-			paddingBottom: '8px', 
-			paddingTop:'8px'
+			paddingBottom: '0', 
+			paddingTop:'0'
 		},
 		collapseRow: {
 			paddingBottom: '8px', 
