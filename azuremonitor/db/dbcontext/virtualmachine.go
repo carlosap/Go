@@ -83,23 +83,27 @@ func (a *Virtualmachine) Update() error {
 type Virtualmachine struct {
 	tableName struct{} `pg:"azmonitor.virtualmachine,alias:t"`
 
-	Resourceid          *string    `pg:"resourceid"`
-	Resourcegroup       *string    `pg:"resourcegroup"`
-	Servicename         *string    `pg:"servicename"`
-	Cost                *string    `pg:"cost"`
-	Resourcetype        *string    `pg:"resourcetype"`
-	Resource            *string    `pg:"resource"`
-	Consumptiontype     *string    `pg:"consumptiontype"`
-	Meter               *string    `pg:"meter"`
-	Cpuutilization      *string    `pg:"cpuutilization"`
-	Availablememory     *string    `pg:"availablememory"`
-	Disklatency         *string    `pg:"disklatency"`
-	Diskiops            *string    `pg:"diskiops"`
-	Diskbytespersec     *string    `pg:"diskbytespersec"`
-	Networksentrate     *string    `pg:"networksentrate"`
-	Networkreceivedrate *string    `pg:"networkreceivedrate"`
-	Datecreated         *time.Time `pg:"datecreated"`
-	Lastupdated         *time.Time `pg:"lastupdated"`
+	ID                  string                 `pg:"id,pk,type:uuid"`
+	Resourceid          *string                `pg:"resourceid"`
+	Resourcegroup       *string                `pg:"resourcegroup"`
+	Servicename         *string                `pg:"servicename"`
+	Cost                *string                `pg:"cost"`
+	Resourcetype        *string                `pg:"resourcetype"`
+	Resourcelocation    *string                `pg:"resourcelocation"`
+	Consumptiontype     *string                `pg:"consumptiontype"`
+	Meter               *string                `pg:"meter"`
+	Cpuutilization      *string                `pg:"cpuutilization"`
+	Availablememory     *string                `pg:"availablememory"`
+	Disklatency         *string                `pg:"disklatency"`
+	Diskiops            *string                `pg:"diskiops"`
+	Diskbytespersec     *string                `pg:"diskbytespersec"`
+	Networksentrate     *string                `pg:"networksentrate"`
+	Networkreceivedrate *string                `pg:"networkreceivedrate"`
+	Datecreated         *time.Time             `pg:"datecreated"`
+	Lastupdated         *time.Time             `pg:"lastupdated"`
+	Reportstartdate     *string                `pg:"reportstartdate"`
+	Reportenddate       *string                `pg:"reportenddate"`
+	Data                map[string]interface{} `pg:"data"`
 }
 
 //AliasInfos

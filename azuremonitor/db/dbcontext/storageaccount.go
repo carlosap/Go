@@ -2,6 +2,7 @@ package dbcontext
 
 import (
 	"fmt"
+	"time"
 )
 
 //============================================Functional Requirements ===================================
@@ -82,20 +83,26 @@ func (a *Storageaccount) Update() error {
 type Storageaccount struct {
 	tableName struct{} `pg:"azmonitor.storageaccount,alias:t"`
 
-	Resourceid        *string `pg:"resourceid"`
-	Resourcegroup     *string `pg:"resourcegroup"`
-	Servicename       *string `pg:"servicename"`
-	Cost              *string `pg:"cost"`
-	Resourcetype      *string `pg:"resourcetype"`
-	Resourcelocation  *string `pg:"resourcelocation"`
-	Consumptiontype   *string `pg:"consumptiontype"`
-	Meter             *string `pg:"meter"`
-	Availability      *string `pg:"availability"`
-	Totaltransactions *string `pg:"totaltransactions"`
-	E2elatency        *string `pg:"e2elatency"`
-	Serverlantency    *string `pg:"serverlantency"`
-	Failures          *string `pg:"failures"`
-	Capacity          *string `pg:"capacity"`
+	ID                string                 `pg:"id,pk,type:uuid"`
+	Resourceid        *string                `pg:"resourceid"`
+	Resourcegroup     *string                `pg:"resourcegroup"`
+	Servicename       *string                `pg:"servicename"`
+	Cost              *string                `pg:"cost"`
+	Resourcetype      *string                `pg:"resourcetype"`
+	Resourcelocation  *string                `pg:"resourcelocation"`
+	Consumptiontype   *string                `pg:"consumptiontype"`
+	Meter             *string                `pg:"meter"`
+	Availability      *string                `pg:"availability"`
+	Totaltransactions *string                `pg:"totaltransactions"`
+	E2elatency        *string                `pg:"e2elatency"`
+	Serverlantency    *string                `pg:"serverlantency"`
+	Failures          *string                `pg:"failures"`
+	Capacity          *string                `pg:"capacity"`
+	Datecreated       *time.Time             `pg:"datecreated"`
+	Lastupdated       *time.Time             `pg:"lastupdated"`
+	Reportstartdate   *string                `pg:"reportstartdate"`
+	Reportenddate     *string                `pg:"reportenddate"`
+	Data              map[string]interface{} `pg:"data"`
 }
 
 //AliasInfos

@@ -74,10 +74,10 @@ var Columns = struct {
 		Applicationid, SubscriptionID, Name, TenantID, GrantType, ClientID, ClientSecret, Lastmodified string
 	}
 	Storageaccount struct {
-		Resourceid, Resourcegroup, Servicename, Cost, Resourcetype, Resourcelocation, Consumptiontype, Meter, Availability, Totaltransactions, E2elatency, Serverlantency, Failures, Capacity string
+		ID, Resourceid, Resourcegroup, Servicename, Cost, Resourcetype, Resourcelocation, Consumptiontype, Meter, Availability, Totaltransactions, E2elatency, Serverlantency, Failures, Capacity, Datecreated, Lastupdated, Reportstartdate, Reportenddate, Data string
 	}
 	Virtualmachine struct {
-		Resourceid, Resourcegroup, Servicename, Cost, Resourcetype, Resource, Consumptiontype, Meter, Cpuutilization, Availablememory, Disklatency, Diskiops, Diskbytespersec, Networksentrate, Networkreceivedrate, Datecreated, Lastupdated string
+		ID, Resourceid, Resourcegroup, Servicename, Cost, Resourcetype, Resourcelocation, Consumptiontype, Meter, Cpuutilization, Availablememory, Disklatency, Diskiops, Diskbytespersec, Networksentrate, Networkreceivedrate, Datecreated, Lastupdated, Reportstartdate, Reportenddate, Data string
 	}
 }{
 	Application: struct {
@@ -93,8 +93,9 @@ var Columns = struct {
 		Lastmodified:   "lastmodified",
 	},
 	Storageaccount: struct {
-		Resourceid, Resourcegroup, Servicename, Cost, Resourcetype, Resourcelocation, Consumptiontype, Meter, Availability, Totaltransactions, E2elatency, Serverlantency, Failures, Capacity string
+		ID, Resourceid, Resourcegroup, Servicename, Cost, Resourcetype, Resourcelocation, Consumptiontype, Meter, Availability, Totaltransactions, E2elatency, Serverlantency, Failures, Capacity, Datecreated, Lastupdated, Reportstartdate, Reportenddate, Data string
 	}{
+		ID:                "id",
 		Resourceid:        "resourceid",
 		Resourcegroup:     "resourcegroup",
 		Servicename:       "servicename",
@@ -109,16 +110,22 @@ var Columns = struct {
 		Serverlantency:    "serverlantency",
 		Failures:          "failures",
 		Capacity:          "capacity",
+		Datecreated:       "datecreated",
+		Lastupdated:       "lastupdated",
+		Reportstartdate:   "reportstartdate",
+		Reportenddate:     "reportenddate",
+		Data:              "data",
 	},
 	Virtualmachine: struct {
-		Resourceid, Resourcegroup, Servicename, Cost, Resourcetype, Resource, Consumptiontype, Meter, Cpuutilization, Availablememory, Disklatency, Diskiops, Diskbytespersec, Networksentrate, Networkreceivedrate, Datecreated, Lastupdated string
+		ID, Resourceid, Resourcegroup, Servicename, Cost, Resourcetype, Resourcelocation, Consumptiontype, Meter, Cpuutilization, Availablememory, Disklatency, Diskiops, Diskbytespersec, Networksentrate, Networkreceivedrate, Datecreated, Lastupdated, Reportstartdate, Reportenddate, Data string
 	}{
+		ID:                  "id",
 		Resourceid:          "resourceid",
 		Resourcegroup:       "resourcegroup",
 		Servicename:         "servicename",
 		Cost:                "cost",
 		Resourcetype:        "resourcetype",
-		Resource:            "resource",
+		Resourcelocation:    "resourcelocation",
 		Consumptiontype:     "consumptiontype",
 		Meter:               "meter",
 		Cpuutilization:      "cpuutilization",
@@ -130,6 +137,9 @@ var Columns = struct {
 		Networkreceivedrate: "networkreceivedrate",
 		Datecreated:         "datecreated",
 		Lastupdated:         "lastupdated",
+		Reportstartdate:     "reportstartdate",
+		Reportenddate:       "reportenddate",
+		Data:                "data",
 	},
 }
 
