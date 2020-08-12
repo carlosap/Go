@@ -250,6 +250,7 @@ func (r ResourceGroupCost) Print() {
 				vmContext.Diskbytespersec = &vm.DiskBytes
 				vmContext.Networksentrate = &vm.NetworkSentRate
 				vmContext.Networkreceivedrate = &vm.NetworkReceivedRate
+				vmContext.Resourcelocation = &resourceLocation
 				vmContext.Consumptiontype = &chargeType
 				vmContext.Reportstartdate = &startDate
 				vmContext.Reportenddate = &endDate
