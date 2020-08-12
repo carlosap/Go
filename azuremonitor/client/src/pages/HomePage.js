@@ -33,7 +33,6 @@ const useStyles = makeStyles({
 const HomePage = () => {
     const styles = useStyles()
     const {state, dispatch} = useContext(AppContext)
-
     return (
         <Grid style={{padding:'10px'}} container>
             <Grid style={{display:'flex', justifyContent:'space-between'}} sm={12} item>

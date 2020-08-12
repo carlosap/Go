@@ -7,6 +7,17 @@ import CloseIcon from '@material-ui/icons/Close';
 const Recommendations = (props) => {    
     const [open, setOpen] = useState(false)
     const {recommendations} = props
+
+    // Check if any questions were answered in this category
+    const checkIfAnswered = (questions) => {
+        for(var question of questions) {
+            if(question.answer !== ''){
+                return true
+            }
+        }
+        return false
+    }
+
     return (
         <div>
             <Tooltip title="Show Recommendations">
@@ -15,23 +26,41 @@ const Recommendations = (props) => {
                 </IconButton>
             </Tooltip>
 
-            <Dialog maxWidth='xs' fullWidth open={open} onClose={() => setOpen(false)}>
+            <Dialog scroll='paper' maxWidth='md' fullWidth open={open} onClose={() => setOpen(false)}>
 
                 <DialogTitle style={{textAlign:'center', paddingBottom:'8px'}}>
-                    <Typography style={{fontWeight:'bold'}} variant="h5"> Recommendations</Typography>
-                    <Divider fullWidth/>
+                    <div>
+                        <Typography style={{fontWeight:'bold'}} variant="h5"> Recommendations</Typography>
+                        <Divider/>
+                    </div>
                 </DialogTitle>
 
                 <DialogContent>
-                    <Typography style={{marginBottom:' 10px'}} color="primary" variant="h6">
-                        {`${recommendations.length} Optimization(s) Available`}
-                    </Typography>
                     {recommendations.length > 0 ? 
                         recommendations.map((rec, idx) => (
-                            <Typography key={idx} style={{marginBottom:'4px'}} color="textPrimary">{`- ${rec}`}</Typography>
+                            <div key={idx} style={{textAlign:'center'}}>
+                                {checkIfAnswered(rec.questions) &&  (
+                                        <Typography style={{marginBottom:' 15px', marginTop: '15px', fontWeight:'bold'}} color="primary" variant="h6">
+                                            {`${rec.category}`}
+                                        </Typography>
+                                    )
+                                }
+                                
+                                {rec.questions.map((question) => {
+                                    if(question.answer !== "") {
+                                        return (
+                                            <div key={idx} >
+                                                <Typography variant='h6' color="textPrimary">{question.question}</Typography>
+                                                <Typography style={{marginBottom:'8px'}} color="textPrimary">{`- ${question.answer}`}</Typography>
+                                            </div>
+                                        )
+                                    }
+                                })}
+                            </div>
+                           
                         ))
                     : 
-                        <Typography> This area has no optimizations available </Typography>
+                        <Typography> Analysis form has not been filled out yet. You can find this form by clicking on the "Analysis Form" in the actions section</Typography>
                     }
                 </DialogContent>
 

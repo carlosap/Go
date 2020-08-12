@@ -48,7 +48,6 @@ const useStyles = makeStyles({
 
 const AnalysisPage = () => {
     const { state, dispatch } = useContext(AppContext)
-    console.log(state)
     const styles = useStyles()
     const {type, id} = useParams()
 

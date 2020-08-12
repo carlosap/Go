@@ -4,11 +4,11 @@ import {IconButton, Tooltip} from '@material-ui/core'
 import EditIcon from '@material-ui/icons/Edit';
 
 const Edit = (props) => {
-    const {resource, subscription} = props
+    const {resource, subscription, groupName} = props
     const handleClick = () => {
         props.history.push({
             pathname: `/analysis/${resource.type}/${resource.resourceName}`,
-            state: { subscription: subscription}
+            state: { subscription: subscription, groupName: groupName}
         })
     }
 

@@ -53,7 +53,7 @@ const ResourceGroups = (props) => {
 	
 	return (
 		<React.Fragment>
-			<CollapseRow style={{paddingLeft:'36px'}}name={group.groupName} open={open} setOpen={setOpen} styles={styles.collapseRow}/>
+			<CollapseRow style={{paddingLeft:'36px'}} name={group.groupName} open={open} setOpen={setOpen} styles={styles.collapseRow}/>
 			<TableRow>
 				<TableCell style={{ paddingBottom: 0, paddingTop: 0, paddingLeft:'36px' }}>
 					<Collapse in={open}> 
@@ -94,9 +94,9 @@ const ResourceGroups = (props) => {
 																<BorderlessCell align='center' style={styles.padding}>{resource.savings}</BorderlessCell>
 																<BorderlessCell align='center' style={styles.padding}>
 																	<div style={{display:'flex', justifyContent:'center'}}>
-																		<Usages subscription={subscription} resource={resource}/>
+																		<Usages usage={resource.usage}/>
 																		<Recommendations recommendations={resource.recommendations}/>
-																		<Edit subscription={subscription} resource={resource}/>
+																		<Edit groupName={group.groupName} subscription={subscription} resource={resource}/>
 																	</div>
 																</BorderlessCell>
 															</TableRow>
@@ -109,9 +109,9 @@ const ResourceGroups = (props) => {
 															<TableCell align='center' style={styles.padding}>{resource.savings}</TableCell>
 															<TableCell align='center' style={styles.padding}>
 																<div style={{display:'flex', justifyContent:'center'}}>
-																	<Usages resource={resource}/>
+																	<Usages  usage={resource.usage}/>
 																	<Recommendations recommendations={resource.recommendations}/>
-																	<Edit subscription={subscription} resource={resource}/>
+																	<Edit groupName={group.groupName} subscription={subscription} resource={resource}/>
 																</div>															
 															</TableCell>
 													</TableRow>

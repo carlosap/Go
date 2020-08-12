@@ -28,7 +28,7 @@ const VMQuestionaire = (props) => {
             confirmButtonText: 'Yes, go back!'
         }).then((result) => {
             if (result.value) {
-                dispatch({type:'RESET_STATE'})
+                dispatch({type: 'RESET_QUESTIONS'})
                 props.history.push("/")
             }
         })
@@ -45,7 +45,8 @@ const VMQuestionaire = (props) => {
         }).then((result) => {
             if (result.value) {
                 let payload = {
-                    subscription: props.location.state.subscription,
+                    subscriptionName: props.location.state.subscription,
+                    groupName: props.location.state.groupName,
                     recommendations: state.Questions,
                     resourceName: resourceName
                 }
@@ -58,6 +59,7 @@ const VMQuestionaire = (props) => {
                 'success'
                 ).then(() => {
                     props.history.push("/")
+                    dispatch({type: 'RESET_QUESTIONS'})
                 })
             }
         })
