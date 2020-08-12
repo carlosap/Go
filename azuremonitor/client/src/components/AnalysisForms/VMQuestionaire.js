@@ -1,5 +1,9 @@
 import React, {useState} from 'react'
-import {TextField, Typography} from '@material-ui/core'
+import {withRouter} from 'react-router'
+import {IconButton, TextField, Typography, Tooltip} from '@material-ui/core'
+import SaveIcon from '@material-ui/icons/Save'
+import ArrowBackIcon from '@material-ui/icons/ArrowBack'
+import Swal from 'sweetalert2'
 
 const VMQuestionaire = (props) => {
     const {questions, dispatch} = props
@@ -10,9 +14,47 @@ const VMQuestionaire = (props) => {
             answer: event.target.value,
             category: questions.category
         }
-        dispatch({type:"UPDATE_ANSWER", payload: payload})
+        dispatch({type:'UPDATE_ANSWER', payload: payload})
     }
 
+    const handleBack = () => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "If you leave before saving, all changes will be lost.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, go back!'
+        }).then((result) => {
+            if (result.value) {
+                dispatch({type:'RESET_STATE'})
+                props.history.push("/")
+            }
+        })
+    }
+
+    const handleSave = () => {
+        Swal.fire({
+            title: 'Save all answers?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, save my answers!'
+        }).then((result) => {
+            if (result.value) {
+                Swal.fire(
+                'Saved!',
+                'Answers have been updated on home page.',
+                'success'
+                ).then(() => {
+                    props.history.push("/")
+                })
+            }
+        })
+    }
+    
     return (
         <div>
             {questions.questions.map((question,idx) => (
@@ -32,8 +74,23 @@ const VMQuestionaire = (props) => {
                     />
                 </div>
             ))}
+
+            <div style={{marginTop:'15px', display:'flex', justifyContent: 'center'}}>
+                <Tooltip title='Back To Home Page'>
+                    <IconButton onClick={handleBack} color='primary'>
+                        <ArrowBackIcon fontSize='large'/>
+                    </IconButton>
+                </Tooltip>
+
+                <Tooltip title='Save Answers'>
+                    <IconButton onClick={handleSave} color='primary'>
+                        <SaveIcon fontSize='large'/>
+                    </IconButton>
+                </Tooltip>
+            </div>
+            
         </div>
     )
 } 
 
-export default VMQuestionaire
+export default withRouter(VMQuestionaire)

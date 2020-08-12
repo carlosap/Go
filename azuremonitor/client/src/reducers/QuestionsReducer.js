@@ -1,3 +1,4 @@
+import {VMQuestions} from '../MockData/questions.json'
 
 const QuestionsReducer = (state, action) => {
     switch (action.type) {
@@ -18,6 +19,10 @@ const QuestionsReducer = (state, action) => {
                     } 
                     return question
                 })
+            }
+        case 'RESET_STATE':
+            return {
+                Questions: VMQuestions
             }
         default:
             return state;
