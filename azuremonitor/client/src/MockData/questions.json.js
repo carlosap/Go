@@ -21,6 +21,11 @@ export const VMQuestions = [
                 id: 1,
                 question: 'What is the Disk IOPs and Latancy Analysis?',
                 answer: ''
+            },
+            {
+                id: 2,
+                question: 'Downgrade storage from prime to standard?',
+                answer: ''
             }
         ]
     },
@@ -106,5 +111,17 @@ export const VMQuestions = [
     },
     {
         category: "Summary",
+        questions: [
+            {
+                id: 1,
+                question: 'Please summarize overall analysis.',
+                answer: ''
+            },
+            {
+                id: 2,
+                question: 'Estimate cost savings.',
+                answer: ''
+            }
+        ]
     }   
 ]

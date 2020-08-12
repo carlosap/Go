@@ -14,11 +14,14 @@ const Recommendations = (props) => {
                     <InfoIcon color='primary'/>
                 </IconButton>
             </Tooltip>
+
             <Dialog maxWidth='xs' fullWidth open={open} onClose={() => setOpen(false)}>
+
                 <DialogTitle style={{textAlign:'center', paddingBottom:'8px'}}>
                     <Typography style={{fontWeight:'bold'}} variant="h5"> Recommendations</Typography>
                     <Divider fullWidth/>
                 </DialogTitle>
+
                 <DialogContent>
                     <Typography style={{marginBottom:' 10px'}} color="primary" variant="h6">
                         {`${recommendations.length} Optimization(s) Available`}
@@ -30,16 +33,16 @@ const Recommendations = (props) => {
                     : 
                         <Typography> This area has no optimizations available </Typography>
                     }
-                    
                 </DialogContent>
+
                 <DialogActions style={{alignSelf:'center'}}>
                     <Tooltip title="Close">
                         <IconButton onClick={() => setOpen(false)}>
                             <CloseIcon/>
                         </IconButton>
                     </Tooltip>
-                    
                 </DialogActions>
+                
             </Dialog>
         </div>
         

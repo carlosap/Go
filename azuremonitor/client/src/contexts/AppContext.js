@@ -1,6 +1,7 @@
 import React, { createContext, useReducer, useEffect, useState } from 'react';
-import QuestionsReducer from '../reducers/QuestionsReducer'
+import appReducer from '../reducers/appReducer'
 import {VMQuestions} from '../MockData/questions.json'
+import {Resources} from '../MockData/resources.json'
 export const AppContext = createContext();
 
 let socket = null;
@@ -9,8 +10,9 @@ const AppContextProvider = (props) => {
 
     const [isConnection, setConnection] = useState(false);
 
-    const [state, dispatch] = useReducer(QuestionsReducer, {}, () => {
+    const [state, dispatch] = useReducer(appReducer, {}, () => {
         return {
+            Resources: Resources,
             Questions: VMQuestions
         }
     })

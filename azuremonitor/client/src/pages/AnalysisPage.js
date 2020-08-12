@@ -86,7 +86,7 @@ const AnalysisPage = () => {
                 </div>
 
                 <div className={styles.questions}>
-                    <VMQuestionaire dispatch={dispatch} questions={state.Questions[tabIndex]}/>
+                    <VMQuestionaire resourceName={id} state={state} dispatch={dispatch} questions={state.Questions[tabIndex]}/>
                 </div>
 
             </Paper>
