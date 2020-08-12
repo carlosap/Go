@@ -8,7 +8,7 @@ import LineGraph from '../components/LineGraph'
 import PieChart from '../components/PieChart'
 import Logo from '../assets/images/logo.png'
 
-import data from "../data.json"
+import data from "../MockData/resources.json"
 
 const useStyles = makeStyles({
     logo: {
