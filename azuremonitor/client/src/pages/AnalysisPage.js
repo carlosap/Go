@@ -43,6 +43,8 @@ const useStyles = makeStyles({
         display: 'flex',
         flexDirection: 'column',
         alignItems:'center',
+        maxHeight: 550,
+        overflow:'auto'
     }
 }) 
 
@@ -75,7 +77,7 @@ const AnalysisPage = () => {
                 </Typography>
             </div>
 
-            <Paper style={{margin: '35px auto', paddingBottom: '15px'}} elevation={3}>
+            <Paper style={{margin: '35px auto', height:600, paddingBottom: '15px'}} elevation={3}>
                 <div>
                     <StyledTabs value={tabIndex} onChange={handleTabSwitch}>
                         {VMQuestions.map((question, idx) => (
