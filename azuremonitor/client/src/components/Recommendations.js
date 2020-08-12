@@ -51,7 +51,7 @@ const Recommendations = (props) => {
                                         return (
                                             <div key={idx} >
                                                 <Typography variant='h6' color="textPrimary">{question.question}</Typography>
-                                                <Typography style={{marginBottom:'8px'}} color="textPrimary">{`- ${question.answer}`}</Typography>
+                                                <Typography style={{marginBottom:'8px', marginTop:'10px'}} color="textPrimary">{`- ${question.answer}`}</Typography>
                                             </div>
                                         )
                                     }
