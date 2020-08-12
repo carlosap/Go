@@ -1,5 +1,6 @@
 import React, { createContext, useReducer, useEffect, useState } from 'react';
-import { appReducer } from '../reducers/appReducer';
+import QuestionsReducer from '../reducers/QuestionsReducer'
+import {VMQuestions} from '../MockData/questions.json'
 export const AppContext = createContext();
 
 let socket = null;
@@ -8,24 +9,16 @@ const AppContextProvider = (props) => {
 
     const [isConnection, setConnection] = useState(false);
 
-    const [state, dispatch] = useReducer(appReducer, {}, () => {
-        const weather = localStorage.getItem('weather');
-        const forecast = localStorage.getItem('forecast');
-        const ipinfo = localStorage.getItem('ipinfo');
-        const news = localStorage.getItem('news')
-        
+    const [state, dispatch] = useReducer(QuestionsReducer, {}, () => {
         return {
-            weather: weather ? JSON.parse(weather) : {},
-            forecast: forecast ? JSON.parse(forecast) : {},
-            ipinfo: ipinfo ? JSON.parse(ipinfo) : {},
-            news: news ? JSON.parse(news) : {}
+            Questions: VMQuestions
         }
     })
 
-    useEffect(() => {localStorage.setItem('weather', JSON.stringify(state.weather))}, [state.weather]);
-    useEffect(() => {localStorage.setItem('forecast', JSON.stringify(state.forecast))}, [state.forecast]);
-    useEffect(() => {localStorage.setItem('ipinfo', JSON.stringify(state.ipinfo))}, [state.ipinfo]);
-    useEffect(() => {localStorage.setItem('news', JSON.stringify(state.news))}, [state.news]);
+    // useEffect(() => {localStorage.setItem('weather', JSON.stringify(state.weather))}, [state.weather]);
+    // useEffect(() => {localStorage.setItem('forecast', JSON.stringify(state.forecast))}, [state.forecast]);
+    // useEffect(() => {localStorage.setItem('ipinfo', JSON.stringify(state.ipinfo))}, [state.ipinfo]);
+    // useEffect(() => {localStorage.setItem('news', JSON.stringify(state.news))}, [state.news]);
     
     const wsUpdateListener = () => {
         socket.onmessage = (e) => {
@@ -40,7 +33,6 @@ const AppContextProvider = (props) => {
         };
 
     };
-
 
     const wsClosedListener = (e) => {
 

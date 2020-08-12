@@ -1,7 +1,10 @@
-import React, {useState} from 'react'
+import React, {useState, useContext} from 'react'
+import { AppContext } from '../contexts/AppContext'
 import {useParams} from 'react-router-dom'
 import {makeStyles, withStyles} from '@material-ui/core/styles'
-import {Tab, Tabs, Typography} from '@material-ui/core'
+import {Tab, Tabs, Typography, Paper} from '@material-ui/core'
+import {VMQuestions} from "../MockData/questions.json"
+import VMQuestionaire from '../components/AnalysisForms/VMQuestionaire'
 
 const StyledTabs = withStyles({
     indicator: {
@@ -11,18 +14,21 @@ const StyledTabs = withStyles({
 
         // define and inject spans to further customize indicator
         '& > span': {   
-            maxWidth: 70,
+            maxWidth: '60%',
             width:'100%',
-            backgroundColor: 'blue'
+            backgroundColor: '#87CEFA'
         }
     }
 })((props) => <Tabs {...props} TabIndicatorProps={{children: <span/>}}/>);
 
 const StyledTab = withStyles((theme) => ({
     root: {
-        fontSize: theme.typography.pxToRem(15),
+        textTransform:'none',
+        fontSize: theme.typography.pxToRem(16),
         fontWeight: theme.typography.fontWeightBold,
-        
+        color: 'black',
+        paddingLeft: '0',
+        paddingRight: '0'
     }
 }))((props) => <Tab {...props}/>)
 
@@ -31,13 +37,22 @@ const useStyles = makeStyles({
         width: '70%',
         display: 'flex',
         flexDirection: 'column',
-        margin: '20px auto'
+        margin: '20px auto',
+    },
+    questions: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems:'center',
     }
 }) 
 
 const AnalysisPage = () => {
+    const { state, dispatch } = useContext(AppContext)
+    console.log(state)
     const styles = useStyles()
     const {type, id} = useParams()
+
+    // Used to keep track of tabs
     const [tabIndex, setIndex] = useState(0)
 
     const handleTabSwitch = (e, index) => {
@@ -61,17 +76,22 @@ const AnalysisPage = () => {
                 </Typography>
             </div>
 
-            <div style={{backgroundColor:'#696969', margin: '15px auto'}}>
-                <StyledTabs value={tabIndex} onChange={handleTabSwitch}>
-                    <StyledTab label="Computation"/>
-                    <StyledTab label="Storage"/>
-                    <StyledTab label="Network Data"/>
-                    <StyledTab label="Migration and Agreements"/>
-                    <Tab label="Optimizations"/>
-                    <Tab label="Accountability"/>
-                    <Tab label="Summary"/>
-                </StyledTabs>
-            </div>
+            <Paper style={{margin: '35px auto', paddingBottom: '15px'}} elevation={3}>
+                <div>
+                    <StyledTabs value={tabIndex} onChange={handleTabSwitch}>
+                        {VMQuestions.map((question, idx) => (
+                            <StyledTab id={question.category} key={idx} label={question.category}/>
+                        ))}
+                    </StyledTabs>
+                </div>
+
+                <div className={styles.questions}>
+                    <VMQuestionaire dispatch={dispatch} questions={state.Questions[tabIndex]}/>
+                </div>
+
+            </Paper>
+                
+           
         </div>
     )
 }

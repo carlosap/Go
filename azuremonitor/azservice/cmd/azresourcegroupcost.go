@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"github.com/Go/azuremonitor/db/dbcontext"
 )
 
 type ResourceGroupCost struct {
@@ -217,6 +218,7 @@ func (r ResourceGroupCost) Print() {
 
 			//Additional requests
 			if serviceName == "virtual machines" && resourceType == "virtualmachines" && len(costUSD) > 0 && chargeType == "usage" {
+				var vmContext = &dbcontext.Virtualmachine{}
 				var vm = &ResourceUsageVirtualMachine{}
 				vm, err := vm.getVirtualMachineByResourceId(resourceId, startD, endD)
 				if err != nil {
@@ -228,6 +230,25 @@ func (r ResourceGroupCost) Print() {
 				fmt.Println("ResourceID,Resource Group,Service Name,Cost,Resource Type,Resource Location,Consumption Type,Meter,CPU Utilization Avg,Available Memory,Logical Disk Latency,Disk IOPs,Disk Bytes/sec,Network Sent Rate, Network Received Rate")
 				fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 				fmt.Printf("%s,%s,%s,$%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",resourceId, resourceGroupName, serviceName, costUSD,resourceType, resourceLocation, chargeType, meter, vm.CpuUtilization, vm.MemoryAvailable, vm.DiskLatency, vm.DiskIOPs, vm.DiskBytes, vm.NetworkSentRate, vm.NetworkSentRate)
+				vmContext.Resourceid = &resourceId
+				vmContext.Resourcegroup = &resourceGroupName
+				vmContext.Servicename = &serviceName
+				vmContext.Cost = &costUSD
+				vmContext.Resourcetype = &resourceType
+				vmContext.Meter = &meter
+				vmContext.Cpuutilization = &vm.CpuUtilization
+				vmContext.Availablememory = &vm.MemoryAvailable
+				vmContext.Disklatency = &vm.DiskLatency
+				vmContext.Diskiops = &vm.DiskIOPs
+				vmContext.Diskbytespersec = &vm.DiskBytes
+				vmContext.Networksentrate = &vm.NetworkSentRate
+				vmContext.Networkreceivedrate = &vm.NetworkReceivedRate
+				vmContext.Consumptiontype = &chargeType
+
+				err = vmContext.Insert()
+				if err != nil {
+					fmt.Printf("Error: while inserting vm record %v", err)
+				}
 			}
 
 			//if serviceName == "storage" && resourceType == "storageaccounts" && chargeType == "usage" {
