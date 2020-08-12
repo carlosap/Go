@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS azmonitor.application (
 
 
 CREATE TABLE IF NOT EXISTS azmonitor.virtualmachine (
-  resourceID  varchar UNIQUE,
+  id UUID UNIQUE NOT NULL DEFAULT uuid_generate_v4(),
+  resourceID  varchar,
   resourceGroup varchar,
   serviceName varchar,
   cost varchar,
@@ -30,12 +31,17 @@ CREATE TABLE IF NOT EXISTS azmonitor.virtualmachine (
   networkSentRate varchar,
   networkReceivedRate varchar,
   dateCreated TIMESTAMP,
-  lastUpdated  TIMESTAMP
+  lastUpdated  TIMESTAMP,
+  reportStartDate varchar,
+  reportEndDate varchar,
+  data jsonb,
+  PRIMARY KEY (id)
 );
 
 
 CREATE TABLE IF NOT EXISTS azmonitor.storageaccount (
-  resourceID  varchar UNIQUE,
+  id UUID UNIQUE NOT NULL DEFAULT uuid_generate_v4(),
+  resourceID  varchar,
   resourceGroup varchar,
   serviceName varchar,
   cost varchar,
@@ -48,5 +54,11 @@ CREATE TABLE IF NOT EXISTS azmonitor.storageaccount (
   e2ELatency varchar, 
   serverLantency varchar,
   failures varchar,
-  capacity varchar
+  capacity varchar,
+  dateCreated TIMESTAMP,
+  lastUpdated  TIMESTAMP,
+  reportStartDate varchar,
+  reportEndDate varchar,
+  data jsonb,
+  PRIMARY KEY (id)
 ); 
