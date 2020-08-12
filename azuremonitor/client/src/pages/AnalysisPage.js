@@ -68,12 +68,9 @@ const AnalysisPage = () => {
                 </Typography>
 
                 <Typography style={{marginTop:'10px'}} variant='body1'>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                    sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
-                    ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit 
-                    in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur 
-                    sint occaecat cupidatat non proident, 
+                    Collect, analyze, and act on telemetry data from your Azure Subscription. 
+                    Capgimin Monitor helps you optimize performance and availability of your applications 
+                    and proactively identify problems in seconds.
                 </Typography>
             </div>
 
