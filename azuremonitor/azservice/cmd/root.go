@@ -53,7 +53,7 @@ func init() {
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "localization services",
-	Short: "Elysium Localization Services",
+	Short: "Azure Localization Services",
 	Long:  ``,
 }
 

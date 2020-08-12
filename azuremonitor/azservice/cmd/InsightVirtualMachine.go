@@ -26,10 +26,10 @@ type ResourceUsageVirtualMachine struct {
 	} `json:"tables"`
 }
 
-func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(id string, startD string,endD string) (*ResourceUsageVirtualMachine, error) {
+func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(resourceGroup string, resourceID string) (*ResourceUsageVirtualMachine, error) {
 	//Validate
-	if id == "" || startD == "" || endD == "" {
-		return nil, fmt.Errorf("resource id name is required")
+	if resourceID == "" || resourceGroup == "" {
+		return nil, fmt.Errorf("resource id and resource group names are required")
 	}
 
 	cl := Client{}
@@ -40,11 +40,11 @@ func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(id string, s
 
 	//Cache lookup
 	c := &Cache{}
-	cKey := fmt.Sprintf("%s_%s_GetVirtualMachineByResourceId_%s_%s",cl.AppConfig.AccessToken.SubscriptionID, id, startD, endD)
+	cKey := fmt.Sprintf("%s_%s_%s_GetVirtualMachineByResourceId_%s_%s",cl.AppConfig.AccessToken.SubscriptionID, resourceGroup, resourceID, startDate, endDate)
 	cHashVal := c.Get(cKey)
 	if len(cHashVal) <= 0 {
 		//Execute Request
-		r, err := r.executeRequest(id, startD, endD, cKey, cl.AppConfig.AccessToken.SubscriptionID)
+		r, err := r.executeRequest(resourceGroup,resourceID,cl.AppConfig.AccessToken.SubscriptionID, cKey)
 		if err != nil {
 			return r, err
 		}
@@ -53,13 +53,11 @@ func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(id string, s
 		//Load From Cache
 		err := LoadFromCache(cKey, r)
 		if err != nil {
-			//fmt.Println("******WARNNING!!!!!!!!!MISSING FILE:::RESTORING WITH NEW REQUEST:::", err)
-			r, err := r.executeRequest(id, startD, endD, cKey,cl.AppConfig.AccessToken.SubscriptionID)
+			r, err := r.executeRequest(resourceGroup,resourceID,cl.AppConfig.AccessToken.SubscriptionID, cKey)
 			if err != nil {
 				return r, err
 			}
 		}
-		//fmt.Println(r)
 	}
 
 	r.setPerformanceValue()
@@ -67,7 +65,7 @@ func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(id string, s
 	return r, nil
 }
 
-func (r *ResourceUsageVirtualMachine) executeRequest(id string, startD string, endD string, cKey string, subscriptionId string) (*ResourceUsageVirtualMachine, error) {
+func (r *ResourceUsageVirtualMachine) executeRequest(resourceGroup string, resourceID string, subscriptionId string, cKey string) (*ResourceUsageVirtualMachine, error) {
 
 	var at = &AccessToken{}
 	at, err := at.getAccessToken()
@@ -80,17 +78,17 @@ func (r *ResourceUsageVirtualMachine) executeRequest(id string, startD string, e
 		"defaultworkspace-%s-eus/query?api-version=2017-10-01",subscriptionId, subscriptionId)
 
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
-	payload := strings.NewReader("{\"query\": \"let startDateTime = datetime('2020-07-01T08:00:00.000Z');" +
-		"let endDateTime = datetime('2020-07-30T16:00:00.000Z');" +
+	strPayload := "{\"query\": \"let startDateTime = datetime('{{startdate}}T08:00:00.000Z');" +
+		"let endDateTime = datetime('{{enddate}}T16:00:00.000Z');" +
 		"let trendBinSize = 8h;let maxListSize = 1000;" +
 		"let cpuMemory = materialize(InsightsMetrics| where TimeGenerated between (startDateTime .. endDateTime)| " +
-		"where _ResourceId =~ '/subscriptions/bb07e91d-a908-4fe4-a04e-40cf2d4b0603/resourcegroups/elysium_demo/providers/microsoft.compute/virtualmachines/elysium'| " +
+		"where _ResourceId =~ '/subscriptions/{{subscriptionid}}/resourcegroups/{{resourcegroup}}/providers/microsoft.compute/virtualmachines/{{resourceid}}'| " +
 		"where Origin == 'vm.azm.ms'| where (Namespace == 'Processor' and Name == 'UtilizationPercentage') or (Namespace == 'Memory' and Name == 'AvailableMB')| " +
 		"project TimeGenerated, Name, Namespace, Val);let networkDisk = materialize(InsightsMetrics| " +
 		"where TimeGenerated between (startDateTime .. endDateTime)| " +
-		"where _ResourceId =~ '/subscriptions/bb07e91d-a908-4fe4-a04e-40cf2d4b0603/resourcegroups/" +
-		"elysium_demo/providers/microsoft.compute/" +
-		"virtualmachines/elysium'| " +
+		"where _ResourceId =~ '/subscriptions/{{subscriptionid}}/resourcegroups/" +
+		"{{resourcegroup}}/providers/microsoft.compute/" +
+		"virtualmachines/{{resourceid}}'| " +
 		"where Origin == 'vm.azm.ms'| " +
 		"where (Namespace == 'Network' and Name in ('WriteBytesPerSecond', 'ReadBytesPerSecond'))    " +
 		"or (Namespace == 'LogicalDisk' and Name in ('TransfersPerSecond', 'BytesPerSecond', 'TransferLatencyMs'))| " +
@@ -114,8 +112,16 @@ func (r *ResourceUsageVirtualMachine) executeRequest(id string, startD string, e
 		"makelist(percentile_cValue_90, maxListSize),    makelist(percentile_cValue_95, maxListSize) by cName| " +
 		"join(    rawDataCached    | summarize min(cValue), avg(cValue), max(cValue), " +
 		"percentiles(cValue, 5, 10, 50, 90, 95) by cName)on cName\"," +
-		"\"timespan\": \"2020-07-01T08:00:00.000Z/2020-07-30T16:00:00.000Z\"}")
+		"\"timespan\": \"{{startdate}}T08:00:00.000Z/{{enddate}}T16:00:00.000Z\"}"
 
+	//
+
+	strPayload = strings.ReplaceAll(strPayload, "{{startdate}}",startDate)
+	strPayload = strings.ReplaceAll(strPayload, "{{enddate}}",endDate)
+	strPayload = strings.ReplaceAll(strPayload, "{{subscriptionid}}",subscriptionId)
+	strPayload = strings.ReplaceAll(strPayload, "{{resourcegroup}}",resourceGroup)
+	strPayload = strings.ReplaceAll(strPayload, "{{resourceid}}",resourceID)
+	payload := strings.NewReader(strPayload)
 	client := &http.Client {}
 	req, _ := http.NewRequest("POST",url, payload)
 	req.Header.Add("Authorization", token)

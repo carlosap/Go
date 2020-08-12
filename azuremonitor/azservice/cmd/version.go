@@ -2,11 +2,15 @@ package cmd
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
+var developer string
+var version = "0.3"
+
 func init() {
+	//cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringVar(&developer, "developer", "Carlos Perez", "Developer name.")
 	rootCmd.AddCommand(versionCmd)
 }
 
@@ -15,11 +19,11 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of elysium localization",
 	Long:  `All software has versions`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 0 {
-			fmt.Printf("args %v\n", args)
+		clearTerminal()
+		developer, _ := cmd.Flags().GetString("developer")
+		if developer != "" {
+			fmt.Printf("Developer: %s\n", developer)
 		}
-
-		//clearTerminal()
-		fmt.Println("Elysium Localization v0.2")
+		fmt.Println("Azmonitor ", version)
 	},
 }

@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"github.com/Go/azuremonitor/db/dbcontext"
+	"time"
 )
 
 type ResourceGroupCost struct {
@@ -28,13 +29,24 @@ type ResourceGroupCost struct {
 	} `json:"properties"`
 }
 
-func init() {
+var (
+ 	layoutISO = "2006-01-02"
+ 	startDate string
+	endDate string
+)
 
+func init() {
 	r, err := setResourceGroupCostCommand()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	now := time.Now()
+	month := now.AddDate(0, -1, 0)
+	//make sure we support a syntax like this  .\azservice.exe get-rgc --from 2020-07-01 --to 2020-07-30
+	rootCmd.PersistentFlags().StringVar(&startDate, "from", month.Format("2006-01-02"), "start date of report (i.e. YYYY-MM-DD)")
+	rootCmd.PersistentFlags().StringVar(&endDate, "to", now.Format("2006-01-02"), "end date of report (i.e. YYYY-MM-DD)")
 	rootCmd.AddCommand(r)
 }
 
@@ -63,14 +75,12 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 			return err
 		}
 
-		startD := "2020-07-01"
-		endD := "2020-07-31"
 		if len(rgList) > 0 {
-			clearTerminal()
+			//clearTerminal()
 			r.PrintHeader()
 			for i := 0; i < len(rgList); i++ {
 				rgName := rgList[i]
-				r, err = r.getResourceGroupCost(rgName, startD, endD)
+				r, err = r.getResourceGroupCost(rgName, startDate, endDate)
 				if err != nil {
 					return err
 				}
@@ -182,9 +192,6 @@ func (r ResourceGroupCost) PrintHeader() {
 
 func (r ResourceGroupCost) Print() {
 
-	// only 30-days increments
-	startD := "2020-07-01"
-	endD := "2020-07-30"
 	for i := 0; i < len(r.Properties.Rows); i++ {
 		row := r.Properties.Rows[i]
 		//fmt.Printf("%v\n", row)
@@ -220,12 +227,12 @@ func (r ResourceGroupCost) Print() {
 			if serviceName == "virtual machines" && resourceType == "virtualmachines" && len(costUSD) > 0 && chargeType == "usage" {
 				var vmContext = &dbcontext.Virtualmachine{}
 				var vm = &ResourceUsageVirtualMachine{}
-				vm, err := vm.getVirtualMachineByResourceId(resourceId, startD, endD)
+				vm, err := vm.getVirtualMachineByResourceId(resourceGroupName,resourceId)
 				if err != nil {
 					fmt.Printf("Error: failed to retrieve vm resouce usage %v\n", err)
 				}
 
-				fmt.Printf("Resource Group Consumption: %s-%s\n", serviceName, resourceType)
+				fmt.Printf("Resource Group Consumption: %s-%s from %s  to %s\n", serviceName, resourceType, startDate, endDate)
 				fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 				fmt.Println("ResourceID,Resource Group,Service Name,Cost,Resource Type,Resource Location,Consumption Type,Meter,CPU Utilization Avg,Available Memory,Logical Disk Latency,Disk IOPs,Disk Bytes/sec,Network Sent Rate, Network Received Rate")
 				fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
