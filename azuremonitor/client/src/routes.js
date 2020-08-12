@@ -4,7 +4,7 @@ import React from 'react';
 import { Redirect } from "react-router-dom";
 
 const NavbarRoutes = {
-    title: 'Azure Monitor',
+    title: 'Azure Resource Tracker',
     routes: [
         {
             path: "/home",
