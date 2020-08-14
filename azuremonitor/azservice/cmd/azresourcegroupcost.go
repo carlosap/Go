@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Go/azuremonitor/db/cache"
 	"github.com/Go/azuremonitor/db/dbcontext"
 	"github.com/spf13/cobra"
 	"io/ioutil"
@@ -10,18 +11,17 @@ import (
 	"os"
 	"strings"
 	"time"
-	"github.com/Go/azuremonitor/db/cache"
 )
 
 type ResourceGroupCost struct {
-	ID         string      `json:"id"`
-	Name       string      `json:"name"`
-	ResourceGroupName       string      `json:"resourcegroupname"`
-	Type       string      `json:"type"`
-	Location   interface{} `json:"location"`
-	Sku        interface{} `json:"sku"`
-	ETag       interface{} `json:"eTag"`
-	Properties struct {
+	ID                string      `json:"id"`
+	Name              string      `json:"name"`
+	ResourceGroupName string      `json:"resourcegroupname"`
+	Type              string      `json:"type"`
+	Location          interface{} `json:"location"`
+	Sku               interface{} `json:"sku"`
+	ETag              interface{} `json:"eTag"`
+	Properties        struct {
 		NextLink interface{} `json:"nextLink"`
 		Columns  []struct {
 			Name string `json:"name"`
@@ -30,12 +30,6 @@ type ResourceGroupCost struct {
 		Rows [][]interface{} `json:"rows"`
 	} `json:"properties"`
 }
-
-var (
-	layoutISO = "2006-01-02"
-	startDate string
-	endDate   string
-)
 
 func init() {
 	r, err := setResourceGroupCostCommand()
@@ -46,22 +40,21 @@ func init() {
 
 	now := time.Now()
 	month := now.AddDate(0, 0, -29)
-	//make sure we support a syntax like this  .\azservice.exe get-rgc --from 2020-07-01 --to 2020-07-30
-	rootCmd.PersistentFlags().StringVar(&startDate, "from", month.Format("2006-01-02"), "start date of report (i.e. YYYY-MM-DD)")
-	rootCmd.PersistentFlags().StringVar(&endDate, "to", now.Format("2006-01-02"), "end date of report (i.e. YYYY-MM-DD)")
+	rootCmd.PersistentFlags().StringVar(&startDate, "from", month.Format(layoutISO), "start date of report (i.e. YYYY-MM-DD)")
+	rootCmd.PersistentFlags().StringVar(&endDate, "to", now.Format(layoutISO), "end date of report (i.e. YYYY-MM-DD)")
 	rootCmd.AddCommand(r)
 }
 
 func setResourceGroupCostCommand() (*cobra.Command, error) {
 
 	description := fmt.Sprintf("%s\n%s\n%s",
-		cmdConfig.ResourceGroupCost.DescriptionLine1,
-		cmdConfig.ResourceGroupCost.DescriptionLine2,
-		cmdConfig.ResourceGroupCost.DescriptionLine3)
+		configuration.ResourceGroupCost.DescriptionLine1,
+		configuration.ResourceGroupCost.DescriptionLine2,
+		configuration.ResourceGroupCost.DescriptionLine3)
 
 	cmd := &cobra.Command{
-		Use:   cmdConfig.ResourceGroupCost.Command,
-		Short: cmdConfig.ResourceGroupCost.CommandComments,
+		Use:   configuration.ResourceGroupCost.Command,
+		Short: configuration.ResourceGroupCost.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
@@ -108,14 +101,13 @@ func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string, start
 	}
 
 	r.ResourceGroupName = resourceGroupName
-
 	//Cache lookup
 	c := &cache.Cache{}
-	cKey := fmt.Sprintf("%s_%s_GetResourceGroupCost_%s_%s", cmdConfig.AccessToken.SubscriptionID, resourceGroupName, startD, endD)
+	cKey := fmt.Sprintf("%s_%s_GetResourceGroupCost_%s_%s", configuration.AccessToken.SubscriptionID, resourceGroupName, startD, endD)
 	cHashVal := c.Get(cKey)
 	if len(cHashVal) <= 0 {
 		//Execute Request
-		r, err := r.executeRequest(resourceGroupName, startD, endD, cKey, cmdConfig.AccessToken.SubscriptionID)
+		r, err := r.executeRequest(resourceGroupName, startD, endD, cKey, configuration.AccessToken.SubscriptionID)
 		if err != nil {
 			return r, err
 		}
@@ -124,7 +116,7 @@ func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string, start
 		//Load From Cache
 		err := LoadFromCache(cKey, r)
 		if err != nil {
-			r, err := r.executeRequest(resourceGroupName, startD, endD, cKey, cmdConfig.AccessToken.SubscriptionID)
+			r, err := r.executeRequest(resourceGroupName, startD, endD, cKey, configuration.AccessToken.SubscriptionID)
 			if err != nil {
 				return r, err
 			}
@@ -142,7 +134,7 @@ func (r *ResourceGroupCost) executeRequest(resourceGroupName string, startD stri
 		return nil, err
 	}
 
-	url := strings.Replace(cmdConfig.ResourceGroupCost.URL, "{{subscriptionID}}", subscriptionId, 1)
+	url := strings.Replace(configuration.ResourceGroupCost.URL, "{{subscriptionID}}", subscriptionId, 1)
 	url = strings.Replace(url, "{{resourceGroup}}", resourceGroupName, 1)
 
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
@@ -192,7 +184,6 @@ func (r ResourceGroupCost) PrintHeader() {
 
 }
 
-
 func (r ResourceGroupCost) PrintUsage() {
 
 	printResourceGroupUsage(r)
@@ -204,7 +195,7 @@ func (r ResourceGroupCost) Print() {
 }
 
 func printResourceGroupCost(r ResourceGroupCost) {
-	fmt.Printf("%s\n",r.ResourceGroupName)
+	fmt.Printf("%s\n", r.ResourceGroupName)
 	for i := 0; i < len(r.Properties.Rows); i++ {
 		row := r.Properties.Rows[i]
 		if len(row) > 0 {
@@ -235,7 +226,7 @@ func printResourceGroupCost(r ResourceGroupCost) {
 				resourceId = pArray[len(pArray)-1]
 			}
 
-			fmt.Printf("\t%s,%s,%s,%s,%s,%s,$%s\n",resourceId,serviceName,resourceType, resourceLocation, chargeType, meter,costUSD)
+			fmt.Printf("\t%s,%s,%s,%s,%s,%s,$%s\n", resourceId, serviceName, resourceType, resourceLocation, chargeType, meter, costUSD)
 		}
 	}
 }

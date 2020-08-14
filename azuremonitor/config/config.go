@@ -1,9 +1,11 @@
 package config
 
+import "C"
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"go/build"
 	"io/ioutil"
 	"log"
@@ -12,6 +14,11 @@ import (
 
 	"github.com/BurntSushi/toml"
 )
+
+type Configurations struct {
+	Cmd       CmdConfig
+
+}
 
 // Config holds the configuration used for instantiating a new Roach.
 type Config struct {
@@ -32,6 +39,8 @@ type Config struct {
 		SSLModeEnabled string
 	}
 }
+
+
 
 type CmdConfig struct {
 	AccessToken struct {
@@ -114,22 +123,6 @@ type CmdConfig struct {
 	} `json:"resourcegroupcost"`
 }
 
-func GetCmdConfig(filename string) (*CmdConfig, error) {
-
-	var ac CmdConfig
-	file, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, errors.Wrap(err, "read error")
-	}
-	err = json.Unmarshal([]byte(file), &ac)
-
-	if err != nil {
-		return nil, errors.Wrap(err, "unmarshal")
-	}
-
-	return &ac, nil
-}
-
 // NodeConfig is a struct with the data to be TOML encoded for a node configuration file.
 type NodeConfig struct {
 	LogToFile       bool   `toml:"log_to_file" json:"log_to_file"`
@@ -175,8 +168,33 @@ type Debug struct {
 
 var debug = Debug{}
 
+
 func init() {
 	debug = LoadDebugConfigs()
+}
+
+func GetCmdConfig() (CmdConfig, error) {
+	var c CmdConfig
+	viper.AddConfigPath("./configs")
+	viper.SetConfigName("env.prod")
+	viper.SetConfigType("json")
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalf("Error reading config file, %s", err)
+	}
+
+	filename := viper.ConfigFileUsed()
+	fmt.Printf("Using config: %s\n", viper.ConfigFileUsed())
+	file, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return c, errors.Wrap(err, "read error")
+	}
+	err = json.Unmarshal([]byte(file), &c)
+
+	if err != nil {
+		return c, errors.Wrap(err, "unmarshal")
+	}
+
+	return c, nil
 }
 
 // Loads configurations for server from proxy.toml

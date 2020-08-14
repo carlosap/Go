@@ -8,10 +8,6 @@ import (
 	"time"
 )
 
-
-var ctr int = 0
-var startTime time.Time
-
 func init() {
 
 	cron, err := setScheduleCronCommand()

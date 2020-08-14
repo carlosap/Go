@@ -3,21 +3,21 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Go/azuremonitor/db/cache"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"github.com/Go/azuremonitor/db/cache"
 )
 
 type ResourceUsageVirtualMachine struct {
-	CpuUtilization    string
-	MemoryAvailable    string
-	DiskLatency    	string
-	DiskIOPs    string
-	DiskBytes	string
-	NetworkSentRate string
+	CpuUtilization      string
+	MemoryAvailable     string
+	DiskLatency         string
+	DiskIOPs            string
+	DiskBytes           string
+	NetworkSentRate     string
 	NetworkReceivedRate string
-	Tables []struct {
+	Tables              []struct {
 		Name    string `json:"name"`
 		Columns []struct {
 			Name string `json:"name"`
@@ -35,11 +35,11 @@ func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(resourceGrou
 
 	//Cache lookup
 	c := &cache.Cache{}
-	cKey := fmt.Sprintf("%s_%s_%s_GetVirtualMachineByResourceId_%s_%s",cmdConfig.AccessToken.SubscriptionID, resourceGroup, resourceID, startDate, endDate)
+	cKey := fmt.Sprintf("%s_%s_%s_GetVirtualMachineByResourceId_%s_%s", configuration.AccessToken.SubscriptionID, resourceGroup, resourceID, startDate, endDate)
 	cHashVal := c.Get(cKey)
 	if len(cHashVal) <= 0 {
 		//Execute Request
-		r, err := r.executeRequest(resourceGroup,resourceID,cmdConfig.AccessToken.SubscriptionID, cKey)
+		r, err := r.executeRequest(resourceGroup, resourceID, configuration.AccessToken.SubscriptionID, cKey)
 		if err != nil {
 			return r, err
 		}
@@ -48,7 +48,7 @@ func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(resourceGrou
 		//Load From Cache
 		err := LoadFromCache(cKey, r)
 		if err != nil {
-			r, err := r.executeRequest(resourceGroup,resourceID,cmdConfig.AccessToken.SubscriptionID, cKey)
+			r, err := r.executeRequest(resourceGroup, resourceID, configuration.AccessToken.SubscriptionID, cKey)
 			if err != nil {
 				return r, err
 			}
@@ -68,9 +68,9 @@ func (r *ResourceUsageVirtualMachine) executeRequest(resourceGroup string, resou
 		return nil, err
 	}
 
-	url := fmt.Sprintf("https://management.azure.com//subscriptions/%s/resourcegroups/" +
-		"defaultresourcegroup-eus/providers/microsoft.operationalinsights/workspaces/" +
-		"defaultworkspace-%s-eus/query?api-version=2017-10-01",subscriptionId, subscriptionId)
+	url := fmt.Sprintf("https://management.azure.com//subscriptions/%s/resourcegroups/"+
+		"defaultresourcegroup-eus/providers/microsoft.operationalinsights/workspaces/"+
+		"defaultworkspace-%s-eus/query?api-version=2017-10-01", subscriptionId, subscriptionId)
 
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
 	strPayload := "{\"query\": \"let startDateTime = datetime('{{startdate}}T08:00:00.000Z');" +
@@ -111,14 +111,14 @@ func (r *ResourceUsageVirtualMachine) executeRequest(resourceGroup string, resou
 
 	//
 
-	strPayload = strings.ReplaceAll(strPayload, "{{startdate}}",startDate)
-	strPayload = strings.ReplaceAll(strPayload, "{{enddate}}",endDate)
-	strPayload = strings.ReplaceAll(strPayload, "{{subscriptionid}}",subscriptionId)
-	strPayload = strings.ReplaceAll(strPayload, "{{resourcegroup}}",resourceGroup)
-	strPayload = strings.ReplaceAll(strPayload, "{{resourceid}}",resourceID)
+	strPayload = strings.ReplaceAll(strPayload, "{{startdate}}", startDate)
+	strPayload = strings.ReplaceAll(strPayload, "{{enddate}}", endDate)
+	strPayload = strings.ReplaceAll(strPayload, "{{subscriptionid}}", subscriptionId)
+	strPayload = strings.ReplaceAll(strPayload, "{{resourcegroup}}", resourceGroup)
+	strPayload = strings.ReplaceAll(strPayload, "{{resourceid}}", resourceID)
 	payload := strings.NewReader(strPayload)
-	client := &http.Client {}
-	req, _ := http.NewRequest("POST",url, payload)
+	client := &http.Client{}
+	req, _ := http.NewRequest("POST", url, payload)
 	req.Header.Add("Authorization", token)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
@@ -127,11 +127,10 @@ func (r *ResourceUsageVirtualMachine) executeRequest(resourceGroup string, resou
 	body, err := ioutil.ReadAll(res.Body)
 	//fmt.Println(string(body))
 
-	err = json.Unmarshal(body,r)
+	err = json.Unmarshal(body, r)
 	if err != nil {
 		return r, fmt.Errorf("recommendation list unmarshal body response: ", err)
 	}
-
 
 	//cached it
 	err = saveCache(cKey, r)
@@ -153,26 +152,26 @@ func (r *ResourceUsageVirtualMachine) setPerformanceValue() {
 
 			//cpu
 			if strings.Contains(strTile, "rocessor Time") {
-				_,r.CpuUtilization = getCpuUtilization(row)
+				_, r.CpuUtilization = getCpuUtilization(row)
 			}
 
 			switch strTile {
 			case "Available MBytes":
-			_, _, r.MemoryAvailable	= getVmAvailableMemory(row)
+				_, _, r.MemoryAvailable = getVmAvailableMemory(row)
 				//getVmAvailableMemory(row)
 			case "Avg. Disk sec/Transfer":
-			_,_,r.DiskLatency =	getLogicalDiskLatency(row)
+				_, _, r.DiskLatency = getLogicalDiskLatency(row)
 				//getLogicalDiskLatency(row)
 			case "Disk Bytes/sec":
-			_,_,r.DiskBytes = getDiskBytesPerSeconds(row)
+				_, _, r.DiskBytes = getDiskBytesPerSeconds(row)
 			case "Disk Transfers/sec":
-			_,r.DiskIOPs =	getLogicalDiskIOPs(row)
+				_, r.DiskIOPs = getLogicalDiskIOPs(row)
 				//getLogicalDiskIOPs(row)
 			case "Bytes Sent/sec":
-			_, _, r.NetworkSentRate = getBytesSentRate(row)
+				_, _, r.NetworkSentRate = getBytesSentRate(row)
 				//getBytesSentRate(row)
 			case "Bytes Received/sec":
-			_, _, r.NetworkReceivedRate = getBytesReceivedRate(row)
+				_, _, r.NetworkReceivedRate = getBytesReceivedRate(row)
 				//getBytesReceivedRate(row)
 			}
 		}
@@ -195,7 +194,7 @@ func getVmAvailableMemory(row []interface{}) (float64, float64, string) {
 	return gbValue, kbValue, strValue
 }
 
-func getCpuUtilization(row []interface{}) (float64,string) {
+func getCpuUtilization(row []interface{}) (float64, string) {
 	parsedValue := fmt.Sprintf("%v", row[12])
 	value, err := stringToFloat(parsedValue)
 	if err != nil {
@@ -217,7 +216,7 @@ func getLogicalDiskLatency(row []interface{}) (float64, float64, string) {
 	}
 	msValue := value * 1000
 	strDisplay := fmt.Sprintf("%v", msValue)
-	strValue := fmt.Sprintf("%sms",strDisplay[0:4])
+	strValue := fmt.Sprintf("%sms", strDisplay[0:4])
 	//fmt.Printf("Logical Disk Latency Avg: %sms [%g] \n", strDisplay[0:4], msValue)
 	return msValue, value, strValue
 }
@@ -262,7 +261,7 @@ func getBytesSentRate(row []interface{}) (float64, float64, string) {
 	kbValue := value / KB
 	strDisplay := fmt.Sprintf("%v", kbValue)
 	//fmt.Printf("Bytes Sent Rate Avg: %sKB [%g] \n", strDisplay[0:4], value)
-	strValue := fmt.Sprintf("%sKB",strDisplay[0:4])
+	strValue := fmt.Sprintf("%sKB", strDisplay[0:4])
 	return kbValue, value, strValue
 }
 

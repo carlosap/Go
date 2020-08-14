@@ -29,8 +29,8 @@ type SupportedValues struct {
 	Properties             []Properties `json:"properties"`
 }
 type Properties struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
+	Name                string            `json:"name"`
+	Value               string            `json:"value"`
 	DisplayName         string            `json:"displayName"`
 	DependsOn           []string          `json:"dependsOn"`
 	ApplicableScenarios []string          `json:"applicableScenarios"`
@@ -48,7 +48,6 @@ type Properties struct {
 	ResourceMetadata     ResourceMetadata   `json:"resourceMetadata"`
 }
 
-
 func init() {
 
 	r, err := setRecommendationListCommand()
@@ -62,13 +61,13 @@ func init() {
 func setRecommendationListCommand() (*cobra.Command, error) {
 
 	description := fmt.Sprintf("%s\n%s\n%s",
-		cmdConfig.RecommendationList.DescriptionLine1,
-		cmdConfig.RecommendationList.DescriptionLine2,
-		cmdConfig.RecommendationList.DescriptionLine3)
+		configuration.RecommendationList.DescriptionLine1,
+		configuration.RecommendationList.DescriptionLine2,
+		configuration.RecommendationList.DescriptionLine3)
 
 	cmd := &cobra.Command{
-		Use:   cmdConfig.RecommendationList.Command,
-		Short: cmdConfig.RecommendationList.CommandComments,
+		Use:   configuration.RecommendationList.Command,
+		Short: configuration.RecommendationList.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
@@ -87,15 +86,14 @@ func setRecommendationListCommand() (*cobra.Command, error) {
 
 func (r *RecommendationList) getAzureRecommendationList() (*RecommendationList, error) {
 	var at = &AccessToken{}
-
 	at, err := at.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
-	client := &http.Client {}
-	req, _ := http.NewRequest("GET", cmdConfig.RecommendationList.URL, nil)
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", configuration.RecommendationList.URL, nil)
 	req.Header.Add("Authorization", token)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")

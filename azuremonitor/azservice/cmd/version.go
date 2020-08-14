@@ -5,9 +5,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var developer string
-var version = "0.3"
-
 func init() {
 	//cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&developer, "developer", "Carlos Perez", "Developer name.")

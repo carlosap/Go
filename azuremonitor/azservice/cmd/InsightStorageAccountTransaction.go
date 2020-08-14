@@ -3,15 +3,15 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Go/azuremonitor/db/cache"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"github.com/Go/azuremonitor/db/cache"
 )
 
 type StorageAccountTransaction struct {
-	Cost     int       `json:"cost"`
-	Interval string    `json:"interval"`
+	Cost     int    `json:"cost"`
+	Interval string `json:"interval"`
 	Value    []struct {
 		ID   string `json:"id"`
 		Type string `json:"type"`
@@ -24,13 +24,13 @@ type StorageAccountTransaction struct {
 		Timeseries         []struct {
 			Metadatavalues []interface{} `json:"metadatavalues"`
 			Data           []struct {
-				Total     float64   `json:"total"`
+				Total float64 `json:"total"`
 			} `json:"data"`
 		} `json:"timeseries"`
 	} `json:"value"`
 }
 
-func (r *StorageAccountTransaction) getStorageAccountTransaction(resurceGroup string, storageAccount string, startD string,endD string) (*StorageAccountTransaction, error) {
+func (r *StorageAccountTransaction) getStorageAccountTransaction(resurceGroup string, storageAccount string, startD string, endD string) (*StorageAccountTransaction, error) {
 	//Validate
 	if storageAccount == "" || startD == "" || endD == "" {
 		return nil, fmt.Errorf("resource id name is required")
@@ -38,11 +38,11 @@ func (r *StorageAccountTransaction) getStorageAccountTransaction(resurceGroup st
 
 	//Cache lookup
 	c := &cache.Cache{}
-	cKey := fmt.Sprintf("%s_%s_GetStorageAccountByResourceId_%s_%s",cmdConfig.AccessToken.SubscriptionID, storageAccount, startD, endD)
+	cKey := fmt.Sprintf("%s_%s_GetStorageAccountByResourceId_%s_%s", configuration.AccessToken.SubscriptionID, storageAccount, startD, endD)
 	cHashVal := c.Get(cKey)
 	if len(cHashVal) <= 0 {
 		//Execute Request
-		r, err := r.executeRequest(cmdConfig.AccessToken.SubscriptionID, resurceGroup, storageAccount, startD, endD, cKey)
+		r, err := r.executeRequest(configuration.AccessToken.SubscriptionID, resurceGroup, storageAccount, startD, endD, cKey)
 		if err != nil {
 			return r, err
 		}
@@ -51,7 +51,7 @@ func (r *StorageAccountTransaction) getStorageAccountTransaction(resurceGroup st
 		//Load From Cache
 		err := LoadFromCache(cKey, r)
 		if err != nil {
-			r, err := r.executeRequest(cmdConfig.AccessToken.SubscriptionID,resurceGroup, storageAccount, startD, endD, cKey)
+			r, err := r.executeRequest(configuration.AccessToken.SubscriptionID, resurceGroup, storageAccount, startD, endD, cKey)
 			if err != nil {
 				return r, err
 			}
@@ -69,27 +69,26 @@ func (r *StorageAccountTransaction) executeRequest(subscriptionId string, resour
 		return nil, err
 	}
 
-	url := fmt.Sprintf("https://management.azure.com/subscriptions/" +
-		"%s/resourceGroups/" +
-		"%s/providers/Microsoft.Storage/storageAccounts/" +
-		"%s/providers/microsoft.Insights/metrics?" +
-		"timespan=%sT05:43:23.526Z/%sT09:43:23.526Z&interval=FULL" +
-		"&metricnames=Transactions" +
-		"&aggregation=total" +
+	url := fmt.Sprintf("https://management.azure.com/subscriptions/"+
+		"%s/resourceGroups/"+
+		"%s/providers/Microsoft.Storage/storageAccounts/"+
+		"%s/providers/microsoft.Insights/metrics?"+
+		"timespan=%sT05:43:23.526Z/%sT09:43:23.526Z&interval=FULL"+
+		"&metricnames=Transactions"+
+		"&aggregation=total"+
 		"&metricNamespace=Microsoft.Storage/storageAccounts&validatedimensions=false&api-version=2019-07-01",
 		subscriptionId,
 		resourceGroup,
 		storageAccount,
 		startD,
 		endD,
-		)
-
+	)
 
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
 	payload := strings.NewReader("")
 
-	client := &http.Client {}
-	req, _ := http.NewRequest("GET",url, payload)
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", url, payload)
 	req.Header.Add("Authorization", token)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
@@ -98,7 +97,7 @@ func (r *StorageAccountTransaction) executeRequest(subscriptionId string, resour
 	body, err := ioutil.ReadAll(res.Body)
 	//fmt.Println(string(body))
 
-	err = json.Unmarshal(body,r)
+	err = json.Unmarshal(body, r)
 	if err != nil {
 		return r, fmt.Errorf("recommendation list unmarshal body response: ", err)
 	}
@@ -115,9 +114,9 @@ func (r *StorageAccountTransaction) executeRequest(subscriptionId string, resour
 
 func (r *StorageAccountTransaction) getTransactions() float64 {
 	var retVal float64
-	for i:=0; i < len(r.Value); i++ {
+	for i := 0; i < len(r.Value); i++ {
 		val := r.Value[i]
-		for x:=0; x < len(val.Timeseries); x++ {
+		for x := 0; x < len(val.Timeseries); x++ {
 			retVal = val.Timeseries[x].Data[0].Total
 			return retVal
 		}
@@ -125,5 +124,3 @@ func (r *StorageAccountTransaction) getTransactions() float64 {
 
 	return retVal
 }
-
-

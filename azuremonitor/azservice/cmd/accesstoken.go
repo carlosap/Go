@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	c "github.com/Go/azuremonitor/config"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"net/http"
@@ -28,14 +29,15 @@ func init() {
 
 func setAccessTokenCommand() (*cobra.Command, error) {
 
+	configuration, _ = c.GetCmdConfig()
 	description := fmt.Sprintf("%s\n%s\n%s",
-		cmdConfig.AccessToken.DescriptionLine1,
-		cmdConfig.AccessToken.DescriptionLine2,
-		cmdConfig.AccessToken.DescriptionLine3)
+		configuration.AccessToken.DescriptionLine1,
+		configuration.AccessToken.DescriptionLine2,
+		configuration.AccessToken.DescriptionLine3)
 
 	cmd := &cobra.Command{
-		Use:   cmdConfig.AccessToken.Command,
-		Short: cmdConfig.AccessToken.CommandComments,
+		Use:   configuration.AccessToken.Command,
+		Short: configuration.AccessToken.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
@@ -54,12 +56,13 @@ func setAccessTokenCommand() (*cobra.Command, error) {
 
 func (at *AccessToken) getAccessToken() (*AccessToken, error) {
 
-	url := strings.Replace(cmdConfig.AccessToken.URL, "{{tenantID}}", cmdConfig.AccessToken.TenantID, 1)
+	fmt.Printf("The Access token is %s", configuration.AccessToken.URL)
+	url := strings.Replace(configuration.AccessToken.URL, "{{tenantID}}", configuration.AccessToken.TenantID, 1)
 	strPayload := fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&scope=%s",
-		cmdConfig.AccessToken.GrantType,
-		cmdConfig.AccessToken.ClientID,
-		cmdConfig.AccessToken.ClientSecret,
-		cmdConfig.AccessToken.Scope)
+		configuration.AccessToken.GrantType,
+		configuration.AccessToken.ClientID,
+		configuration.AccessToken.ClientSecret,
+		configuration.AccessToken.Scope)
 
 	payload := strings.NewReader(strPayload)
 
@@ -91,6 +94,6 @@ func (at *AccessToken) Print() {
 Access Token:
 --------------------------------------
 %s
-`,at.AccessToken,)
+`, at.AccessToken)
 
 }

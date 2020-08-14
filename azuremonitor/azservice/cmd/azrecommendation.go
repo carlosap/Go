@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"net/http"
-	"fmt"
 	"os"
 	"strings"
 )
@@ -42,15 +42,14 @@ func init() {
 
 func setRecommendationCommand() (*cobra.Command, error) {
 
-
 	description := fmt.Sprintf("%s\n%s\n%s",
-		cmdConfig.Recommendation.DescriptionLine1,
-		cmdConfig.Recommendation.DescriptionLine2,
-		cmdConfig.Recommendation.DescriptionLine3)
+		configuration.Recommendation.DescriptionLine1,
+		configuration.Recommendation.DescriptionLine2,
+		configuration.Recommendation.DescriptionLine3)
 
 	cmd := &cobra.Command{
-		Use:   cmdConfig.Recommendation.Command,
-		Short: cmdConfig.Recommendation.CommandComments,
+		Use:   configuration.Recommendation.Command,
+		Short: configuration.Recommendation.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
@@ -75,9 +74,9 @@ func (r *RecommendationList) getAzureRecommendation() (*RecommendationList, erro
 		return nil, err
 	}
 
-	url := strings.Replace(cmdConfig.Recommendation.URL, "{{subscriptionID}}", cmdConfig.AccessToken.SubscriptionID, 1)
+	url := strings.Replace(configuration.Recommendation.URL, "{{subscriptionID}}", configuration.AccessToken.SubscriptionID, 1)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
-	client := &http.Client {}
+	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", token)
 	req.Header.Add("Accept", "application/json")
@@ -93,7 +92,6 @@ func (r *RecommendationList) getAzureRecommendation() (*RecommendationList, erro
 
 	return r, nil
 }
-
 
 func (r *RecommendationList) PrintRecommendations() {
 	fmt.Println("Subscription Recommendations:")
@@ -115,14 +113,13 @@ Problem:                 %s
 Recommendation:          %s
 Additional Notes:        %v
 
-`,recommendaiton.Properties.RecommendationTypeID,
-recommendaiton.Properties.ImpactedField,
-recommendaiton.Properties.ImpactedValue,
-recommendaiton.Properties.ShortDescription.Problem,
-recommendaiton.Properties.ShortDescription.Solution,
-recommendaiton.Properties.ExtendedProperties,
-)
+`, recommendaiton.Properties.RecommendationTypeID,
+		recommendaiton.Properties.ImpactedField,
+		recommendaiton.Properties.ImpactedValue,
+		recommendaiton.Properties.ShortDescription.Problem,
+		recommendaiton.Properties.ShortDescription.Solution,
+		recommendaiton.Properties.ExtendedProperties,
+	)
 
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
 }
-

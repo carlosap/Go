@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"net/http"
-	"fmt"
 	"os"
 	"strings"
 )
@@ -39,13 +39,13 @@ func init() {
 func setSubscriptionInfoCommand() (*cobra.Command, error) {
 
 	description := fmt.Sprintf("%s\n%s\n%s",
-		cmdConfig.SubscriptionInfo.DescriptionLine1,
-		cmdConfig.SubscriptionInfo.DescriptionLine2,
-		cmdConfig.SubscriptionInfo.DescriptionLine3)
+		configuration.SubscriptionInfo.DescriptionLine1,
+		configuration.SubscriptionInfo.DescriptionLine2,
+		configuration.SubscriptionInfo.DescriptionLine3)
 
 	cmd := &cobra.Command{
-		Use:   cmdConfig.SubscriptionInfo.Command,
-		Short: cmdConfig.SubscriptionInfo.CommandComments,
+		Use:   configuration.SubscriptionInfo.Command,
+		Short: configuration.SubscriptionInfo.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
@@ -69,10 +69,9 @@ func (s *SubscriptionInfo) getSubscriptionInfo() (*SubscriptionInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	url := strings.Replace(cmdConfig.SubscriptionInfo.URL, "{{subscriptionID}}", cmdConfig.AccessToken.SubscriptionID, 1)
+	url := strings.Replace(configuration.SubscriptionInfo.URL, "{{subscriptionID}}", configuration.AccessToken.SubscriptionID, 1)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
-	client := &http.Client {}
+	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", token)
 	req.Header.Add("Accept", "application/json")
@@ -102,12 +101,12 @@ Manage By Tenants:        %v
 Status:                   %s
 Policies:                 %v
 
-`,s.SubscriptionID,
-s.DisplayName,
-s.AuthorizationSource,
-s.ManagedByTenants,
-s.State,
-s.SubscriptionPolicies,
-)
+`, s.SubscriptionID,
+		s.DisplayName,
+		s.AuthorizationSource,
+		s.ManagedByTenants,
+		s.State,
+		s.SubscriptionPolicies,
+	)
 
 }

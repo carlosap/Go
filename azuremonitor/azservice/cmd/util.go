@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Go/azuremonitor/db/cache"
 	externalip "github.com/glendc/go-external-ip"
 	guuid "github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
@@ -15,32 +16,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
-	"sync"
 	"unicode/utf8"
-	"github.com/Go/azuremonitor/db/cache"
 )
-
-var lock sync.Mutex
-const (
-	TB = 1000000000000
-	GB = 1000000000
-	MB = 1000000
-	KB = 1000
-)
-
-var siFactors = map[string]float64{
-	"":  1e0,
-	"k": 1e3,
-	"M": 1e6,
-	"G": 1e9,
-	"T": 1e12,
-	"P": 1e15,
-	"E": 1e18,
-	"Z": 1e21,
-	"Y": 1e24,
-	"K": 1e3,
-	"B": 1e9,
-}
 
 func stringToFloat(s string) (float64, error) {
 	f, err := strconv.ParseFloat(s, 64)
@@ -140,7 +117,6 @@ func saveCache(key string, v interface{}) error {
 	c.Set(key, fileKey.String())
 	return err
 }
-
 
 func Save(path string, v interface{}) error {
 	lock.Lock()

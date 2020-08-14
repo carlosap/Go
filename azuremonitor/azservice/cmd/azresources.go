@@ -2,12 +2,12 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"os"
-	"fmt"
+	"strings"
 )
 
 type Resource struct {
@@ -15,15 +15,15 @@ type Resource struct {
 }
 
 type Value struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Type string `json:"type"`
-	Kind     string `json:"kind,omitempty"`
-	Location string `json:"location"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Type      string `json:"type"`
+	Kind      string `json:"kind,omitempty"`
+	Location  string `json:"location"`
 	ManagedBy string `json:"managedBy,omitempty"`
-	Sku  Sku  `json:"sku,omitempty"`
-	Tags Tags `json:"tags,omitempty"`
-	Plan Plan `json:"plan,omitempty"`
+	Sku       Sku    `json:"sku,omitempty"`
+	Tags      Tags   `json:"tags,omitempty"`
+	Plan      Plan   `json:"plan,omitempty"`
 }
 type Plan struct {
 	Name          string `json:"name"`
@@ -36,7 +36,7 @@ type Sku struct {
 	Tier string `json:"tier"`
 }
 
-type Tags     struct {
+type Tags struct {
 	MsResourceUsage string `json:"ms-resource-usage"`
 }
 
@@ -52,15 +52,14 @@ func init() {
 
 func setResourcesCommand() (*cobra.Command, error) {
 
-
 	description := fmt.Sprintf("%s\n%s\n%s",
-		cmdConfig.Resources.DescriptionLine1,
-		cmdConfig.Resources.DescriptionLine2,
-		cmdConfig.Resources.DescriptionLine3)
+		configuration.Resources.DescriptionLine1,
+		configuration.Resources.DescriptionLine2,
+		configuration.Resources.DescriptionLine3)
 
 	cmd := &cobra.Command{
-		Use:   cmdConfig.Resources.Command,
-		Short: cmdConfig.Resources.CommandComments,
+		Use:   configuration.Resources.Command,
+		Short: configuration.Resources.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
@@ -85,9 +84,9 @@ func (r *Resource) getResources() (*Resource, error) {
 		return nil, err
 	}
 
-	url := strings.Replace(cmdConfig.Resources.URL, "{{subscriptionID}}", cmdConfig.AccessToken.SubscriptionID, 1)
+	url := strings.Replace(configuration.Resources.URL, "{{subscriptionID}}", configuration.AccessToken.SubscriptionID, 1)
 	strheaderToken := fmt.Sprintf("Bearer %s", at.AccessToken)
-	client := &http.Client {}
+	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 
 	if err != nil {
@@ -119,7 +118,6 @@ func (r *Resource) Print() {
 Azure Resources:
 --------------------------------------
 %v
-`,r.Values,)
+`, r.Values)
 
 }
-
