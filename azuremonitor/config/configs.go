@@ -64,7 +64,7 @@ type Database struct {
 	Driver   string `toml:"driver" json:"driver"`
 }
 
-type AuthbossServer struct {
+type Server struct {
 	ABServerIP               string `toml:"ab_server_ip" json:"server_ip"`
 	ABServerPort             string `toml:"ab_server_port" json:"server_port"`
 	AzuremonitorFrontEndPort string `toml:"azuremonitor_front_end_port" json:"azuremonitor_front_end_port"`
@@ -80,9 +80,9 @@ func init() {
 	debug = LoadDebugConfigs()
 }
 
-// Loads configurations for authboss from proxy.toml
-func LoadAuthbossConfigs() AuthbossServer {
-	ab_server := AuthbossServer{}
+// Loads configurations for server from proxy.toml
+func LoadConfigs() Server {
+	ab_server := Server{}
 
 	configPath, err := GetEnvConfigFile()
 

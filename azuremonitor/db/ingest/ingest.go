@@ -112,7 +112,7 @@ func IngestApplication(pipe chan interface{}) {
 
 		id, err := strconv.Atoi(line[0])
 		if err != nil {
-			log.Fatalf("Error while casting Grouprank from csv file %v ", err)
+			log.Fatalf("Error while casting application from csv file %v ", err)
 		}
 		application.Applicationid = id
 		application.SubscriptionID = &line[1]
