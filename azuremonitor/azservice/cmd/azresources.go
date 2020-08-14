@@ -51,20 +51,16 @@ func init() {
 }
 
 func setResourcesCommand() (*cobra.Command, error) {
-	cl := Client{}
-	err := cl.New()
-	if err != nil {
-		return nil, err
-	}
+
 
 	description := fmt.Sprintf("%s\n%s\n%s",
-		cl.AppConfig.Resources.DescriptionLine1,
-		cl.AppConfig.Resources.DescriptionLine2,
-		cl.AppConfig.Resources.DescriptionLine3)
+		cmdConfig.Resources.DescriptionLine1,
+		cmdConfig.Resources.DescriptionLine2,
+		cmdConfig.Resources.DescriptionLine3)
 
 	cmd := &cobra.Command{
-		Use:   cl.AppConfig.Resources.Command,
-		Short: cl.AppConfig.Resources.CommandComments,
+		Use:   cmdConfig.Resources.Command,
+		Short: cmdConfig.Resources.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
@@ -83,18 +79,13 @@ func setResourcesCommand() (*cobra.Command, error) {
 
 func (r *Resource) getResources() (*Resource, error) {
 	var at = &AccessToken{}
-	cl := Client{}
-	err := cl.New()
+
+	at, err := at.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	at, err = at.getAccessToken()
-	if err != nil {
-		return nil, err
-	}
-
-	url := strings.Replace(cl.AppConfig.Resources.URL, "{{subscriptionID}}", cl.AppConfig.AccessToken.SubscriptionID, 1)
+	url := strings.Replace(cmdConfig.Resources.URL, "{{subscriptionID}}", cmdConfig.AccessToken.SubscriptionID, 1)
 	strheaderToken := fmt.Sprintf("Bearer %s", at.AccessToken)
 	client := &http.Client {}
 	req, err := http.NewRequest("GET", url, nil)

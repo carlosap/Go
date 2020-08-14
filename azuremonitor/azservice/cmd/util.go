@@ -17,6 +17,7 @@ import (
 	"strconv"
 	"sync"
 	"unicode/utf8"
+	"github.com/Go/azuremonitor/db/cache"
 )
 
 var lock sync.Mutex
@@ -129,7 +130,7 @@ func clearCache(fileName string) {
 
 // Save saves a representation of v to the cachefolder
 func saveCache(key string, v interface{}) error {
-	c := &Cache{}
+	c := &cache.Cache{}
 	fileKey := guuid.New()
 	path := filepath.Join("cache", fileKey.String())
 	err := Save(path, v)
@@ -181,7 +182,7 @@ var Unmarshal = func(r io.Reader, v interface{}) error {
 // Use os.IsNotExist() to see if the returned error is due
 // to the file being missing.
 func LoadFromCache(cKey string, v interface{}) error {
-	c := &Cache{}
+	c := &cache.Cache{}
 	cHashVal := c.Get(cKey)
 	path := filepath.Join("cache", cHashVal)
 	lock.Lock()

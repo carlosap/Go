@@ -1,23 +1,4 @@
-/*
-Usage Example:
-	c := &Cache{}
-	c.init("./spartan.db")
-	//c.Set("carlos", "hello wordl")
-	//temp := c.Get("carlos")
-	//fmt.Printf("%s\n",temp)
-	//c.Set("jessical", "hello wordl1")
-	//c.Set("estefania", "hello wordl2")
-	//c.Set("jorge", "hello wordl3")
-	//fmt.Println(c.Get("estefania"))
-	c.DisplayAll()
-	//c.Delete("estefania")
-	//c.ClearAll()
-
-
-
-
-*/
-package cmd
+package cache
 
 import (
 	"database/sql"
@@ -29,6 +10,12 @@ import (
 type Cache struct {
 	Key string
 	Value string
+}
+
+func init() {
+	c := &Cache{}
+	c.init("./spartan.db")
+
 }
 
 func (c *Cache) init(dbpath string) {
@@ -146,3 +133,4 @@ func (c *Cache)DisplayAll() {
 		fmt.Println(id + ":" + value)
 	}
 }
+

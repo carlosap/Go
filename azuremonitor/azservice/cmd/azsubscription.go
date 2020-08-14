@@ -37,20 +37,15 @@ func init() {
 }
 
 func setSubscriptionInfoCommand() (*cobra.Command, error) {
-	cl := Client{}
-	err := cl.New()
-	if err != nil {
-		return nil, err
-	}
 
 	description := fmt.Sprintf("%s\n%s\n%s",
-		cl.AppConfig.SubscriptionInfo.DescriptionLine1,
-		cl.AppConfig.SubscriptionInfo.DescriptionLine2,
-		cl.AppConfig.SubscriptionInfo.DescriptionLine3)
+		cmdConfig.SubscriptionInfo.DescriptionLine1,
+		cmdConfig.SubscriptionInfo.DescriptionLine2,
+		cmdConfig.SubscriptionInfo.DescriptionLine3)
 
 	cmd := &cobra.Command{
-		Use:   cl.AppConfig.SubscriptionInfo.Command,
-		Short: cl.AppConfig.SubscriptionInfo.CommandComments,
+		Use:   cmdConfig.SubscriptionInfo.Command,
+		Short: cmdConfig.SubscriptionInfo.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
@@ -69,18 +64,13 @@ func setSubscriptionInfoCommand() (*cobra.Command, error) {
 
 func (s *SubscriptionInfo) getSubscriptionInfo() (*SubscriptionInfo, error) {
 	var at = &AccessToken{}
-	cl := Client{}
-	err := cl.New()
+
+	at, err := at.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	at, err = at.getAccessToken()
-	if err != nil {
-		return nil, err
-	}
-
-	url := strings.Replace(cl.AppConfig.SubscriptionInfo.URL, "{{subscriptionID}}", cl.AppConfig.AccessToken.SubscriptionID, 1)
+	url := strings.Replace(cmdConfig.SubscriptionInfo.URL, "{{subscriptionID}}", cmdConfig.AccessToken.SubscriptionID, 1)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
 	client := &http.Client {}
 	req, _ := http.NewRequest("GET", url, nil)

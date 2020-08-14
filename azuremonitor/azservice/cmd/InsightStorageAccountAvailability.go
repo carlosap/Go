@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"github.com/Go/azuremonitor/db/cache"
 )
 
 type StorageAccountAvailability struct {
@@ -36,19 +37,13 @@ func (r *StorageAccountAvailability) getStorageAccountAvailability(resurceGroup 
 		return nil, fmt.Errorf("resource id name is required")
 	}
 
-	cl := Client{}
-	err := cl.New()
-	if err != nil {
-		return nil, err
-	}
-
 	//Cache lookup
-	c := &Cache{}
-	cKey := fmt.Sprintf("%s_%s_GetStorageAccountByResourceId_%s_%s",cl.AppConfig.AccessToken.SubscriptionID, storageAccount, startD, endD)
+	c := &cache.Cache{}
+	cKey := fmt.Sprintf("%s_%s_GetStorageAccountByResourceId_%s_%s",cmdConfig.AccessToken.SubscriptionID, storageAccount, startD, endD)
 	cHashVal := c.Get(cKey)
 	if len(cHashVal) <= 0 {
 		//Execute Request
-		r, err := r.executeRequest(cl.AppConfig.AccessToken.SubscriptionID, resurceGroup, storageAccount, startD, endD, cKey)
+		r, err := r.executeRequest(cmdConfig.AccessToken.SubscriptionID, resurceGroup, storageAccount, startD, endD, cKey)
 		if err != nil {
 			return r, err
 		}
@@ -57,7 +52,7 @@ func (r *StorageAccountAvailability) getStorageAccountAvailability(resurceGroup 
 		//Load From Cache
 		err := LoadFromCache(cKey, r)
 		if err != nil {
-			r, err := r.executeRequest(cl.AppConfig.AccessToken.SubscriptionID,resurceGroup, storageAccount, startD, endD, cKey)
+			r, err := r.executeRequest(cmdConfig.AccessToken.SubscriptionID,resurceGroup, storageAccount, startD, endD, cKey)
 			if err != nil {
 				return r, err
 			}

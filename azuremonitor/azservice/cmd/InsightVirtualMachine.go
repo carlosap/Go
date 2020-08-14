@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"github.com/Go/azuremonitor/db/cache"
 )
 
 type ResourceUsageVirtualMachine struct {
@@ -32,19 +33,13 @@ func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(resourceGrou
 		return nil, fmt.Errorf("resource id and resource group names are required")
 	}
 
-	cl := Client{}
-	err := cl.New()
-	if err != nil {
-		return nil, err
-	}
-
 	//Cache lookup
-	c := &Cache{}
-	cKey := fmt.Sprintf("%s_%s_%s_GetVirtualMachineByResourceId_%s_%s",cl.AppConfig.AccessToken.SubscriptionID, resourceGroup, resourceID, startDate, endDate)
+	c := &cache.Cache{}
+	cKey := fmt.Sprintf("%s_%s_%s_GetVirtualMachineByResourceId_%s_%s",cmdConfig.AccessToken.SubscriptionID, resourceGroup, resourceID, startDate, endDate)
 	cHashVal := c.Get(cKey)
 	if len(cHashVal) <= 0 {
 		//Execute Request
-		r, err := r.executeRequest(resourceGroup,resourceID,cl.AppConfig.AccessToken.SubscriptionID, cKey)
+		r, err := r.executeRequest(resourceGroup,resourceID,cmdConfig.AccessToken.SubscriptionID, cKey)
 		if err != nil {
 			return r, err
 		}
@@ -53,7 +48,7 @@ func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(resourceGrou
 		//Load From Cache
 		err := LoadFromCache(cKey, r)
 		if err != nil {
-			r, err := r.executeRequest(resourceGroup,resourceID,cl.AppConfig.AccessToken.SubscriptionID, cKey)
+			r, err := r.executeRequest(resourceGroup,resourceID,cmdConfig.AccessToken.SubscriptionID, cKey)
 			if err != nil {
 				return r, err
 			}

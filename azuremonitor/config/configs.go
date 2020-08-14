@@ -3,7 +3,9 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 	"go/build"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -29,6 +31,103 @@ type Config struct {
 		//SSLModeEnabled dbsslmode disable/enabled
 		SSLModeEnabled string
 	}
+}
+
+type CmdConfig struct {
+	AccessToken struct {
+		Command          string `json:"command"`
+		CommandComments  string `json:"command_comments"`
+		DescriptionLine1 string `json:"description_line1"`
+		DescriptionLine2 string `json:"description_line2"`
+		DescriptionLine3 string `json:"description_line3"`
+		Key              string `json:"key"`
+		Name             string `json:"name"`
+		URL              string `json:"url"`
+		GrantType        string `json:"grant_type"`
+		ClientID         string `json:"client_id"`
+		ClientSecret     string `json:"client_secret"`
+		Scope            string `json:"scope"`
+		SubscriptionID   string `json:"subscription_id"`
+		TenantID         string `json:"tenant_id"`
+	} `json:"access_token"`
+	Resources struct {
+		Command          string `json:"command"`
+		CommandComments  string `json:"command_comments"`
+		DescriptionLine1 string `json:"description_line1"`
+		DescriptionLine2 string `json:"description_line2"`
+		DescriptionLine3 string `json:"description_line3"`
+		Key              string `json:"key"`
+		Name             string `json:"name"`
+		URL              string `json:"url"`
+		GrantType        string `json:"grant_type"`
+		ClientID         string `json:"client_id"`
+		ClientSecret     string `json:"client_secret"`
+		Scope            string `json:"scope"`
+		SubscriptionID   string `json:"subscription_id"`
+		TenantID         string `json:"tenant_id"`
+	} `json:"resources"`
+	SubscriptionInfo struct {
+		Command          string `json:"command"`
+		CommandComments  string `json:"command_comments"`
+		DescriptionLine1 string `json:"description_line1"`
+		DescriptionLine2 string `json:"description_line2"`
+		DescriptionLine3 string `json:"description_line3"`
+		Name             string `json:"name"`
+		URL              string `json:"url"`
+		SubscriptionID   string `json:"subscription_id"`
+	} `json:"subscriptioninfo"`
+	RecommendationList struct {
+		Command          string `json:"command"`
+		CommandComments  string `json:"command_comments"`
+		DescriptionLine1 string `json:"description_line1"`
+		DescriptionLine2 string `json:"description_line2"`
+		DescriptionLine3 string `json:"description_line3"`
+		Name             string `json:"name"`
+		URL              string `json:"url"`
+	} `json:"recommendationlist"`
+	Recommendation struct {
+		Command          string `json:"command"`
+		CommandComments  string `json:"command_comments"`
+		DescriptionLine1 string `json:"description_line1"`
+		DescriptionLine2 string `json:"description_line2"`
+		DescriptionLine3 string `json:"description_line3"`
+		Name             string `json:"name"`
+		URL              string `json:"url"`
+	} `json:"recommendation"`
+	ResourceGroups struct {
+		Command          string `json:"command"`
+		CommandComments  string `json:"command_comments"`
+		DescriptionLine1 string `json:"description_line1"`
+		DescriptionLine2 string `json:"description_line2"`
+		DescriptionLine3 string `json:"description_line3"`
+		Name             string `json:"name"`
+		URL              string `json:"url"`
+	} `json:"resourcegroups"`
+	ResourceGroupCost struct {
+		Command          string `json:"command"`
+		CommandComments  string `json:"command_comments"`
+		DescriptionLine1 string `json:"description_line1"`
+		DescriptionLine2 string `json:"description_line2"`
+		DescriptionLine3 string `json:"description_line3"`
+		Name             string `json:"name"`
+		URL              string `json:"url"`
+	} `json:"resourcegroupcost"`
+}
+
+func GetCmdConfig(filename string) (*CmdConfig, error) {
+
+	var ac CmdConfig
+	file, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, errors.Wrap(err, "read error")
+	}
+	err = json.Unmarshal([]byte(file), &ac)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "unmarshal")
+	}
+
+	return &ac, nil
 }
 
 // NodeConfig is a struct with the data to be TOML encoded for a node configuration file.

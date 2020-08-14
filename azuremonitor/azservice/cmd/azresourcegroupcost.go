@@ -10,11 +10,13 @@ import (
 	"os"
 	"strings"
 	"time"
+	"github.com/Go/azuremonitor/db/cache"
 )
 
 type ResourceGroupCost struct {
 	ID         string      `json:"id"`
 	Name       string      `json:"name"`
+	ResourceGroupName       string      `json:"resourcegroupname"`
 	Type       string      `json:"type"`
 	Location   interface{} `json:"location"`
 	Sku        interface{} `json:"sku"`
@@ -30,9 +32,9 @@ type ResourceGroupCost struct {
 }
 
 var (
- 	layoutISO = "2006-01-02"
- 	startDate string
-	endDate string
+	layoutISO = "2006-01-02"
+	startDate string
+	endDate   string
 )
 
 func init() {
@@ -43,7 +45,7 @@ func init() {
 	}
 
 	now := time.Now()
-	month := now.AddDate(0, -1, 0)
+	month := now.AddDate(0, 0, -29)
 	//make sure we support a syntax like this  .\azservice.exe get-rgc --from 2020-07-01 --to 2020-07-30
 	rootCmd.PersistentFlags().StringVar(&startDate, "from", month.Format("2006-01-02"), "start date of report (i.e. YYYY-MM-DD)")
 	rootCmd.PersistentFlags().StringVar(&endDate, "to", now.Format("2006-01-02"), "end date of report (i.e. YYYY-MM-DD)")
@@ -51,20 +53,15 @@ func init() {
 }
 
 func setResourceGroupCostCommand() (*cobra.Command, error) {
-	cl := Client{}
-	err := cl.New()
-	if err != nil {
-		return nil, err
-	}
 
 	description := fmt.Sprintf("%s\n%s\n%s",
-		cl.AppConfig.ResourceGroupCost.DescriptionLine1,
-		cl.AppConfig.ResourceGroupCost.DescriptionLine2,
-		cl.AppConfig.ResourceGroupCost.DescriptionLine3)
+		cmdConfig.ResourceGroupCost.DescriptionLine1,
+		cmdConfig.ResourceGroupCost.DescriptionLine2,
+		cmdConfig.ResourceGroupCost.DescriptionLine3)
 
 	cmd := &cobra.Command{
-		Use:   cl.AppConfig.ResourceGroupCost.Command,
-		Short: cl.AppConfig.ResourceGroupCost.CommandComments,
+		Use:   cmdConfig.ResourceGroupCost.Command,
+		Short: cmdConfig.ResourceGroupCost.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
@@ -75,8 +72,9 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 			return err
 		}
 
+		clearTerminal()
 		if len(rgList) > 0 {
-			//clearTerminal()
+
 			r.PrintHeader()
 			for i := 0; i < len(rgList); i++ {
 				rgName := rgList[i]
@@ -86,6 +84,16 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 				}
 				r.Print()
 			}
+
+			for i := 0; i < len(rgList); i++ {
+				rgName := rgList[i]
+				r, err = r.getResourceGroupCost(rgName, startDate, endDate)
+				if err != nil {
+					return err
+				}
+				r.PrintUsage()
+			}
+
 		}
 
 		return nil
@@ -96,22 +104,18 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string, startD string, endD string) (*ResourceGroupCost, error) {
 
 	if resourceGroupName == "" || startD == "" || endD == "" {
-		return nil, fmt.Errorf("resource group name, start date and end date are required")
+		fmt.Println("error: resource group cost function requires resource group")
 	}
 
-	cl := Client{}
-	err := cl.New()
-	if err != nil {
-		return nil, err
-	}
+	r.ResourceGroupName = resourceGroupName
 
 	//Cache lookup
-	c := &Cache{}
-	cKey := fmt.Sprintf("%s_%s_GetResourceGroupCost_%s_%s", cl.AppConfig.AccessToken.SubscriptionID, resourceGroupName, startD, endD)
+	c := &cache.Cache{}
+	cKey := fmt.Sprintf("%s_%s_GetResourceGroupCost_%s_%s", cmdConfig.AccessToken.SubscriptionID, resourceGroupName, startD, endD)
 	cHashVal := c.Get(cKey)
 	if len(cHashVal) <= 0 {
 		//Execute Request
-		r, err := r.executeRequest(resourceGroupName, startD, endD, cKey, cl.AppConfig.AccessToken.SubscriptionID)
+		r, err := r.executeRequest(resourceGroupName, startD, endD, cKey, cmdConfig.AccessToken.SubscriptionID)
 		if err != nil {
 			return r, err
 		}
@@ -120,7 +124,7 @@ func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string, start
 		//Load From Cache
 		err := LoadFromCache(cKey, r)
 		if err != nil {
-			r, err := r.executeRequest(resourceGroupName, startD, endD, cKey, cl.AppConfig.AccessToken.SubscriptionID)
+			r, err := r.executeRequest(resourceGroupName, startD, endD, cKey, cmdConfig.AccessToken.SubscriptionID)
 			if err != nil {
 				return r, err
 			}
@@ -132,18 +136,13 @@ func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string, start
 
 func (r *ResourceGroupCost) executeRequest(resourceGroupName string, startD string, endD string, cKey string, subscriptionId string) (*ResourceGroupCost, error) {
 	var at = &AccessToken{}
-	cl := Client{}
-	err := cl.New()
+
+	at, err := at.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	at, err = at.getAccessToken()
-	if err != nil {
-		return nil, err
-	}
-
-	url := strings.Replace(cl.AppConfig.ResourceGroupCost.URL, "{{subscriptionID}}", subscriptionId, 1)
+	url := strings.Replace(cmdConfig.ResourceGroupCost.URL, "{{subscriptionID}}", subscriptionId, 1)
 	url = strings.Replace(url, "{{resourceGroup}}", resourceGroupName, 1)
 
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
@@ -186,12 +185,63 @@ func (r *ResourceGroupCost) executeRequest(resourceGroupName string, startD stri
 }
 
 func (r ResourceGroupCost) PrintHeader() {
-	fmt.Println("")
+	fmt.Println("Consumption Report:")
+	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
+	fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Consumption Type,Meter,Cost")
+	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
 
+}
+
+
+func (r ResourceGroupCost) PrintUsage() {
+
+	printResourceGroupUsage(r)
 }
 
 func (r ResourceGroupCost) Print() {
 
+	printResourceGroupCost(r)
+}
+
+func printResourceGroupCost(r ResourceGroupCost) {
+	fmt.Printf("%s\n",r.ResourceGroupName)
+	for i := 0; i < len(r.Properties.Rows); i++ {
+		row := r.Properties.Rows[i]
+		if len(row) > 0 {
+			//casting interface to string
+			costUSD := fmt.Sprintf("%v", row[1])
+			resourceId := fmt.Sprintf("%v", row[2])
+			resourceType := fmt.Sprintf("%v", row[3])
+			resourceLocation := fmt.Sprintf("%v", row[4])
+			chargeType := fmt.Sprintf("%v", row[5])
+			//resourceGroupName := fmt.Sprintf("%v", row[6])
+			//publisherType := fmt.Sprintf("%v", row[7])
+			serviceName := fmt.Sprintf("%v", row[8])
+			meter := fmt.Sprintf("%v", row[9])
+
+			//format cost
+			if len(costUSD) > 5 {
+				costUSD = costUSD[0:5]
+			}
+
+			//remove path
+			if strings.Contains(resourceType, "/") {
+				pArray := strings.Split(resourceType, "/")
+				resourceType = pArray[len(pArray)-1]
+			}
+
+			if strings.Contains(resourceId, "/") {
+				pArray := strings.Split(resourceId, "/")
+				resourceId = pArray[len(pArray)-1]
+			}
+
+			fmt.Printf("\t%s,%s,%s,%s,%s,%s,$%s\n",resourceId,serviceName,resourceType, resourceLocation, chargeType, meter,costUSD)
+		}
+	}
+}
+
+func printResourceGroupUsage(r ResourceGroupCost) {
+	fmt.Println("")
 	for i := 0; i < len(r.Properties.Rows); i++ {
 		row := r.Properties.Rows[i]
 		//fmt.Printf("%v\n", row)
@@ -227,16 +277,16 @@ func (r ResourceGroupCost) Print() {
 			if serviceName == "virtual machines" && resourceType == "virtualmachines" && len(costUSD) > 0 && chargeType == "usage" {
 				var vmContext = &dbcontext.Virtualmachine{}
 				var vm = &ResourceUsageVirtualMachine{}
-				vm, err := vm.getVirtualMachineByResourceId(resourceGroupName,resourceId)
+				vm, err := vm.getVirtualMachineByResourceId(resourceGroupName, resourceId)
 				if err != nil {
 					fmt.Printf("Error: failed to retrieve vm resouce usage %v\n", err)
 				}
 
-				fmt.Printf("Resource Group Consumption: %s-%s from %s  to %s\n", serviceName, resourceType, startDate, endDate)
+				fmt.Printf("Usage Report:\n")
 				fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 				fmt.Println("ResourceID,Resource Group,Service Name,Cost,Resource Type,Resource Location,Consumption Type,Meter,CPU Utilization Avg,Available Memory,Logical Disk Latency,Disk IOPs,Disk Bytes/sec,Network Sent Rate, Network Received Rate")
 				fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-				fmt.Printf("%s,%s,%s,$%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",resourceId, resourceGroupName, serviceName, costUSD,resourceType, resourceLocation, chargeType, meter, vm.CpuUtilization, vm.MemoryAvailable, vm.DiskLatency, vm.DiskIOPs, vm.DiskBytes, vm.NetworkSentRate, vm.NetworkSentRate)
+				fmt.Printf("%s,%s,%s,$%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", resourceId, resourceGroupName, serviceName, costUSD, resourceType, resourceLocation, chargeType, meter, vm.CpuUtilization, vm.MemoryAvailable, vm.DiskLatency, vm.DiskIOPs, vm.DiskBytes, vm.NetworkSentRate, vm.NetworkSentRate)
 				vmContext.Resourceid = &resourceId
 				vmContext.Resourcegroup = &resourceGroupName
 				vmContext.Servicename = &serviceName
@@ -287,7 +337,6 @@ func (r ResourceGroupCost) Print() {
 			//		resourceType, resourceLocation, chargeType, meter,
 			//		stacc.getAvailability(),300.0) //transaction.getTransactions())
 			//}
-
 
 		}
 

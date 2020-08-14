@@ -1,8 +1,3 @@
-/*Todo: notes
-//https://www.postgresql.org/docs/9.4/functions-json.html
-//https://godoc.org/github.com/go-pg/pg
-*/
-
 package dbcontext
 
 import (

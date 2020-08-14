@@ -18,7 +18,6 @@ type AccessToken struct {
 }
 
 func init() {
-
 	at, err := setAccessTokenCommand()
 	if err != nil {
 		fmt.Println(err)
@@ -28,20 +27,15 @@ func init() {
 }
 
 func setAccessTokenCommand() (*cobra.Command, error) {
-	cl := Client{}
-	err := cl.New()
-	if err != nil {
-		return nil, err
-	}
 
 	description := fmt.Sprintf("%s\n%s\n%s",
-		cl.AppConfig.AccessToken.DescriptionLine1,
-		cl.AppConfig.AccessToken.DescriptionLine2,
-		cl.AppConfig.AccessToken.DescriptionLine3)
+		cmdConfig.AccessToken.DescriptionLine1,
+		cmdConfig.AccessToken.DescriptionLine2,
+		cmdConfig.AccessToken.DescriptionLine3)
 
 	cmd := &cobra.Command{
-		Use:   cl.AppConfig.AccessToken.Command,
-		Short: cl.AppConfig.AccessToken.CommandComments,
+		Use:   cmdConfig.AccessToken.Command,
+		Short: cmdConfig.AccessToken.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
@@ -60,18 +54,12 @@ func setAccessTokenCommand() (*cobra.Command, error) {
 
 func (at *AccessToken) getAccessToken() (*AccessToken, error) {
 
-	cl := Client{}
-	err := cl.New()
-	if err != nil {
-		return nil, err
-	}
-
-	url := strings.Replace(cl.AppConfig.AccessToken.URL, "{{tenantID}}", cl.AppConfig.AccessToken.TenantID, 1)
+	url := strings.Replace(cmdConfig.AccessToken.URL, "{{tenantID}}", cmdConfig.AccessToken.TenantID, 1)
 	strPayload := fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&scope=%s",
-		cl.AppConfig.AccessToken.GrantType,
-		cl.AppConfig.AccessToken.ClientID,
-		cl.AppConfig.AccessToken.ClientSecret,
-		cl.AppConfig.AccessToken.Scope)
+		cmdConfig.AccessToken.GrantType,
+		cmdConfig.AccessToken.ClientID,
+		cmdConfig.AccessToken.ClientSecret,
+		cmdConfig.AccessToken.Scope)
 
 	payload := strings.NewReader(strPayload)
 

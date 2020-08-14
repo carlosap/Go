@@ -60,20 +60,15 @@ func init() {
 }
 
 func setRecommendationListCommand() (*cobra.Command, error) {
-	cl := Client{}
-	err := cl.New()
-	if err != nil {
-		return nil, err
-	}
 
 	description := fmt.Sprintf("%s\n%s\n%s",
-		cl.AppConfig.RecommendationList.DescriptionLine1,
-		cl.AppConfig.RecommendationList.DescriptionLine2,
-		cl.AppConfig.RecommendationList.DescriptionLine3)
+		cmdConfig.RecommendationList.DescriptionLine1,
+		cmdConfig.RecommendationList.DescriptionLine2,
+		cmdConfig.RecommendationList.DescriptionLine3)
 
 	cmd := &cobra.Command{
-		Use:   cl.AppConfig.RecommendationList.Command,
-		Short: cl.AppConfig.RecommendationList.CommandComments,
+		Use:   cmdConfig.RecommendationList.Command,
+		Short: cmdConfig.RecommendationList.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
@@ -92,29 +87,21 @@ func setRecommendationListCommand() (*cobra.Command, error) {
 
 func (r *RecommendationList) getAzureRecommendationList() (*RecommendationList, error) {
 	var at = &AccessToken{}
-	cl := Client{}
-	err := cl.New()
-	if err != nil {
-		return nil, err
-	}
 
-	at, err = at.getAccessToken()
+	at, err := at.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
 	client := &http.Client {}
-	req, _ := http.NewRequest("GET", cl.AppConfig.RecommendationList.URL, nil)
+	req, _ := http.NewRequest("GET", cmdConfig.RecommendationList.URL, nil)
 	req.Header.Add("Authorization", token)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 	res, err := client.Do(req)
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
-
-	//fmt.Println(string(body))
-
 	err = json.Unmarshal(body, r)
 	if err != nil {
 		fmt.Println("recommendation list unmarshal body response: ", err)

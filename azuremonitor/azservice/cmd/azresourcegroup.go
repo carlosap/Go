@@ -36,20 +36,15 @@ func init() {
 }
 
 func setResourceGroupCommand() (*cobra.Command, error) {
-	cl := Client{}
-	err := cl.New()
-	if err != nil {
-		return nil, err
-	}
 
 	description := fmt.Sprintf("%s\n%s\n%s",
-		cl.AppConfig.ResourceGroups.DescriptionLine1,
-		cl.AppConfig.ResourceGroups.DescriptionLine2,
-		cl.AppConfig.ResourceGroups.DescriptionLine3)
+		cmdConfig.ResourceGroups.DescriptionLine1,
+		cmdConfig.ResourceGroups.DescriptionLine2,
+		cmdConfig.ResourceGroups.DescriptionLine3)
 
 	cmd := &cobra.Command{
-		Use:   cl.AppConfig.ResourceGroups.Command,
-		Short: cl.AppConfig.ResourceGroups.CommandComments,
+		Use:   cmdConfig.ResourceGroups.Command,
+		Short: cmdConfig.ResourceGroups.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
@@ -68,14 +63,8 @@ func setResourceGroupCommand() (*cobra.Command, error) {
 
 func (r ResourceGroupList) getResourceGroups() (ResourceGroupList, error) {
 	var at = &AccessToken{}
-	cl := Client{}
 	rg := ResourceGroups{}
-	err := cl.New()
-	if err != nil {
-		return nil, err
-	}
-
-	at, err = at.getAccessToken()
+	at, err := at.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
@@ -129,12 +118,12 @@ func (r ResourceGroupList) getResourceGroups() (ResourceGroupList, error) {
 		"\"httpMethod\": \"POST\",\"name\": \"34cc625b-b20a-423a-9563-33faf337b033\"," +
 		"\"requestHeaderDetails\": {\"commandName\": \"HubsExtension.BrowseResourceGroups.microsoft.resources/subscriptions/resourcegroups.InitialLoad\"}," +
 		"\"url\": \"https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2018-09-01-preview\"}]}",
-		cl.AppConfig.AccessToken.SubscriptionID,
-		cl.AppConfig.AccessToken.SubscriptionID,
+		cmdConfig.AccessToken.SubscriptionID,
+		cmdConfig.AccessToken.SubscriptionID,
 	))
 
 	client := &http.Client {}
-	req, _ := http.NewRequest("POST", cl.AppConfig.ResourceGroups.URL, payload)
+	req, _ := http.NewRequest("POST", cmdConfig.ResourceGroups.URL, payload)
 	req.Header.Add("Authorization", token)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")

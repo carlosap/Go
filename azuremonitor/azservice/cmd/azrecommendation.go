@@ -41,20 +41,16 @@ func init() {
 }
 
 func setRecommendationCommand() (*cobra.Command, error) {
-	cl := Client{}
-	err := cl.New()
-	if err != nil {
-		return nil, err
-	}
+
 
 	description := fmt.Sprintf("%s\n%s\n%s",
-		cl.AppConfig.Recommendation.DescriptionLine1,
-		cl.AppConfig.Recommendation.DescriptionLine2,
-		cl.AppConfig.Recommendation.DescriptionLine3)
+		cmdConfig.Recommendation.DescriptionLine1,
+		cmdConfig.Recommendation.DescriptionLine2,
+		cmdConfig.Recommendation.DescriptionLine3)
 
 	cmd := &cobra.Command{
-		Use:   cl.AppConfig.Recommendation.Command,
-		Short: cl.AppConfig.Recommendation.CommandComments,
+		Use:   cmdConfig.Recommendation.Command,
+		Short: cmdConfig.Recommendation.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
@@ -73,18 +69,13 @@ func setRecommendationCommand() (*cobra.Command, error) {
 
 func (r *RecommendationList) getAzureRecommendation() (*RecommendationList, error) {
 	var at = &AccessToken{}
-	cl := Client{}
-	err := cl.New()
+
+	at, err := at.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	at, err = at.getAccessToken()
-	if err != nil {
-		return nil, err
-	}
-
-	url := strings.Replace(cl.AppConfig.Recommendation.URL, "{{subscriptionID}}", cl.AppConfig.AccessToken.SubscriptionID, 1)
+	url := strings.Replace(cmdConfig.Recommendation.URL, "{{subscriptionID}}", cmdConfig.AccessToken.SubscriptionID, 1)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
 	client := &http.Client {}
 	req, _ := http.NewRequest("GET", url, nil)
