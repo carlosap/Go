@@ -78,8 +78,6 @@ func (at *AccessToken) getAccessToken() (*AccessToken, error) {
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 
-	//fmt.Println(string(body))
-
 	err = json.Unmarshal(body, at)
 	if err != nil {
 		fmt.Println("unmarshal body response: ", err)

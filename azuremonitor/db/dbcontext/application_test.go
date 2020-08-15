@@ -21,3 +21,18 @@ func TestApplication(t *testing.T) {
 	})
 
 }
+
+func Test(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{"carlos"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if test.name != "hermes"  {
+				t.Errorf("failed to pass")
+			}
+		})
+	}
+}
