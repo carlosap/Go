@@ -183,7 +183,7 @@ func GetCmdConfig() (CmdConfig, error) {
 	}
 
 	filename := viper.ConfigFileUsed()
-	fmt.Printf("Using config: %s\n", viper.ConfigFileUsed())
+	//fmt.Printf("Using config: %s\n", viper.ConfigFileUsed())
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return c, errors.Wrap(err, "read error")

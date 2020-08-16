@@ -14,6 +14,7 @@ const (
 )
 
 var (
+
 	configuration c.CmdConfig
 	layoutISO     = "2006-01-02"
 	startDate     string
@@ -23,6 +24,8 @@ var (
 	lock          sync.Mutex
 	developer     string
 	version       = "0.3"
+	parallel, cpus = getCpuParallelCapabilities()
+	Methods = &RequestMethods{POST: "POST", GET: "GET"}
 )
 
 var siFactors = map[string]float64{

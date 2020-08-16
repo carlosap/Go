@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
-	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 )
 
 type ResourceGroups struct {
@@ -60,15 +58,9 @@ func setResourceGroupCommand() (*cobra.Command, error) {
 	return cmd, nil
 }
 
-func (r ResourceGroupList) getResourceGroups() (ResourceGroupList, error) {
-	var at = &AccessToken{}
-	rg := ResourceGroups{}
-	at, err := at.getAccessToken()
-	if err != nil {
-		return nil, err
-	}
-	token := fmt.Sprintf("Bearer %s", at.AccessToken)
-	payload := strings.NewReader(fmt.Sprintf("{\"requests\": [{\"content\": {\"subscriptions\": [\"%s\"],"+
+func (r ResourceGroups) getPayload() string {
+
+	payload := fmt.Sprintf("{\"requests\": [{\"content\": {\"subscriptions\": [\"%s\"],"+
 		"\"query\": \"(resourcecontainers|where type in~ ('microsoft.resources/subscriptions/resourcegroups'))"+
 		"|where type =~ 'microsoft.resources/subscriptions/resourcegroups'\\r\\n| "+
 		"extend status = case(\\r\\n    (properties.provisioningState =~ 'accepted'), "+
@@ -118,18 +110,41 @@ func (r ResourceGroupList) getResourceGroups() (ResourceGroupList, error) {
 		"\"url\": \"https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2018-09-01-preview\"}]}",
 		configuration.AccessToken.SubscriptionID,
 		configuration.AccessToken.SubscriptionID,
-	))
+	)
+	return payload
+}
+func (r ResourceGroups) getHeader() (http.Header, error) {
+	var at = &AccessToken{}
+	var header = http.Header{}
+	at, err := at.getAccessToken()
+	if err != nil {
+		return nil, err
+	}
+	token := fmt.Sprintf("Bearer %s", at.AccessToken)
+	header.Add("Authorization", token)
+	header.Add("Accept", "application/json")
+	header.Add("Content-Type", "application/json")
 
-	client := &http.Client{}
-	req, _ := http.NewRequest("POST", configuration.ResourceGroups.URL, payload)
-	req.Header.Add("Authorization", token)
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
-	res, err := client.Do(req)
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	return header, err
+}
+func (r ResourceGroupList) getResourceGroups() (ResourceGroupList, error) {
 
-	err = json.Unmarshal(body, &rg)
+	rg := ResourceGroups{}
+
+
+	payload := rg.getPayload()
+	header, _ := rg.getHeader()
+	request := Request{
+		"ResourceGroups",
+		configuration.ResourceGroups.URL,
+		Methods.POST,
+		payload,
+		header,
+	}
+
+	_ = request.Execute()
+	body := request.GetResponse()
+	err := json.Unmarshal(body, &rg)
 	if err != nil {
 		fmt.Println("recommendation list unmarshal body response: ", err)
 	}

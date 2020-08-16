@@ -5,7 +5,6 @@ import (
 	"fmt"
 	c "github.com/Go/azuremonitor/config"
 	"github.com/spf13/cobra"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -56,33 +55,30 @@ func setAccessTokenCommand() (*cobra.Command, error) {
 
 func (at *AccessToken) getAccessToken() (*AccessToken, error) {
 
-	fmt.Printf("The Access token is %s", configuration.AccessToken.URL)
 	url := strings.Replace(configuration.AccessToken.URL, "{{tenantID}}", configuration.AccessToken.TenantID, 1)
+	header := http.Header{}
+	header.Add("Content-Type", "application/x-www-form-urlencoded")
 	strPayload := fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&scope=%s",
 		configuration.AccessToken.GrantType,
 		configuration.AccessToken.ClientID,
 		configuration.AccessToken.ClientSecret,
 		configuration.AccessToken.Scope)
 
-	payload := strings.NewReader(strPayload)
-
-	client := &http.Client{}
-	req, err := http.NewRequest("POST", url, payload)
-	if err != nil {
-		fmt.Println(err)
+	request := Request{
+		"AccessToken",
+		url,
+		Methods.POST,
+		strPayload,
+		header,
 	}
-
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	res, err := client.Do(req)
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-
-	err = json.Unmarshal(body, at)
+	_ = request.Execute()
+	body := request.GetResponse()
+	err := json.Unmarshal(body, at)
 	if err != nil {
 		fmt.Println("unmarshal body response: ", err)
 	}
-	return at, nil
+
+	return at, err
 }
 
 func (at *AccessToken) Print() {

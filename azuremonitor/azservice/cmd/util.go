@@ -2,21 +2,18 @@ package cmd
 
 import (
 	"bytes"
-	"encoding/base32"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/Go/azuremonitor/db/cache"
-	externalip "github.com/glendc/go-external-ip"
 	guuid "github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
 	"io"
-	"net"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strconv"
 	"unicode/utf8"
+	"reflect"
 )
 
 func stringToFloat(s string) (float64, error) {
@@ -38,57 +35,6 @@ func stringToFloat(s string) (float64, error) {
 		return 0, err
 	}
 	return f * factor, nil
-}
-
-// returns internal ip and public ip
-// you can also get this information https://myexternalip.com/raw
-func getIP() ([]string, error) {
-	var ips []string
-	extIp := externalip.DefaultConsensus(nil, nil)
-	ipTemp, _ := extIp.ExternalIP()
-	if len(ipTemp.String()) > 0 {
-		ips = append(ips, ipTemp.String())
-	}
-
-	ifaces, err := net.Interfaces()
-	if err != nil {
-		return ips, err
-	}
-	for _, iface := range ifaces {
-		if iface.Flags&net.FlagUp == 0 {
-			continue // interface down
-		}
-		if iface.Flags&net.FlagLoopback != 0 {
-			continue // loopback interface
-		}
-		addrs, err := iface.Addrs()
-		if err != nil {
-			return ips, err
-		}
-		for _, addr := range addrs {
-			var ip net.IP
-			switch v := addr.(type) {
-			case *net.IPNet:
-				ip = v.IP
-				ips = append(ips, ip.String())
-				//fmt.Printf("ip net: %s\n", ip.String())
-			case *net.IPAddr:
-				ip = v.IP
-				//fmt.Printf("ip address: %s\n", ip.String())
-				ips = append(ips, ip.String())
-			}
-			if ip == nil || ip.IsLoopback() {
-				continue
-			}
-			ip = ip.To4()
-			if ip == nil {
-				continue // not an ipv4 address
-			}
-
-			return ips, nil
-		}
-	}
-	return ips, errors.New("no network connection detected")
 }
 
 func clearTerminal() {
@@ -173,18 +119,23 @@ func LoadFromCache(cKey string, v interface{}) error {
 	return Unmarshal(f, v)
 }
 
-//EncodeStringToBase32Value encodes string to base32
-func EncodeStringToBase32Value(v string) string {
-	d := []byte(v)
-	return base32.StdEncoding.EncodeToString(d)
+func getCpuParallelCapabilities() (int, int) {
+	var parallel int
+	cpus := runtime.NumCPU()
+	if cpus < 2 {
+		parallel = 1
+	} else {
+		parallel = cpus - 1
+	}
+
+	if runtime.GOOS == "solaris" {
+		parallel = 3
+	}
+	return parallel, cpus
 }
 
-//DecodeBase32ToString takes a based32 string and returns string
-func DecodeBase32ToString(v string) string {
-	d, err := base32.StdEncoding.DecodeString(v)
-	if err != nil {
-		fmt.Println("error:", err)
-		return ""
-	}
-	return string(d)
+func getStructNameByInterface(v interface{}) string {
+	rv := reflect.ValueOf(v)
+	typ := rv.Type()
+	return typ.Name()
 }
