@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -66,26 +65,38 @@ func setRecommendationCommand() (*cobra.Command, error) {
 	return cmd, nil
 }
 
-func (r *RecommendationList) getAzureRecommendation() (*RecommendationList, error) {
+func (r *RecommendationList) getURL() string {
+
+return 	strings.Replace(configuration.Recommendation.URL,
+	"{{subscriptionID}}",
+	configuration.AccessToken.SubscriptionID, 1)
+
+}
+
+func (r *RecommendationList) getHeader() http.Header {
 	var at = &AccessToken{}
-
-	at, err := at.getAccessToken()
-	if err != nil {
-		return nil, err
-	}
-
-	url := strings.Replace(configuration.Recommendation.URL, "{{subscriptionID}}", configuration.AccessToken.SubscriptionID, 1)
+	var header = http.Header{}
+	at, _ = at.getAccessToken()
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
-	client := &http.Client{}
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("Authorization", token)
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
-	res, err := client.Do(req)
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	header.Add("Authorization", token)
+	header.Add("Accept", "application/json")
+	header.Add("Content-Type", "application/json")
 
-	err = json.Unmarshal(body, r)
+	return header
+}
+
+func (r *RecommendationList) getAzureRecommendation() (*RecommendationList, error) {
+
+	request := Request{
+		"RecommendationList",
+		r.getURL(),
+		Methods.GET,
+		"",
+		r.getHeader(),
+	}
+	_ = request.Execute()
+	body := request.GetResponse()
+	err := json.Unmarshal(body, r)
 	if err != nil {
 		fmt.Println("recommendation list unmarshal body response: ", err)
 	}

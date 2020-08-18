@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"time"
 )
@@ -85,26 +83,19 @@ func setRecommendationListCommand() (*cobra.Command, error) {
 }
 
 func (r *RecommendationList) getAzureRecommendationList() (*RecommendationList, error) {
-	var at = &AccessToken{}
-	at, err := at.getAccessToken()
-	if err != nil {
-		return nil, err
+	request := Request{
+		"RecommendationList_RL",
+		configuration.RecommendationList.URL,
+		Methods.GET,
+		"",
+		r.getHeader(),
 	}
-
-	token := fmt.Sprintf("Bearer %s", at.AccessToken)
-	client := &http.Client{}
-	req, _ := http.NewRequest("GET", configuration.RecommendationList.URL, nil)
-	req.Header.Add("Authorization", token)
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
-	res, err := client.Do(req)
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	err = json.Unmarshal(body, r)
+	_ = request.Execute()
+	body := request.GetResponse()
+	err := json.Unmarshal(body, r)
 	if err != nil {
 		fmt.Println("recommendation list unmarshal body response: ", err)
 	}
-
 	return r, nil
 }
 
@@ -172,7 +163,7 @@ func printRecommendationResource(recommendaiton RecommendationValue) {
 	fmt.Println("----------------------------------------\n")
 	for x := 0; x < len(recommendaiton.Properties.SupportedValues); x++ {
 		v := recommendaiton.Properties.SupportedValues[x]
-		fmt.Printf("ID [%s] - [%s]\n", v.ID, v.DisplayName)
+		fmt.Printf("[%d]ID [%s] - [%s]\n",x+1, v.ID, v.DisplayName)
 	}
 }
 

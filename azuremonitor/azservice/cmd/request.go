@@ -35,7 +35,11 @@ func (r Requests) Execute() []string {
 	semaphore := make(chan int, parallel)
 	c := &cache.Cache{}
 	//ch := make(chan string)
-	for _, request := range r {
+	for index, request := range r {
+		fmt.Printf("..%d-%d", index, len(r))
+		if index == len(r) {
+			fmt.Print("....please wait")
+		}
 		wg.Add(1)
 		go func(r Request) {
 			defer wg.Done()

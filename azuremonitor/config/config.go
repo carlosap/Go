@@ -121,6 +121,15 @@ type CmdConfig struct {
 		Name             string `json:"name"`
 		URL              string `json:"url"`
 	} `json:"resourcegroupcost"`
+	ResourceGroupUsage struct {
+		Command          string `json:"command"`
+		CommandComments  string `json:"command_comments"`
+		DescriptionLine1 string `json:"description_line1"`
+		DescriptionLine2 string `json:"description_line2"`
+		DescriptionLine3 string `json:"description_line3"`
+		Name             string `json:"name"`
+		URL              string `json:"url"`
+	} `json:"resourcegroupusage"`
 }
 
 // NodeConfig is a struct with the data to be TOML encoded for a node configuration file.
