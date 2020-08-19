@@ -12,6 +12,7 @@ import SubdirectoryArrowRightIcon from '@material-ui/icons/SubdirectoryArrowRigh
 import Recommendations from './Recommendations'
 import Edit from "./Edit"
 import Usages from "./Usages"
+import MoreVert from "./MoreVert"
 
 const BorderlessCell = withStyles({
 	root: {
@@ -97,6 +98,7 @@ const ResourceGroups = (props) => {
 																		<Usages usage={resource.usage}/>
 																		<Recommendations recommendations={resource.recommendations}/>
 																		<Edit groupName={group.groupName} subscription={subscription} resource={resource}/>
+																		<MoreVert subscription={subscription} groupName={group.groupName} resourceName={resource.resourceName}/>
 																	</div>
 																</BorderlessCell>
 															</TableRow>
@@ -112,6 +114,7 @@ const ResourceGroups = (props) => {
 																	<Usages  usage={resource.usage}/>
 																	<Recommendations recommendations={resource.recommendations}/>
 																	<Edit groupName={group.groupName} subscription={subscription} resource={resource}/>
+																	<MoreVert subscription={subscription} groupName={group.groupName} resourceName={resource.resourceName}/>
 																</div>															
 															</TableCell>
 													</TableRow>

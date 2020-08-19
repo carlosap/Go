@@ -1,4 +1,5 @@
 import {VMQuestions} from '../MockData/questions.json'
+import { FormHelperText } from '@material-ui/core'
 
 const QuestionsReducer = (state, action) => {
     switch (action.type) {
@@ -68,7 +69,35 @@ const QuestionsReducer = (state, action) => {
                     return temp
                 })
             }
-            
+        
+        case 'SET_SAVINGS': 
+            console.log(action.payload)
+            const {subscription, group, resource, amount} = action.payload
+            return {
+                ...state,
+                Resources: state.Resources.map(sub => {
+                    if(sub.subscriptionName === subscription){
+                        let temp = sub
+                        for(var i = 0; i < temp.resourceGroups.length; i++){
+                            if(temp.resourceGroups[i].groupName === group) {
+
+                                for(let j = 0; j < temp.resourceGroups[i].resources.length; j++) {
+                                    if(temp.resourceGroups[i].resources[j].resourceName === resource) {
+                                        if(amount === '-'){
+                                            temp.resourceGroups[i].resources[j].savings = amount
+                                        } else {
+                                            temp.resourceGroups[i].resources[j].savings = `$${amount}`
+                                        }
+                                        return temp
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        return sub
+                    }
+                })
+            }
         default:
             return state;
     }
