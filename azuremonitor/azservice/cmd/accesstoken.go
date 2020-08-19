@@ -70,6 +70,8 @@ func (at *AccessToken) getAccessToken() (*AccessToken, error) {
 		Methods.POST,
 		strPayload,
 		header,
+		false,
+		at,
 	}
 	_ = request.Execute()
 	body := request.GetResponse()

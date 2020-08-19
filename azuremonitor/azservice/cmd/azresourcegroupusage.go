@@ -129,6 +129,8 @@ func (r *ResourceGroupUsage) getResourceGroupUsage(resourceGroupName string) (*R
 			Methods.POST,
 			payload,
 			header,
+			false,
+			r,
 		}
 		_ = request.Execute()
 		body := request.GetResponse()
@@ -151,6 +153,8 @@ func (r *ResourceGroupUsage) getResourceGroupUsage(resourceGroupName string) (*R
 				Methods.POST,
 				payload,
 				header,
+				false,
+				r,
 			}
 			_ = request.Execute()
 			body := request.GetResponse()

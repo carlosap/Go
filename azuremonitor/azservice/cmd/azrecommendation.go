@@ -93,6 +93,8 @@ func (r *RecommendationList) getAzureRecommendation() (*RecommendationList, erro
 		Methods.GET,
 		"",
 		r.getHeader(),
+		false,
+		r,
 	}
 	_ = request.Execute()
 	body := request.GetResponse()

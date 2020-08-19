@@ -67,33 +67,18 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 
 		clearTerminal()
 		requests := r.getRequests(rgList)
-		_ = requests.Execute()
-
-		for _, item := range requests {
-			fmt.Printf("The item: %s\n", item.Name)
-			if len(item.GetResponse()) > 0 {
-				err := json.Unmarshal(item.GetResponse(), r)
-				if err != nil {
-					fmt.Println("GetResourceGroupCost unmarshal body response: ", err)
-				}
-				r.Print()
-			}
-			fmt.Println()
+		errors := requests.Execute()
+		if len(errors) > 0 {
+			printErrors(errors)
 		}
 
-		//fmt.Printf("the end of the line : %v\n", requests)
-		//if len(rgList) > 0 {
-		//
-		//	r.PrintHeader()
-		//	for i := 0; i < len(rgList); i++ {
-		//		rgName := rgList[i]
-		//		r, err = r.getResourceGroupCost(rgName)
-		//		if err != nil {
-		//			return err
-		//		}
-		//		r.Print()
-		//	}
-		//}
+		for _, item := range requests {
+			if len(item.GetResponse()) > 0 {
+				_ = json.Unmarshal(item.GetResponse(), r)
+				r.ResourceGroupName = item.Name
+				r.Print()
+			}
+		}
 
 		return nil
 	}
@@ -111,6 +96,8 @@ func (r *ResourceGroupCost) getRequests(rsgroups []string) Requests {
 		request.Payload = r.getPayload()
 		request.Url = r.getUrl(rgName)
 		request.Method = Methods.POST
+		request.IsCache = true
+		request.ValueType = r
 		requests = append(requests, request)
 	}
 	return requests
@@ -172,6 +159,8 @@ func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string) (*Res
 			Methods.POST,
 			payload,
 			header,
+			true,
+			&r,
 		}
 		_ = request.Execute()
 		body := request.GetResponse()
@@ -194,6 +183,8 @@ func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string) (*Res
 				Methods.POST,
 				payload,
 				header,
+				true,
+				&r,
 			}
 			_ = request.Execute()
 			body := request.GetResponse()

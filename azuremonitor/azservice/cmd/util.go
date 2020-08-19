@@ -8,13 +8,23 @@ import (
 	guuid "github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"strconv"
 	"unicode/utf8"
-	"reflect"
 )
+
+func printErrors(errors []string) {
+	if len(errors) > 0 {
+		fmt.Fprintf(os.Stderr, "\n%d errors occurred:\n", len(errors))
+		for _, err := range errors {
+			fmt.Fprintf(os.Stderr, "--> %s\n", err)
+		}
+	}
+}
 
 func stringToFloat(s string) (float64, error) {
 	f, err := strconv.ParseFloat(s, 64)
@@ -117,6 +127,17 @@ func LoadFromCache(cKey string, v interface{}) error {
 
 	defer f.Close()
 	return Unmarshal(f, v)
+}
+
+func loadFile(path string)([]byte, error) {
+
+	lock.Lock()
+	defer lock.Unlock()
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return data, err
+	}
+	return data, nil
 }
 
 func getCpuParallelCapabilities() (int, int) {

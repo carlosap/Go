@@ -140,6 +140,8 @@ func (r ResourceGroupList) getResourceGroups() (ResourceGroupList, error) {
 		Methods.POST,
 		payload,
 		header,
+		false,
+		ResourceGroups{},
 	}
 
 	_ = request.Execute()
