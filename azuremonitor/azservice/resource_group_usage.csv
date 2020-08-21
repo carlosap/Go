@@ -1,0 +1,2 @@
+ResourceID,Resource Group,Service Name,Cost,Resource Type,Resource Location,Consumption Type,Meter,CPU Utilization Avg,Available Memory,Logical Disk Latency,Disk IOPs,Disk Bytes/sec,Network Sent Rate,Network Received Rate
+elysium,elysium_demo,virtual machines,109.6,virtualmachines,us east,usage,d2 v3/d2s v3,3.15%,6.6GB,0.83ms,5.06,1202GB,5.76KB,5.76KB
