@@ -30,6 +30,7 @@ var (
 	parallel, cpus = getCpuParallelCapabilities()
 	Methods = &RequestMethods{POST: "POST", GET: "GET"}
     csvRgcReportName = "resource_group_cost.csv"
+	csvRguReportName = "resource_group_usage.csv"
 )
 
 var siFactors = map[string]float64{

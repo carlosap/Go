@@ -31,8 +31,6 @@ func (r *ResourceUsageVirtualMachine) getVmUsage(resourceGroup string, resourceI
 		return nil, fmt.Errorf("resource id and resource group names are required")
 	}
 
-	fmt.Printf("Getting usage information about %s-%s\n", resourceGroup, resourceID)
-
 	request := Request{
 		Name:      "vm"+"_"+resourceGroup+"_"+resourceID,
 		Url:       r.getUrl(),
@@ -47,11 +45,11 @@ func (r *ResourceUsageVirtualMachine) getVmUsage(resourceGroup string, resourceI
 	IfErrorsPrintThem(errors)
 
 	body := request.GetResponse()
-	fmt.Println(string(body))
+	//fmt.Println(string(body))
 	_ = json.Unmarshal(body, r)
 	r.setUsageValue()
 
-	fmt.Println("The usage is %v\n", r)
+	//fmt.Println("The usage is %v\n", r)
 	return r, nil
 }
 
