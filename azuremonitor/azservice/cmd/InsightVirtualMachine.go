@@ -3,8 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Go/azuremonitor/db/cache"
-	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -27,53 +25,35 @@ type ResourceUsageVirtualMachine struct {
 	} `json:"tables"`
 }
 
-func (r *ResourceUsageVirtualMachine) getVirtualMachineByResourceId(resourceGroup string, resourceID string) (*ResourceUsageVirtualMachine, error) {
-	//Validate
+func (r *ResourceUsageVirtualMachine) getVmUsage(resourceGroup string, resourceID string) (*ResourceUsageVirtualMachine, error) {
+
 	if resourceID == "" || resourceGroup == "" {
 		return nil, fmt.Errorf("resource id and resource group names are required")
 	}
 
-	//Cache lookup
-	c := &cache.Cache{}
-	cKey := fmt.Sprintf("%s_%s_%s_GetVirtualMachineByResourceId_%s_%s", configuration.AccessToken.SubscriptionID, resourceGroup, resourceID, startDate, endDate)
-	cHashVal := c.Get(cKey)
-	if len(cHashVal) <= 0 {
-		//Execute Request
-		r, err := r.executeRequest(resourceGroup, resourceID, configuration.AccessToken.SubscriptionID, cKey)
-		if err != nil {
-			return r, err
-		}
-
-	} else {
-		//Load From Cache
-		err := LoadFromCache(cKey, r)
-		if err != nil {
-			r, err := r.executeRequest(resourceGroup, resourceID, configuration.AccessToken.SubscriptionID, cKey)
-			if err != nil {
-				return r, err
-			}
-		}
+	request := Request{
+		Name:      "VirtualMachineByResourceId",
+		Url:       r.getUrl(),
+		Method:    Methods.POST,
+		Payload:   "",
+		Header:    r.getHeader(),
+		IsCache:   false,
+		ValueType: r,
 	}
 
-	r.setPerformanceValue()
+	errors := request.Execute()
+	IfErrorsPrintThem(errors)
+
+	body := request.GetResponse()
+	fmt.Println(string(body))
+	_ = json.Unmarshal(body, r)
+	r.setUsageValue()
 
 	return r, nil
 }
 
-func (r *ResourceUsageVirtualMachine) executeRequest(resourceGroup string, resourceID string, subscriptionId string, cKey string) (*ResourceUsageVirtualMachine, error) {
-
-	var at = &AccessToken{}
-	at, err := at.getAccessToken()
-	if err != nil {
-		return nil, err
-	}
-
-	url := fmt.Sprintf("https://management.azure.com//subscriptions/%s/resourcegroups/"+
-		"defaultresourcegroup-eus/providers/microsoft.operationalinsights/workspaces/"+
-		"defaultworkspace-%s-eus/query?api-version=2017-10-01", subscriptionId, subscriptionId)
-
-	token := fmt.Sprintf("Bearer %s", at.AccessToken)
-	strPayload := "{\"query\": \"let startDateTime = datetime('{{startdate}}T08:00:00.000Z');" +
+func (r *ResourceUsageVirtualMachine) getPayload(resourceGroup string, resourceID string) string {
+	payload := "{\"query\": \"let startDateTime = datetime('{{startdate}}T08:00:00.000Z');" +
 		"let endDateTime = datetime('{{enddate}}T16:00:00.000Z');" +
 		"let trendBinSize = 8h;let maxListSize = 1000;" +
 		"let cpuMemory = materialize(InsightsMetrics| where TimeGenerated between (startDateTime .. endDateTime)| " +
@@ -109,42 +89,37 @@ func (r *ResourceUsageVirtualMachine) executeRequest(resourceGroup string, resou
 		"percentiles(cValue, 5, 10, 50, 90, 95) by cName)on cName\"," +
 		"\"timespan\": \"{{startdate}}T08:00:00.000Z/{{enddate}}T16:00:00.000Z\"}"
 
-	//
+	payload = strings.ReplaceAll(payload, "{{startdate}}", startDate)
+	payload = strings.ReplaceAll(payload, "{{enddate}}", endDate)
+	payload = strings.ReplaceAll(payload, "{{subscriptionid}}", configuration.AccessToken.SubscriptionID)
+	payload = strings.ReplaceAll(payload, "{{resourcegroup}}", resourceGroup)
+	payload = strings.ReplaceAll(payload, "{{resourceid}}", resourceID)
 
-	strPayload = strings.ReplaceAll(strPayload, "{{startdate}}", startDate)
-	strPayload = strings.ReplaceAll(strPayload, "{{enddate}}", endDate)
-	strPayload = strings.ReplaceAll(strPayload, "{{subscriptionid}}", subscriptionId)
-	strPayload = strings.ReplaceAll(strPayload, "{{resourcegroup}}", resourceGroup)
-	strPayload = strings.ReplaceAll(strPayload, "{{resourceid}}", resourceID)
-	payload := strings.NewReader(strPayload)
-	client := &http.Client{}
-	req, _ := http.NewRequest("POST", url, payload)
-	req.Header.Add("Authorization", token)
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
-	res, err := client.Do(req)
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	//fmt.Println(string(body))
-
-	err = json.Unmarshal(body, r)
-	if err != nil {
-		return r, fmt.Errorf("recommendation list unmarshal body response: ", err)
-	}
-
-	//cached it
-	err = saveCache(cKey, r)
-	if err != nil {
-		return r, fmt.Errorf("error: failed to save to cache folder - %s: %v", cKey, err)
-	}
-
-	return r, nil
+	return payload
 }
 
-func (r *ResourceUsageVirtualMachine) setPerformanceValue() {
+func (r *ResourceUsageVirtualMachine) getHeader() http.Header {
+	var at = &AccessToken{}
+	var header = http.Header{}
+	at, _ = at.getAccessToken()
+	token := fmt.Sprintf("Bearer %s", at.AccessToken)
+	header.Add("Authorization", token)
+	header.Add("Accept", "application/json")
+	header.Add("Content-Type", "application/json")
+	return header
+}
 
-	//var availableMemory float64
-	//fmt.Printf("::::::::%v", r)
+func (r *ResourceUsageVirtualMachine) getUrl() string {
+	//TODO:::this may require some location
+	url := fmt.Sprintf("https://management.azure.com//subscriptions/%s/resourcegroups/"+
+		"defaultresourcegroup-eus/providers/microsoft.operationalinsights/workspaces/"+
+		"defaultworkspace-%s-eus/query?api-version=2017-10-01", configuration.AccessToken.SubscriptionID, configuration.AccessToken.SubscriptionID)
+
+	return url
+}
+
+func (r *ResourceUsageVirtualMachine) setUsageValue() {
+
 	for i := 0; i < len(r.Tables); i++ {
 		for x := 0; x < len(r.Tables[i].Rows); x++ {
 			row := r.Tables[i].Rows[x]
@@ -158,21 +133,16 @@ func (r *ResourceUsageVirtualMachine) setPerformanceValue() {
 			switch strTile {
 			case "Available MBytes":
 				_, _, r.MemoryAvailable = getVmAvailableMemory(row)
-				//getVmAvailableMemory(row)
 			case "Avg. Disk sec/Transfer":
 				_, _, r.DiskLatency = getLogicalDiskLatency(row)
-				//getLogicalDiskLatency(row)
 			case "Disk Bytes/sec":
 				_, _, r.DiskBytes = getDiskBytesPerSeconds(row)
 			case "Disk Transfers/sec":
 				_, r.DiskIOPs = getLogicalDiskIOPs(row)
-				//getLogicalDiskIOPs(row)
 			case "Bytes Sent/sec":
 				_, _, r.NetworkSentRate = getBytesSentRate(row)
-				//getBytesSentRate(row)
 			case "Bytes Received/sec":
 				_, _, r.NetworkReceivedRate = getBytesReceivedRate(row)
-				//getBytesReceivedRate(row)
 			}
 		}
 

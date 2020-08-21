@@ -36,64 +36,64 @@ func (r Requests) Execute() []string {
 	c := &cache.Cache{}
 	for _, request := range r {
 		wg.Add(1)
-		go func(r Request) {
+		go func(requestItem Request) {
 			defer wg.Done()
 			semaphore <- 1
-			c.Delete(r.Name)
-			if r.IsCache {
+			c.Delete(requestItem.Name)
+			if requestItem.IsCache {
 				//1- fresh request
-				cKey := fmt.Sprintf("%s_%s_%s_%s_%s", configuration.AccessToken.SubscriptionID, r.Name,r.Url, startDate, endDate)
+				cKey := fmt.Sprintf("%s_%s_%s_%s_%s", configuration.AccessToken.SubscriptionID, requestItem.Name,requestItem.Url, startDate, endDate)
 				//fmt.Printf("the key is: %s\n", cKey)
 				cHashVal := c.Get(cKey)
 				if len(cHashVal) <= 0 {
-					body, err := makeRequest(r)
+					body, err := makeRequest(requestItem)
 					if err != nil {
 						errorLock.Lock()
 						defer errorLock.Unlock()
 						errors = append(errors,
-							fmt.Sprintf("%s error: %s", r.Url, err))
+							fmt.Sprintf("%s error: %s", requestItem.Url, err))
 					} else {
 						updateLock.Lock()
 						defer updateLock.Unlock()
-						c.Set(r.Name, string(body))
-						_ = json.Unmarshal(body, r.ValueType)
-						_ = saveCache(cKey, r.ValueType)
+						c.Set(requestItem.Name, string(body))
+						_ = json.Unmarshal(body, requestItem.ValueType)
+						_ = saveCache(cKey, requestItem.ValueType)
 					}
 				} else {
 					//2- corrupted files
 					//fmt.Printf("the hashvalue: %s\n", cHashVal)
-					err := LoadFromCache(cKey, r.ValueType)
+					err := LoadFromCache(cKey, requestItem.ValueType)
 					if err != nil {
-						body, err := makeRequest(r)
+						body, err := makeRequest(requestItem)
 						if err != nil {
 							errorLock.Lock()
 							defer errorLock.Unlock()
 							errors = append(errors,
-								fmt.Sprintf("%s error: %s", r.Url, err))
+								fmt.Sprintf("%s error: %s", requestItem.Url, err))
 						} else {
 							updateLock.Lock()
 							defer updateLock.Unlock()
-							c.Set(r.Name, string(body))
-							_ = json.Unmarshal(body, r.ValueType)
-							_ = saveCache(cKey, r.ValueType)
+							c.Set(requestItem.Name, string(body))
+							_ = json.Unmarshal(body, requestItem.ValueType)
+							_ = saveCache(cKey, requestItem.ValueType)
 						}
 					}
 					path := filepath.Join("cache", cHashVal)
 					body, _ := loadFile(path)
-					c.Set(r.Name, string(body))
+					c.Set(requestItem.Name, string(body))
 				}
 			} else {
 				// 3- no cached
-				body, err := makeRequest(r)
+				body, err := makeRequest(requestItem)
 				if err != nil {
 					errorLock.Lock()
 					defer errorLock.Unlock()
 					errors = append(errors,
-						fmt.Sprintf("%s error: %s", r.Url, err))
+						fmt.Sprintf("%s error: %s", requestItem.Url, err))
 				} else {
 					updateLock.Lock()
 					defer updateLock.Unlock()
-					c.Set(r.Name, string(body))
+					c.Set(requestItem.Name, string(body))
 				}
 			}
 
@@ -134,17 +134,6 @@ func (r Request) GetResponse() []byte {
 	body := c.Get(r.Name)
 	return []byte(body)
 }
-
-//func (r Request) GetValue() interface{} {
-//	c := &cache.Cache{}
-//	body := c.Get(r.Name)
-//	err := json.Unmarshal([]byte(body), &r.Value)
-//	if err != nil {
-//		fmt.Println("unmarshal body response: ", err)
-//	}
-//	return r.Value
-//}
-
 
 func (r Request) Execute() []string {
 	var requests = Requests{}

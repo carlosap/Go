@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -64,60 +63,69 @@ func setResourcesCommand() (*cobra.Command, error) {
 
 	cmd.RunE = func(*cobra.Command, []string) error {
 		r := &Resource{}
-		r, err := r.getResources()
-		if err != nil {
-			return err
-		}
 
 		clearTerminal()
+		request := Request{
+			Name:      "resources",
+			Url:       r.getUrl(),
+			Method:    Methods.GET,
+			Payload:   "",
+			Header:    r.getHeader(),
+			IsCache:   false,
+			ValueType: r,
+		}
+		errors := request.Execute()
+		IfErrorsPrintThem(errors)
+
+		body := request.GetResponse()
+		_ = json.Unmarshal(body, r)
 		r.Print()
 		return nil
 	}
 	return cmd, nil
 }
 
-func (r *Resource) getResources() (*Resource, error) {
+func (r *Resource) getHeader() http.Header {
 	var at = &AccessToken{}
-
+	var header = http.Header{}
 	at, err := at.getAccessToken()
 	if err != nil {
-		return nil, err
+		return nil
 	}
-
-	url := strings.Replace(configuration.Resources.URL, "{{subscriptionID}}", configuration.AccessToken.SubscriptionID, 1)
-	strheaderToken := fmt.Sprintf("Bearer %s", at.AccessToken)
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", url, nil)
-
-	if err != nil {
-		fmt.Println("request : ", err)
-	}
-
-	req.Header.Add("Authorization", strheaderToken)
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
-
-	res, err := client.Do(req)
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-
-	//fmt.Println(string(body))
-
-	err = json.Unmarshal(body, r)
-	if err != nil {
-		fmt.Println("resources unmarshal body response: ", err)
-	}
-
-	return r, nil
+	token := fmt.Sprintf("Bearer %s", at.AccessToken)
+	header.Add("Authorization", token)
+	header.Add("Accept", "application/json")
+	header.Add("Content-Type", "application/json")
+	return header
 }
-
+func (r *Resource) getUrl() string {
+	url := strings.Replace(configuration.Resources.URL, "{{subscriptionID}}", configuration.AccessToken.SubscriptionID, 1)
+	return url
+}
 func (r *Resource) Print() {
+	fmt.Println("Resource Report:")
+	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
+	fmt.Println("Name,Type,Kind,Location,ManageBy,Sku Name, Sku Tier,Tags,Plan Name, Plan Promotion Code, Plan Product, Plan Publisher")
+	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
+	for i :=0; i< len(r.Values); i++ {
+		var resourceType, resourceManageby string
+		item := r.Values[i]
 
-	fmt.Printf(
-		`
-Azure Resources:
---------------------------------------
-%v
-`, r.Values)
+		//remove path
+		if strings.Contains(item.Type, "/") {
+			pArray := strings.Split(item.Type, "/")
+			resourceType = pArray[len(pArray)-1]
+		}
+
+		if strings.Contains(item.ManagedBy, "/") {
+			pArray := strings.Split(item.ManagedBy, "/")
+			resourceManageby = pArray[len(pArray)-1]
+		}
+
+
+		fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",item.Name, resourceType, item.Kind,item.Location,resourceManageby,
+			item.Sku.Name, item.Sku.Tier,item.Tags.MsResourceUsage, item.Plan.Name,
+			item.Plan.PromotionCode,item.Plan.Product, item.Plan.Publisher)
+	}
 
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -35,7 +34,6 @@ func init() {
 	}
 	rootCmd.AddCommand(r)
 }
-
 func setSubscriptionInfoCommand() (*cobra.Command, error) {
 
 	description := fmt.Sprintf("%s\n%s\n%s",
@@ -50,50 +48,49 @@ func setSubscriptionInfoCommand() (*cobra.Command, error) {
 
 	cmd.RunE = func(*cobra.Command, []string) error {
 		s := &SubscriptionInfo{}
-		s, err := s.getSubscriptionInfo()
-		if err != nil {
-			return err
-		}
-
 		clearTerminal()
+		request := Request{
+			Name:      "subscriptionInfo",
+			Url:       s.getUrl(),
+			Method:    Methods.GET,
+			Payload:   "",
+			Header:    s.getHeader(),
+			IsCache:   true,
+			ValueType: s,
+		}
+		errors := request.Execute()
+		IfErrorsPrintThem(errors)
+
+		body := request.GetResponse()
+		_ = json.Unmarshal(body, s)
 		s.Print()
 		return nil
 	}
 	return cmd, nil
 }
-
-func (s *SubscriptionInfo) getSubscriptionInfo() (*SubscriptionInfo, error) {
+func (r *SubscriptionInfo) getHeader() http.Header {
 	var at = &AccessToken{}
-
+	var header = http.Header{}
 	at, err := at.getAccessToken()
 	if err != nil {
-		return nil, err
+		return nil
 	}
-	url := strings.Replace(configuration.SubscriptionInfo.URL, "{{subscriptionID}}", configuration.AccessToken.SubscriptionID, 1)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
-	client := &http.Client{}
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("Authorization", token)
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
-
-	res, err := client.Do(req)
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-
-	err = json.Unmarshal(body, s)
-	if err != nil {
-		fmt.Println("subscription info unmarshal body response: ", err)
-	}
-
-	return s, nil
+	header.Add("Authorization", token)
+	header.Add("Accept", "application/json")
+	header.Add("Content-Type", "application/json")
+	return header
 }
-
+func (r *SubscriptionInfo) getUrl() string {
+	url := strings.Replace(configuration.SubscriptionInfo.URL, "{{subscriptionID}}", configuration.AccessToken.SubscriptionID, 1)
+	return url
+}
 func (s *SubscriptionInfo) Print() {
 
 	fmt.Printf(
 		`
-Azure Subscription Inforamtion: %s
+--------------------------------------
+Subscription Inforamtion: %s
 --------------------------------------
 Name:                     %s
 Authorization Source:     %s

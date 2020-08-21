@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Go/azuremonitor/db/cache"
 	"github.com/spf13/cobra"
 	"net/http"
 	"os"
@@ -35,6 +34,9 @@ func init() {
 	month := now.AddDate(0, 0, -29)
 	rootCmd.PersistentFlags().StringVar(&startDate, "from", month.Format(layoutISO), "start date of report (i.e. YYYY-MM-DD)")
 	rootCmd.PersistentFlags().StringVar(&endDate, "to", now.Format(layoutISO), "end date of report (i.e. YYYY-MM-DD)")
+	rootCmd.PersistentFlags().BoolVar(&saveDb,"db", false, "[=true]saves records to Postgres db")
+	rootCmd.PersistentFlags().BoolVar(&saveCsv,"csv", false, "[=true]saves records into a csv output file")
+	rootCmd.PersistentFlags().BoolVar(&ignoreZeroCost,"izcost", false, "[=true] ignores resources with zero cost")
 
 	r, err := setResourceGroupCostCommand()
 	if err != nil {
@@ -68,8 +70,11 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 		clearTerminal()
 		requests := r.getRequests(rgList)
 		errors := requests.Execute()
-		if len(errors) > 0 {
-			printErrors(errors)
+		IfErrorsPrintThem(errors)
+
+		if saveCsv {
+			RemoveFile(csvRgcReportName)
+			r.PrintHeader()
 		}
 
 		for _, item := range requests {
@@ -77,6 +82,7 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 				_ = json.Unmarshal(item.GetResponse(), r)
 				r.ResourceGroupName = item.Name
 				r.Print()
+				r.writeCSV()
 			}
 		}
 
@@ -138,74 +144,17 @@ func (r *ResourceGroupCost) getHeader() (http.Header, error) {
 	return header, err
 }
 
-func (r *ResourceGroupCost) getResourceGroupCost(resourceGroupName string) (*ResourceGroupCost, error) {
-
-	if resourceGroupName == "" {
-		fmt.Println("error: resource group cost function requires resource group")
-	}
-
-	r.ResourceGroupName = resourceGroupName
-	url := r.getUrl(resourceGroupName)
-	payload := r.getPayload()
-	header, _ := r.getHeader()
-	//Cache lookup
-	c := &cache.Cache{}
-	cKey := fmt.Sprintf("%s_%s_GetResourceGroupCost_%s_%s", configuration.AccessToken.SubscriptionID, resourceGroupName, startDate, endDate)
-	cHashVal := c.Get(cKey)
-	if len(cHashVal) <= 0 {
-		request := Request{
-			"ResourceGroups",
-			url,
-			Methods.POST,
-			payload,
-			header,
-			true,
-			&r,
-		}
-		_ = request.Execute()
-		body := request.GetResponse()
-		err := json.Unmarshal(body, r)
-		if err != nil {
-			fmt.Println("GetResourceGroupCost unmarshal body response: ", err)
-		}
-		err = saveCache(cKey, r)
-		if err != nil {
-			return r, fmt.Errorf("error: failed to save to cache folder - %s: %v", cKey, err)
-		}
-
-	} else {
-		//Load From Cache
-		err := LoadFromCache(cKey, r)
-		if err != nil {
-			request := Request{
-				"ResourceGroups",
-				url,
-				Methods.POST,
-				payload,
-				header,
-				true,
-				&r,
-			}
-			_ = request.Execute()
-			body := request.GetResponse()
-			err := json.Unmarshal(body, r)
-			if err != nil {
-				fmt.Println("GetResourceGroupCost unmarshal body response: ", err)
-			}
-			err = saveCache(cKey, r)
-			if err != nil {
-				return r, fmt.Errorf("error: failed to save to cache folder - %s: %v", cKey, err)
-			}
-		}
-	}
-	return r, nil
-}
-
 func (r ResourceGroupCost) PrintHeader() {
 	fmt.Println("Consumption Report:")
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
 	fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Consumption Type,Meter,Cost")
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
+	if saveCsv {
+		var matrix [][]string
+		rec := []string{"Resource Group","ResourceID","Service Name","Resource Type","Resource Location","Consumption Type","Meter","Cost" }
+		matrix = append(matrix, rec)
+		saveCSV(csvRgcReportName, matrix)
+	}
 }
 
 func (r ResourceGroupCost) Print() {
@@ -227,6 +176,12 @@ func (r ResourceGroupCost) Print() {
 				costUSD = costUSD[0:5]
 			}
 
+			if ignoreZeroCost {
+				if costUSD == "0" {
+					continue
+				}
+			}
+
 			//remove path
 			if strings.Contains(resourceType, "/") {
 				pArray := strings.Split(resourceType, "/")
@@ -241,4 +196,60 @@ func (r ResourceGroupCost) Print() {
 			fmt.Printf("\t%s,%s,%s,%s,%s,%s,$%s\n", resourceId, serviceName, resourceType, resourceLocation, chargeType, meter, costUSD)
 		}
 	}
+}
+
+func (r ResourceGroupCost) writeCSV() {
+
+	if saveCsv {
+		var matrix [][]string
+		for i := 0; i < len(r.Properties.Rows); i++ {
+			row := r.Properties.Rows[i]
+			if len(row) > 0 {
+				costUSD := fmt.Sprintf("%v", row[1])
+				resourceId := fmt.Sprintf("%v", row[2])
+				resourceType := fmt.Sprintf("%v", row[3])
+				resourceLocation := fmt.Sprintf("%v", row[4])
+				chargeType := fmt.Sprintf("%v", row[5])
+				serviceName := fmt.Sprintf("%v", row[8])
+				meter := fmt.Sprintf("%v", row[9])
+
+				//format cost
+				if len(costUSD) > 5 {
+					costUSD = costUSD[0:5]
+
+				}
+
+				if ignoreZeroCost {
+					if costUSD == "0" {
+						continue
+					}
+				}
+
+				//remove path
+				if strings.Contains(resourceType, "/") {
+					pArray := strings.Split(resourceType, "/")
+					resourceType = pArray[len(pArray)-1]
+				}
+
+				if strings.Contains(resourceId, "/") {
+					pArray := strings.Split(resourceId, "/")
+					resourceId = pArray[len(pArray)-1]
+				}
+
+				var rec []string
+				rec = append(rec, r.ResourceGroupName)
+				rec = append(rec, resourceId)
+				rec = append(rec, serviceName)
+				rec = append(rec, resourceType)
+				rec = append(rec, resourceLocation)
+				rec = append(rec, chargeType)
+				rec = append(rec, meter)
+				rec = append(rec, costUSD)
+				matrix = append(matrix,rec)
+			}
+		}
+
+		saveCSV(csvRgcReportName, matrix)
+	}
+
 }

@@ -1,0 +1,19 @@
+Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Consumption Type,Meter,Cost
+cloud-shell-storage-eastus,cs210032000a0f50565,storage,storageaccounts,us east,usage,all other operations,0
+cloud-shell-storage-eastus,cs210032000a0f50565,storage,storageaccounts,us east,usage,batch write operations,0
+cloud-shell-storage-eastus,cs210032000a0f50565,storage,storageaccounts,us east,usage,lrs data stored,0
+cloud-shell-storage-eastus,cs210032000a0f50565,storage,storageaccounts,us east,usage,lrs data stored - free,0
+cloud-shell-storage-eastus,cs210032000a0f50565,storage,storageaccounts,us east,usage,lrs write operations - free,0
+cloud-shell-storage-eastus,cs210032000a0f50565,storage,storageaccounts,us east,usage,protocol operations - free,0
+cloud-shell-storage-eastus,cs210032000a0f50565,storage,storageaccounts,us east,usage,read operations,0
+cloud-shell-storage-eastus,cs210032000a0f50565,storage,storageaccounts,us east,usage,read operations - free,0
+cloud-shell-storage-eastus,cs210032000a0f50565,storage,storageaccounts,us east,usage,write operations,0
+DefaultResourceGroup-EUS,defaultworkspace-bb07e91d-a908-4fe4-a04e-40cf2d4b0603-eus,log analytics,workspaces,us east,usage,data ingestion,0
+elysium_demo,edaemonnews,cognitive services,accounts,unknown,usage,free transactions,0
+elysium_demo,edaemonnews,cognitive services,accounts,unknown,usage,s1 transactions,3.860
+elysium_demo,elysium_disk1_557a7572648b494bb31b135726187544,storage,disks,us east,usage,p10 disks,51.19
+elysium_demo,elysium,bandwidth,virtualmachines,us east,usage,data transfer in,0
+elysium_demo,elysium,bandwidth,virtualmachines,us east,usage,data transfer out - free,0
+elysium_demo,elysium,virtual machines,virtualmachines,us east,usage,d2 v3/d2s v3,141.1
+elysium_demo,elysium-ip,virtual network,publicipaddresses,us east,usage,dynamic public ip - free,0
+elysium_demo,elysium-ip,virtual network,publicipaddresses,us east,usage,static public ip,6.709

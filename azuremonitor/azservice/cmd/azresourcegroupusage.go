@@ -3,8 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Go/azuremonitor/db/cache"
-	"github.com/Go/azuremonitor/db/dbcontext"
 	"github.com/spf13/cobra"
 	"net/http"
 	"os"
@@ -59,21 +57,41 @@ func setResourceGroupUsageCommand() (*cobra.Command, error) {
 		}
 
 		clearTerminal()
-		if len(rgList) > 0 {
-			for i := 0; i < len(rgList); i++ {
-				rgName := rgList[i]
-				r, err = r.getResourceGroupUsage(rgName)
-				if err != nil {
-					return err
-				}
+		requests := r.getRequests(rgList)
+		errors := requests.Execute()
+		IfErrorsPrintThem(errors)
+
+		for _, item := range requests {
+			if len(item.GetResponse()) > 0 {
+				_ = json.Unmarshal(item.GetResponse(), r)
+				r.ResourceGroupName = item.Name
 				r.Print()
 			}
 		}
+
 		return nil
 	}
 	return cmd, nil
 }
 
+func (r *ResourceGroupUsage) getRequests(rsgroups []string) Requests {
+	requests := Requests{}
+	header, _ := r.getHeader()
+	for i := 0; i < len(rsgroups); i++ {
+		rgName := rsgroups[i]
+		request := Request{}
+		request.Name = rgName
+		request.Header = header
+		request.Payload = r.getPayload()
+		request.Url = r.getUrl(rgName)
+		request.Method = Methods.POST
+		request.IsCache = true
+		request.ValueType = r
+		requests = append(requests, request)
+
+	}
+	return requests
+}
 func (r *ResourceGroupUsage) getUrl(resourceGroupName string) string {
 	url := strings.Replace(configuration.ResourceGroupUsage.URL, "{{subscriptionID}}", configuration.AccessToken.SubscriptionID, 1)
 	url = strings.Replace(url, "{{resourceGroup}}", resourceGroupName, 1)
@@ -108,70 +126,6 @@ func (r *ResourceGroupUsage) getHeader() (http.Header, error) {
 	header.Add("Content-Type", "application/json")
 	return header, err
 }
-
-func (r *ResourceGroupUsage) getResourceGroupUsage(resourceGroupName string) (*ResourceGroupUsage, error) {
-
-	if resourceGroupName == "" {
-		fmt.Println("error: resource group cost function requires resource group")
-	}
-
-	r.ResourceGroupName = resourceGroupName
-	url := r.getUrl(resourceGroupName)
-	payload := r.getPayload()
-	header, _ := r.getHeader()
-	c := &cache.Cache{}
-	cKey := fmt.Sprintf("%s_%s_GetResourceGroupUsage_%s_%s", configuration.AccessToken.SubscriptionID, resourceGroupName, startDate, endDate)
-	cHashVal := c.Get(cKey)
-	if len(cHashVal) <= 0 {
-		request := Request{
-			"ResourceGroups",
-			url,
-			Methods.POST,
-			payload,
-			header,
-			false,
-			r,
-		}
-		_ = request.Execute()
-		body := request.GetResponse()
-		err := json.Unmarshal(body, r)
-		if err != nil {
-			fmt.Println("GetResourceGroupUsage unmarshal body response: ", err)
-		}
-		err = saveCache(cKey, r)
-		if err != nil {
-			return r, fmt.Errorf("error: failed to save to cache folder - %s: %v", cKey, err)
-		}
-
-	} else {
-		//Load From Cache
-		err := LoadFromCache(cKey, r)
-		if err != nil {
-			request := Request{
-				"ResourceGroups",
-				url,
-				Methods.POST,
-				payload,
-				header,
-				false,
-				r,
-			}
-			_ = request.Execute()
-			body := request.GetResponse()
-			err := json.Unmarshal(body, r)
-			if err != nil {
-				fmt.Println("GetResourceGroupUsage unmarshal body response: ", err)
-			}
-			err = saveCache(cKey, r)
-			if err != nil {
-				return r, fmt.Errorf("error: failed to save to cache folder - %s: %v", cKey, err)
-			}
-		}
-	}
-
-	return r, nil
-}
-
 func (r ResourceGroupUsage) Print() {
 	for i := 0; i < len(r.Properties.Rows); i++ {
 		row := r.Properties.Rows[i]
@@ -203,9 +157,9 @@ func (r ResourceGroupUsage) Print() {
 
 			//Additional requests
 			if serviceName == "virtual machines" && resourceType == "virtualmachines" && len(costUSD) > 0 && chargeType == "usage" {
-				var vmContext = &dbcontext.Virtualmachine{}
+				//var vmContext = &dbcontext.Virtualmachine{}
 				var vm = &ResourceUsageVirtualMachine{}
-				vm, err := vm.getVirtualMachineByResourceId(resourceGroupName, resourceId)
+				vm, err := vm.getVmUsage(resourceGroupName, resourceId)
 				if err != nil {
 					fmt.Printf("Error: failed to retrieve vm resouce usage %v\n", err)
 				}
@@ -215,32 +169,32 @@ func (r ResourceGroupUsage) Print() {
 				fmt.Println("ResourceID,Resource Group,Service Name,Cost,Resource Type,Resource Location,Consumption Type,Meter,CPU Utilization Avg,Available Memory,Logical Disk Latency,Disk IOPs,Disk Bytes/sec,Network Sent Rate, Network Received Rate")
 				fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 				fmt.Printf("%s,%s,%s,$%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", resourceId, resourceGroupName, serviceName, costUSD, resourceType, resourceLocation, chargeType, meter, vm.CpuUtilization, vm.MemoryAvailable, vm.DiskLatency, vm.DiskIOPs, vm.DiskBytes, vm.NetworkSentRate, vm.NetworkSentRate)
-				vmContext.Resourceid = &resourceId
-				vmContext.Resourcegroup = &resourceGroupName
-				vmContext.Servicename = &serviceName
-				vmContext.Cost = &costUSD
-				vmContext.Resourcetype = &resourceType
-				vmContext.Meter = &meter
-				vmContext.Cpuutilization = &vm.CpuUtilization
-				vmContext.Availablememory = &vm.MemoryAvailable
-				vmContext.Disklatency = &vm.DiskLatency
-				vmContext.Diskiops = &vm.DiskIOPs
-				vmContext.Diskbytespersec = &vm.DiskBytes
-				vmContext.Networksentrate = &vm.NetworkSentRate
-				vmContext.Networkreceivedrate = &vm.NetworkReceivedRate
-				vmContext.Resourcelocation = &resourceLocation
-				vmContext.Consumptiontype = &chargeType
-				vmContext.Reportstartdate = &startDate
-				vmContext.Reportenddate = &endDate
-				var dataDictionary map[string]interface{}
-				d, _ := json.Marshal(&r)
-				_ = json.Unmarshal(d, &dataDictionary)
-				vmContext.Data = dataDictionary
-
-				err = vmContext.Insert()
-				if err != nil {
-					fmt.Printf("Error: while inserting vm record %v", err)
-				}
+				//vmContext.Resourceid = &resourceId
+				//vmContext.Resourcegroup = &resourceGroupName
+				//vmContext.Servicename = &serviceName
+				//vmContext.Cost = &costUSD
+				//vmContext.Resourcetype = &resourceType
+				//vmContext.Meter = &meter
+				//vmContext.Cpuutilization = &vm.CpuUtilization
+				//vmContext.Availablememory = &vm.MemoryAvailable
+				//vmContext.Disklatency = &vm.DiskLatency
+				//vmContext.Diskiops = &vm.DiskIOPs
+				//vmContext.Diskbytespersec = &vm.DiskBytes
+				//vmContext.Networksentrate = &vm.NetworkSentRate
+				//vmContext.Networkreceivedrate = &vm.NetworkReceivedRate
+				//vmContext.Resourcelocation = &resourceLocation
+				//vmContext.Consumptiontype = &chargeType
+				//vmContext.Reportstartdate = &startDate
+				//vmContext.Reportenddate = &endDate
+				//var dataDictionary map[string]interface{}
+				//d, _ := json.Marshal(&r)
+				//_ = json.Unmarshal(d, &dataDictionary)
+				//vmContext.Data = dataDictionary
+				//
+				//err = vmContext.Insert()
+				//if err != nil {
+				//	fmt.Printf("Error: while inserting vm record %v", err)
+				//}
 			}
 
 			//if serviceName == "storage" && resourceType == "storageaccounts" && chargeType == "usage" {
