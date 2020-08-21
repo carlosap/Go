@@ -206,6 +206,15 @@ func IsPathExists(path string) bool {
 	return false
 }
 
+func IsDirectoryExist(path string) bool {
+	folderInfo, err := os.Stat("temp")
+	if os.IsNotExist(err) {
+		fmt.Println("Folder does not exist.")
+		return false
+	}
+	fmt.Println(folderInfo)
+	return true
+}
 func RemoveFile(path string) bool {
 	err := os.Remove(path)
 	if err != nil {
