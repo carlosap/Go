@@ -158,6 +158,7 @@ func (r ResourceGroupUsage) Print() {
 			//Additional requests
 			if serviceName == "virtual machines" && resourceType == "virtualmachines" && len(costUSD) > 0 && chargeType == "usage" {
 				//var vmContext = &dbcontext.Virtualmachine{}
+				fmt.Println("INSIDE MACHINE!!!")
 				var vm = &ResourceUsageVirtualMachine{}
 				vm, err := vm.getVmUsage(resourceGroupName, resourceId)
 				if err != nil {

@@ -14,7 +14,7 @@ type Cache struct {
 
 func init() {
 	c := &Cache{}
-	c.init("./spartan.db")
+	c.init("./spartan")
 
 }
 
@@ -49,7 +49,7 @@ func (c *Cache) init(dbpath string) {
 }
 
 func (c *Cache)Set(key string, value string)  {
-	db, err := sql.Open("sqlite3","./spartan.db" )
+	db, err := sql.Open("sqlite3","./spartan" )
 	if err != nil {
 		fmt.Printf("error: failed to open db: %v", err)
 	}
@@ -69,7 +69,7 @@ func (c *Cache)Set(key string, value string)  {
 }
 
 func (c *Cache)Get(key string) string {
-	db, err := sql.Open("sqlite3","./spartan.db" )
+	db, err := sql.Open("sqlite3","./spartan" )
 	if err != nil {
 		fmt.Printf("error: failed to open db: %v", err)
 	}
@@ -85,7 +85,7 @@ func (c *Cache)Get(key string) string {
 }
 
 func (c *Cache)Delete(key string) {
-	db, err := sql.Open("sqlite3","./spartan.db" )
+	db, err := sql.Open("sqlite3","./spartan" )
 	if err != nil {
 		fmt.Printf("error: failed to open db: %v", err)
 	}
@@ -100,7 +100,7 @@ func (c *Cache)Delete(key string) {
 }
 
 func (c *Cache)ClearAll() {
-	db, err := sql.Open("sqlite3","./spartan.db" )
+	db, err := sql.Open("sqlite3","./spartan" )
 	if err != nil {
 		fmt.Printf("error: failed to open db: %v", err)
 	}
@@ -114,7 +114,7 @@ func (c *Cache)ClearAll() {
 }
 
 func (c *Cache)DisplayAll() {
-	db, err := sql.Open("sqlite3","./spartan.db" )
+	db, err := sql.Open("sqlite3","./spartan" )
 	if err != nil {
 		fmt.Printf("error: failed to open db: %v", err)
 	}
