@@ -11,6 +11,15 @@ import (
 	"sync"
 )
 
+type IRequest interface {
+	GetUrl() string
+	GetMethod() string
+	GetPayload() string
+	GetHeader() http.Header
+	ExecuteRequest(IRequest)
+	Print()
+}
+
 type Request struct {
 	Name         string
 	Url          string

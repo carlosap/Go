@@ -41,12 +41,8 @@ func setAccessTokenCommand() (*cobra.Command, error) {
 
 	cmd.RunE = func(*cobra.Command, []string) error {
 		at := &AccessToken{}
-		at, err := at.getAccessToken()
-		if err != nil {
-			return err
-		}
-
 		clearTerminal()
+		at.ExecuteRequest(at)
 		at.Print()
 		return nil
 	}
@@ -55,21 +51,42 @@ func setAccessTokenCommand() (*cobra.Command, error) {
 
 func (at *AccessToken) getAccessToken() (*AccessToken, error) {
 
-	url := strings.Replace(configuration.AccessToken.URL, "{{tenantID}}", configuration.AccessToken.TenantID, 1)
-	header := http.Header{}
-	header.Add("Content-Type", "application/x-www-form-urlencoded")
-	strPayload := fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&scope=%s",
-		configuration.AccessToken.GrantType,
-		configuration.AccessToken.ClientID,
-		configuration.AccessToken.ClientSecret,
-		configuration.AccessToken.Scope)
+	//url := strings.Replace(configuration.AccessToken.URL, "{{tenantID}}", configuration.AccessToken.TenantID, 1)
+	//header := http.Header{}
+	//header.Add("Content-Type", "application/x-www-form-urlencoded")
+	//strPayload := fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&scope=%s",
+	//	configuration.AccessToken.GrantType,
+	//	configuration.AccessToken.ClientID,
+	//	configuration.AccessToken.ClientSecret,
+	//	configuration.AccessToken.Scope)
+	//
+	//request := Request{
+	//	"AccessToken",
+	//	url,
+	//	Methods.POST,
+	//	strPayload,
+	//	header,
+	//	false,
+	//	at,
+	//}
+	//_ = request.Execute()
+	//body := request.GetResponse()
+	//err := json.Unmarshal(body, at)
+	//if err != nil {
+	//	fmt.Println("unmarshal body response: ", err)
+	//}
+
+	return at, nil
+}
+
+func (at *AccessToken) ExecuteRequest(r IRequest) {
 
 	request := Request{
 		"AccessToken",
-		url,
-		Methods.POST,
-		strPayload,
-		header,
+		r.GetUrl(),
+		r.GetMethod(),
+		r.GetPayload(),
+		r.GetHeader(),
 		false,
 		at,
 	}
@@ -79,10 +96,32 @@ func (at *AccessToken) getAccessToken() (*AccessToken, error) {
 	if err != nil {
 		fmt.Println("unmarshal body response: ", err)
 	}
-
-	return at, err
 }
 
+
+func (at *AccessToken) GetUrl() string {
+
+	url := strings.Replace(configuration.AccessToken.URL, "{{tenantID}}", configuration.AccessToken.TenantID, 1)
+	return url
+}
+func (at *AccessToken) GetMethod() string {
+	return Methods.POST
+}
+func (at *AccessToken) GetPayload() string {
+	strPayload := fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&scope=%s",
+		configuration.AccessToken.GrantType,
+		configuration.AccessToken.ClientID,
+		configuration.AccessToken.ClientSecret,
+		configuration.AccessToken.Scope)
+
+	return strPayload
+}
+func (at *AccessToken) GetHeader() http.Header {
+
+	header := http.Header{}
+	header.Add("Content-Type", "application/x-www-form-urlencoded")
+	return header
+}
 func (at *AccessToken) Print() {
 
 	fmt.Printf(
