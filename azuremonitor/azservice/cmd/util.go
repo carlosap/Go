@@ -13,7 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"runtime"
+
 	"strconv"
 	"unicode/utf8"
 )
@@ -48,14 +48,7 @@ func stringToFloat(s string) (float64, error) {
 	return f * factor, nil
 }
 
-func clearTerminal() {
-	value, ok := clear[runtime.GOOS] //runtime.GOOS -> linux, windows, darwin etc.
-	if ok {                          //if we defined a clear func for that platform:
-		value() //we execute it
-	} else { //unsupported platform
-		panic("wrong platform")
-	}
-}
+
 
 func clearCache(fileName string) {
 	path := filepath.Join("cache", fileName)

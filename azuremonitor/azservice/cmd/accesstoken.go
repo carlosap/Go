@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/Go/azuremonitor/azure/oauth2"
+	"github.com/Go/azuremonitor/common/terminal"
 	c "github.com/Go/azuremonitor/config"
 	"github.com/spf13/cobra"
 	"os"
@@ -32,7 +33,7 @@ func setAccessTokenCommand() (*cobra.Command, error) {
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
-		clearTerminal()
+		terminal.Clear()
 		at := &oauth2.AccessToken{}
 		at.ExecuteRequest(at)
 		at.Print()
