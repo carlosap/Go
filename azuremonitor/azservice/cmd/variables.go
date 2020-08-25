@@ -14,22 +14,21 @@ const (
 )
 
 var (
-
-	configuration c.CmdConfig
-	layoutISO     = "2006-01-02"
-	startDate     string
-	endDate       string
-	saveDb		  bool
-	saveCsv       bool
-	ignoreZeroCost bool
-	ctr           = 0
-	startTime     time.Time
-	lock          sync.Mutex
-	developer     string
-	version       = "0.3"
-	parallel, cpus = getCpuParallelCapabilities()
-	Methods = &RequestMethods{POST: "POST", GET: "GET"}
-    csvRgcReportName = "resource_group_cost.csv"
+	configuration    c.CmdConfig
+	layoutISO        = "2006-01-02"
+	startDate        string
+	endDate          string
+	saveDb           bool
+	saveCsv          bool
+	ignoreZeroCost   bool
+	ctr              = 0
+	startTime        time.Time
+	lock             sync.Mutex
+	developer        string
+	version          = "0.3"
+	parallel, cpus   = getCpuParallelCapabilities()
+	Methods          = &RequestMethods{POST: "POST", GET: "GET"}
+	csvRgcReportName = "resource_group_cost.csv"
 	csvRguReportName = "resource_group_usage.csv"
 )
 

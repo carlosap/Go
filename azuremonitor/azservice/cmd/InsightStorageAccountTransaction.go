@@ -41,14 +41,12 @@ func (r *StorageAccountTransaction) getStorageAccountTransaction(resurceGroup st
 	cKey := fmt.Sprintf("%s_%s_GetStorageAccountByResourceId_%s_%s", configuration.AccessToken.SubscriptionID, storageAccount, startD, endD)
 	cHashVal := c.Get(cKey)
 	if len(cHashVal) <= 0 {
-		//Execute Request
 		r, err := r.executeRequest(configuration.AccessToken.SubscriptionID, resurceGroup, storageAccount, startD, endD, cKey)
 		if err != nil {
 			return r, err
 		}
 
 	} else {
-		//Load From Cache
 		err := LoadFromCache(cKey, r)
 		if err != nil {
 			r, err := r.executeRequest(configuration.AccessToken.SubscriptionID, resurceGroup, storageAccount, startD, endD, cKey)
@@ -64,10 +62,7 @@ func (r *StorageAccountTransaction) getStorageAccountTransaction(resurceGroup st
 func (r *StorageAccountTransaction) executeRequest(subscriptionId string, resourceGroup string, storageAccount string, startD string, endD string, cKey string) (*StorageAccountTransaction, error) {
 
 	var at = &AccessToken{}
-	at, err := at.getAccessToken()
-	if err != nil {
-		return nil, err
-	}
+	at.ExecuteRequest(at)
 
 	url := fmt.Sprintf("https://management.azure.com/subscriptions/"+
 		"%s/resourceGroups/"+
@@ -95,8 +90,6 @@ func (r *StorageAccountTransaction) executeRequest(subscriptionId string, resour
 	res, err := client.Do(req)
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
-	//fmt.Println(string(body))
-
 	err = json.Unmarshal(body, r)
 	if err != nil {
 		return r, fmt.Errorf("recommendation list unmarshal body response: ", err)
@@ -107,8 +100,6 @@ func (r *StorageAccountTransaction) executeRequest(subscriptionId string, resour
 	if err != nil {
 		return r, fmt.Errorf("error: failed to save to cache folder - %s: %v", cKey, err)
 	}
-
-	//fmt.Printf("%v\n", r)
 	return r, nil
 }
 

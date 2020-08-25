@@ -31,4 +31,3 @@ var cleanCmd = &cobra.Command{
 
 	},
 }
-

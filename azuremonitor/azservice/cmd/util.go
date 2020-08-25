@@ -130,7 +130,7 @@ func LoadFromCache(cKey string, v interface{}) error {
 	return Unmarshal(f, v)
 }
 
-func loadFile(path string)([]byte, error) {
+func loadFile(path string) ([]byte, error) {
 
 	lock.Lock()
 	defer lock.Unlock()
@@ -162,7 +162,7 @@ func getStructNameByInterface(v interface{}) string {
 	return typ.Name()
 }
 
-func saveCSV(filepath string, matrix [][]string)  {
+func saveCSV(filepath string, matrix [][]string) {
 
 	if len(matrix) > 0 {
 
@@ -174,7 +174,7 @@ func saveCSV(filepath string, matrix [][]string)  {
 			}
 		}
 
-		f, err := os.OpenFile(filepath, os.O_WRONLY | os.O_APPEND | os.O_CREATE, 0666)
+		f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "--> %s\n", err)
 		}

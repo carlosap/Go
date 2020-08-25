@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/Go/azuremonitor/db/cache"
 	"io/ioutil"
 	"net/http"
-	"path/filepath"
 	"strings"
 	"sync"
 )
@@ -21,19 +19,18 @@ type IRequest interface {
 }
 
 type Request struct {
-	Name         string
-	Url          string
-	Method       string
-	Payload      string
-	Header       http.Header
-	IsCache      bool
-	ValueType    interface{}
+	Name    string
+	Url     string
+	Method  string
+	Payload string
+	Header  http.Header
+	IsCache bool
 }
 type Requests []Request
 
 type RequestMethods struct {
 	POST string
-	GET string
+	GET  string
 }
 
 func (r Requests) Execute() []string {
@@ -48,13 +45,10 @@ func (r Requests) Execute() []string {
 		go func(requestItem Request) {
 			defer wg.Done()
 			semaphore <- 1
-			c.Delete(requestItem.Name)
+			cKey := getCKey(requestItem)
 			if requestItem.IsCache {
-				//1- fresh request
-				cKey := fmt.Sprintf("%s_%s_%s_%s_%s", configuration.AccessToken.SubscriptionID, requestItem.Name,requestItem.Url, startDate, endDate)
-				//fmt.Printf("the key is: %s\n", cKey)
-				cHashVal := c.Get(cKey)
-				if len(cHashVal) <= 0 {
+				strBody := c.Get(cKey)
+				if len(strBody) <= 0 {
 					body, err := makeRequest(requestItem)
 					if err != nil {
 						errorLock.Lock()
@@ -64,35 +58,11 @@ func (r Requests) Execute() []string {
 					} else {
 						updateLock.Lock()
 						defer updateLock.Unlock()
-						c.Set(requestItem.Name, string(body))
-						_ = json.Unmarshal(body, requestItem.ValueType)
-						_ = saveCache(cKey, requestItem.ValueType)
+						c.Set(cKey, string(body))
 					}
-				} else {
-					//2- corrupted files
-					//fmt.Printf("the hashvalue: %s\n", cHashVal)
-					err := LoadFromCache(cKey, requestItem.ValueType)
-					if err != nil {
-						body, err := makeRequest(requestItem)
-						if err != nil {
-							errorLock.Lock()
-							defer errorLock.Unlock()
-							errors = append(errors,
-								fmt.Sprintf("%s error: %s", requestItem.Url, err))
-						} else {
-							updateLock.Lock()
-							defer updateLock.Unlock()
-							c.Set(requestItem.Name, string(body))
-							_ = json.Unmarshal(body, requestItem.ValueType)
-							_ = saveCache(cKey, requestItem.ValueType)
-						}
-					}
-					path := filepath.Join("cache", cHashVal)
-					body, _ := loadFile(path)
-					c.Set(requestItem.Name, string(body))
 				}
 			} else {
-				// 3- no cached
+				c.Delete(cKey)
 				body, err := makeRequest(requestItem)
 				if err != nil {
 					errorLock.Lock()
@@ -102,10 +72,9 @@ func (r Requests) Execute() []string {
 				} else {
 					updateLock.Lock()
 					defer updateLock.Unlock()
-					c.Set(requestItem.Name, string(body))
+					c.Set(cKey, string(body))
 				}
 			}
-
 			<-semaphore
 		}(request)
 	}
@@ -114,13 +83,18 @@ func (r Requests) Execute() []string {
 	return errors
 }
 
+func getCKey(requestItem Request) string {
+	cKey := fmt.Sprintf("%s_%s_%s_%s_%s", configuration.AccessToken.SubscriptionID, requestItem.Name, requestItem.Url, startDate, endDate)
+	return cKey
+}
+
 func makeRequest(r Request) ([]byte, error) {
 	client := &http.Client{}
 	var body []byte
 	payload := strings.NewReader(r.Payload)
 	req, err := http.NewRequest(r.Method, r.Url, payload)
 	if err != nil {
-		return body,err
+		return body, err
 	}
 
 	//need header
@@ -139,8 +113,9 @@ func makeRequest(r Request) ([]byte, error) {
 }
 
 func (r Request) GetResponse() []byte {
+	cKey := getCKey(r)
 	c := &cache.Cache{}
-	body := c.Get(r.Name)
+	body := c.Get(cKey)
 	return []byte(body)
 }
 
@@ -150,5 +125,3 @@ func (r Request) Execute() []string {
 	errors := requests.Execute()
 	return errors
 }
-
-

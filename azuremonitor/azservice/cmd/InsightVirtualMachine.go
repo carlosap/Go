@@ -32,24 +32,20 @@ func (r *ResourceUsageVirtualMachine) getVmUsage(resourceGroup string, resourceI
 	}
 
 	request := Request{
-		Name:      "vm"+"_"+resourceGroup+"_"+resourceID,
-		Url:       r.getUrl(),
-		Method:    Methods.POST,
-		Payload:   r.getPayload(resourceGroup, resourceID),
-		Header:    r.getHeader(),
-		IsCache:   false,
-		ValueType: r,
+		Name:    "vm" + "_" + resourceGroup + "_" + resourceID,
+		Url:     r.getUrl(),
+		Method:  Methods.POST,
+		Payload: r.getPayload(resourceGroup, resourceID),
+		Header:  r.getHeader(),
+		IsCache: false,
 	}
 
 	errors := request.Execute()
 	IfErrorsPrintThem(errors)
 
 	body := request.GetResponse()
-	//fmt.Println(string(body))
 	_ = json.Unmarshal(body, r)
 	r.setUsageValue()
-
-	//fmt.Println("The usage is %v\n", r)
 	return r, nil
 }
 
@@ -101,9 +97,9 @@ func (r *ResourceUsageVirtualMachine) getPayload(resourceGroup string, resourceI
 
 func (r *ResourceUsageVirtualMachine) getHeader() http.Header {
 	var at = &AccessToken{}
-	var header = http.Header{}
-	at, _ = at.getAccessToken()
+	at.ExecuteRequest(at)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
+	var header = http.Header{}
 	header.Add("Authorization", token)
 	header.Add("Accept", "application/json")
 	header.Add("Content-Type", "application/json")

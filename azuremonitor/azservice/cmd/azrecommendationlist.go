@@ -90,7 +90,6 @@ func (r *RecommendationList) getAzureRecommendationList() (*RecommendationList, 
 		"",
 		r.getHeader(),
 		false,
-		r,
 	}
 	_ = request.Execute()
 	body := request.GetResponse()
@@ -165,7 +164,7 @@ func printRecommendationResource(recommendaiton RecommendationValue) {
 	fmt.Println("----------------------------------------\n")
 	for x := 0; x < len(recommendaiton.Properties.SupportedValues); x++ {
 		v := recommendaiton.Properties.SupportedValues[x]
-		fmt.Printf("[%d]ID [%s] - [%s]\n",x+1, v.ID, v.DisplayName)
+		fmt.Printf("[%d]ID [%s] - [%s]\n", x+1, v.ID, v.DisplayName)
 	}
 }
 

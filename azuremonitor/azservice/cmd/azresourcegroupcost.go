@@ -34,9 +34,9 @@ func init() {
 	month := now.AddDate(0, 0, -29)
 	rootCmd.PersistentFlags().StringVar(&startDate, "from", month.Format(layoutISO), "start date of report (i.e. YYYY-MM-DD)")
 	rootCmd.PersistentFlags().StringVar(&endDate, "to", now.Format(layoutISO), "end date of report (i.e. YYYY-MM-DD)")
-	rootCmd.PersistentFlags().BoolVar(&saveDb,"db", false, "[=true]saves records to Postgres db")
-	rootCmd.PersistentFlags().BoolVar(&saveCsv,"csv", false, "[=true]saves records into a csv output file")
-	rootCmd.PersistentFlags().BoolVar(&ignoreZeroCost,"izcost", false, "[=true] ignores resources with zero cost")
+	rootCmd.PersistentFlags().BoolVar(&saveDb, "db", false, "[=true]saves records to Postgres db")
+	rootCmd.PersistentFlags().BoolVar(&saveCsv, "csv", false, "[=true]saves records into a csv output file")
+	rootCmd.PersistentFlags().BoolVar(&ignoreZeroCost, "izcost", false, "[=true] ignores resources with zero cost")
 
 	r, err := setResourceGroupCostCommand()
 	if err != nil {
@@ -93,7 +93,7 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 
 func (r *ResourceGroupCost) getRequests(rsgroups []string) Requests {
 	requests := Requests{}
-	header, _ := r.getHeader()
+	header := r.getHeader()
 	for i := 0; i < len(rsgroups); i++ {
 		rgName := rsgroups[i]
 		request := Request{}
@@ -103,7 +103,6 @@ func (r *ResourceGroupCost) getRequests(rsgroups []string) Requests {
 		request.Url = r.getUrl(rgName)
 		request.Method = Methods.POST
 		request.IsCache = true
-		request.ValueType = r
 		requests = append(requests, request)
 	}
 	return requests
@@ -130,18 +129,15 @@ func (r *ResourceGroupCost) getPayload() string {
 		endDate,
 	)
 }
-func (r *ResourceGroupCost) getHeader() (http.Header, error) {
+func (r *ResourceGroupCost) getHeader() http.Header {
 	var at = &AccessToken{}
-	var header = http.Header{}
-	at, err := at.getAccessToken()
-	if err != nil {
-		return nil, err
-	}
+	at.ExecuteRequest(at)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
+	var header = http.Header{}
 	header.Add("Authorization", token)
 	header.Add("Accept", "application/json")
 	header.Add("Content-Type", "application/json")
-	return header, err
+	return header
 }
 
 func (r ResourceGroupCost) PrintHeader() {
@@ -151,7 +147,7 @@ func (r ResourceGroupCost) PrintHeader() {
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
 	if saveCsv {
 		var matrix [][]string
-		rec := []string{"Resource Group","ResourceID","Service Name","Resource Type","Resource Location","Consumption Type","Meter","Cost" }
+		rec := []string{"Resource Group", "ResourceID", "Service Name", "Resource Type", "Resource Location", "Consumption Type", "Meter", "Cost"}
 		matrix = append(matrix, rec)
 		saveCSV(csvRgcReportName, matrix)
 	}
@@ -245,7 +241,7 @@ func (r ResourceGroupCost) writeCSV() {
 				rec = append(rec, chargeType)
 				rec = append(rec, meter)
 				rec = append(rec, costUSD)
-				matrix = append(matrix,rec)
+				matrix = append(matrix, rec)
 			}
 		}
 

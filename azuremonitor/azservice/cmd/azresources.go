@@ -66,13 +66,12 @@ func setResourcesCommand() (*cobra.Command, error) {
 
 		clearTerminal()
 		request := Request{
-			Name:      "resources",
-			Url:       r.getUrl(),
-			Method:    Methods.GET,
-			Payload:   "",
-			Header:    r.getHeader(),
-			IsCache:   false,
-			ValueType: r,
+			Name:    "resources",
+			Url:     r.getUrl(),
+			Method:  Methods.GET,
+			Payload: "",
+			Header:  r.getHeader(),
+			IsCache: false,
 		}
 		errors := request.Execute()
 		IfErrorsPrintThem(errors)
@@ -87,12 +86,9 @@ func setResourcesCommand() (*cobra.Command, error) {
 
 func (r *Resource) getHeader() http.Header {
 	var at = &AccessToken{}
-	var header = http.Header{}
-	at, err := at.getAccessToken()
-	if err != nil {
-		return nil
-	}
+	at.ExecuteRequest(at)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
+	var header = http.Header{}
 	header.Add("Authorization", token)
 	header.Add("Accept", "application/json")
 	header.Add("Content-Type", "application/json")
@@ -107,7 +103,7 @@ func (r *Resource) Print() {
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
 	fmt.Println("Name,Type,Kind,Location,ManageBy,Sku Name, Sku Tier,Tags,Plan Name, Plan Promotion Code, Plan Product, Plan Publisher")
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
-	for i :=0; i< len(r.Values); i++ {
+	for i := 0; i < len(r.Values); i++ {
 		var resourceType, resourceManageby string
 		item := r.Values[i]
 
@@ -122,10 +118,9 @@ func (r *Resource) Print() {
 			resourceManageby = pArray[len(pArray)-1]
 		}
 
-
-		fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",item.Name, resourceType, item.Kind,item.Location,resourceManageby,
-			item.Sku.Name, item.Sku.Tier,item.Tags.MsResourceUsage, item.Plan.Name,
-			item.Plan.PromotionCode,item.Plan.Product, item.Plan.Publisher)
+		fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", item.Name, resourceType, item.Kind, item.Location, resourceManageby,
+			item.Sku.Name, item.Sku.Tier, item.Tags.MsResourceUsage, item.Plan.Name,
+			item.Plan.PromotionCode, item.Plan.Product, item.Plan.Publisher)
 	}
 
 }

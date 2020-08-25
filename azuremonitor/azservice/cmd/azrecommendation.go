@@ -67,17 +67,17 @@ func setRecommendationCommand() (*cobra.Command, error) {
 
 func (r *RecommendationList) getURL() string {
 
-return 	strings.Replace(configuration.Recommendation.URL,
-	"{{subscriptionID}}",
-	configuration.AccessToken.SubscriptionID, 1)
+	return strings.Replace(configuration.Recommendation.URL,
+		"{{subscriptionID}}",
+		configuration.AccessToken.SubscriptionID, 1)
 
 }
 
 func (r *RecommendationList) getHeader() http.Header {
 	var at = &AccessToken{}
-	var header = http.Header{}
-	at, _ = at.getAccessToken()
+	at.ExecuteRequest(at)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
+	var header = http.Header{}
 	header.Add("Authorization", token)
 	header.Add("Accept", "application/json")
 	header.Add("Content-Type", "application/json")
@@ -94,7 +94,6 @@ func (r *RecommendationList) getAzureRecommendation() (*RecommendationList, erro
 		"",
 		r.getHeader(),
 		false,
-		r,
 	}
 	_ = request.Execute()
 	body := request.GetResponse()

@@ -50,13 +50,12 @@ func setSubscriptionInfoCommand() (*cobra.Command, error) {
 		s := &SubscriptionInfo{}
 		clearTerminal()
 		request := Request{
-			Name:      "subscriptionInfo",
-			Url:       s.getUrl(),
-			Method:    Methods.GET,
-			Payload:   "",
-			Header:    s.getHeader(),
-			IsCache:   true,
-			ValueType: s,
+			Name:    "subscriptionInfo",
+			Url:     s.getUrl(),
+			Method:  Methods.GET,
+			Payload: "",
+			Header:  s.getHeader(),
+			IsCache: true,
 		}
 		errors := request.Execute()
 		IfErrorsPrintThem(errors)
@@ -70,12 +69,9 @@ func setSubscriptionInfoCommand() (*cobra.Command, error) {
 }
 func (r *SubscriptionInfo) getHeader() http.Header {
 	var at = &AccessToken{}
-	var header = http.Header{}
-	at, err := at.getAccessToken()
-	if err != nil {
-		return nil
-	}
+	at.ExecuteRequest(at)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
+	var header = http.Header{}
 	header.Add("Authorization", token)
 	header.Add("Accept", "application/json")
 	header.Add("Content-Type", "application/json")

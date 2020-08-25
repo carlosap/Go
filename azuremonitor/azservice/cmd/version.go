@@ -23,15 +23,13 @@ var versionCmd = &cobra.Command{
 		}
 		fmt.Println("Azmonitor ", version)
 
-
-
 		//requests := Requests{
 		//	{"accesstoken", "", url, "POST", strPayload, header, item, nil},
 		//	{"google", "", "https://www.google.com", "GET", "", nil, nil, nil},
 		//	{"msn", "", "https://www.msn.com", "GET", "", nil, nil, nil},
 		//}
 		//
-	    //errors := requests.Execute()
+		//errors := requests.Execute()
 		//if len(errors) > 0 {
 		//	fmt.Fprintf(os.Stderr, "\n%d errors occurred:\n", len(errors))
 		//	for _, err := range errors {
@@ -44,12 +42,8 @@ var versionCmd = &cobra.Command{
 		//	fmt.Printf("The body of %s - %s\n", r.Name, body)
 		//}
 
-
-
 		//fmt.Printf("The body of %s - %s\n", request.Name, body)
 		//fmt.Printf("The value of %s - %v\n", request.Name,act.AccessToken )
-
-
 
 	},
 }

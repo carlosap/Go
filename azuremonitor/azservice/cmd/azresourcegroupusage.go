@@ -66,7 +66,6 @@ func setResourceGroupUsageCommand() (*cobra.Command, error) {
 			r.PrintHeader()
 		}
 
-
 		for _, item := range requests {
 			if len(item.GetResponse()) > 0 {
 				_ = json.Unmarshal(item.GetResponse(), r)
@@ -83,7 +82,7 @@ func setResourceGroupUsageCommand() (*cobra.Command, error) {
 
 func (r *ResourceGroupUsage) getRequests(rsgroups []string) Requests {
 	requests := Requests{}
-	header, _ := r.getHeader()
+	header := r.getHeader()
 	for i := 0; i < len(rsgroups); i++ {
 		rgName := rsgroups[i]
 		request := Request{}
@@ -93,7 +92,6 @@ func (r *ResourceGroupUsage) getRequests(rsgroups []string) Requests {
 		request.Url = r.getUrl(rgName)
 		request.Method = Methods.POST
 		request.IsCache = true
-		request.ValueType = r
 		requests = append(requests, request)
 
 	}
@@ -120,18 +118,16 @@ func (r *ResourceGroupUsage) getPayload() string {
 		endDate,
 	)
 }
-func (r *ResourceGroupUsage) getHeader() (http.Header, error) {
+func (r *ResourceGroupUsage) getHeader() http.Header {
 	var at = &AccessToken{}
+	at.ExecuteRequest(at)
 	var header = http.Header{}
-	at, err := at.getAccessToken()
-	if err != nil {
-		return nil, err
-	}
+
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
 	header.Add("Authorization", token)
 	header.Add("Accept", "application/json")
 	header.Add("Content-Type", "application/json")
-	return header, err
+	return header
 }
 func (r ResourceGroupUsage) PrintHeader() {
 	fmt.Printf("Usage Report:\n")
@@ -140,7 +136,7 @@ func (r ResourceGroupUsage) PrintHeader() {
 	fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 	if saveCsv {
 		var matrix [][]string
-		rec := []string{"ResourceID","Resource Group","Service Name","Cost","Resource Type","Resource Location","Consumption Type","Meter","CPU Utilization Avg","Available Memory","Logical Disk Latency","Disk IOPs","Disk Bytes/sec","Network Sent Rate","Network Received Rate" }
+		rec := []string{"ResourceID", "Resource Group", "Service Name", "Cost", "Resource Type", "Resource Location", "Consumption Type", "Meter", "CPU Utilization Avg", "Available Memory", "Logical Disk Latency", "Disk IOPs", "Disk Bytes/sec", "Network Sent Rate", "Network Received Rate"}
 		matrix = append(matrix, rec)
 		saveCSV(csvRguReportName, matrix)
 	}
@@ -239,7 +235,7 @@ func (r ResourceGroupUsage) writeCSV() {
 					}
 
 					var rec []string
-					rec = append(rec,resourceId)
+					rec = append(rec, resourceId)
 					rec = append(rec, resourceGroupName)
 					rec = append(rec, serviceName)
 					rec = append(rec, costUSD)
@@ -254,19 +250,13 @@ func (r ResourceGroupUsage) writeCSV() {
 					rec = append(rec, vm.DiskBytes)
 					rec = append(rec, vm.NetworkSentRate)
 					rec = append(rec, vm.NetworkSentRate)
-					matrix = append(matrix,rec)
+					matrix = append(matrix, rec)
 				}
 			}
 		}
 		saveCSV(csvRguReportName, matrix)
 	}
 }
-
-
-
-
-
-
 
 //TODO:::::
 //if serviceName == "storage" && resourceType == "storageaccounts" && chargeType == "usage" {

@@ -113,27 +113,23 @@ func (r ResourceGroups) getPayload() string {
 	)
 	return payload
 }
-func (r ResourceGroups) getHeader() (http.Header, error) {
+func (r ResourceGroups) getHeader() http.Header {
 	var at = &AccessToken{}
-	var header = http.Header{}
-	at, err := at.getAccessToken()
-	if err != nil {
-		return nil, err
-	}
+	at.ExecuteRequest(at)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
+	var header = http.Header{}
 	header.Add("Authorization", token)
 	header.Add("Accept", "application/json")
 	header.Add("Content-Type", "application/json")
 
-	return header, err
+	return header
 }
 func (r ResourceGroupList) getResourceGroups() (ResourceGroupList, error) {
 
 	rg := ResourceGroups{}
 
-
 	payload := rg.getPayload()
-	header, _ := rg.getHeader()
+	header := rg.getHeader()
 	request := Request{
 		"ResourceGroups",
 		configuration.ResourceGroups.URL,
@@ -141,7 +137,6 @@ func (r ResourceGroupList) getResourceGroups() (ResourceGroupList, error) {
 		payload,
 		header,
 		false,
-		ResourceGroups{},
 	}
 
 	_ = request.Execute()

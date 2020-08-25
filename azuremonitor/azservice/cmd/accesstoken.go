@@ -49,36 +49,6 @@ func setAccessTokenCommand() (*cobra.Command, error) {
 	return cmd, nil
 }
 
-func (at *AccessToken) getAccessToken() (*AccessToken, error) {
-
-	//url := strings.Replace(configuration.AccessToken.URL, "{{tenantID}}", configuration.AccessToken.TenantID, 1)
-	//header := http.Header{}
-	//header.Add("Content-Type", "application/x-www-form-urlencoded")
-	//strPayload := fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&scope=%s",
-	//	configuration.AccessToken.GrantType,
-	//	configuration.AccessToken.ClientID,
-	//	configuration.AccessToken.ClientSecret,
-	//	configuration.AccessToken.Scope)
-	//
-	//request := Request{
-	//	"AccessToken",
-	//	url,
-	//	Methods.POST,
-	//	strPayload,
-	//	header,
-	//	false,
-	//	at,
-	//}
-	//_ = request.Execute()
-	//body := request.GetResponse()
-	//err := json.Unmarshal(body, at)
-	//if err != nil {
-	//	fmt.Println("unmarshal body response: ", err)
-	//}
-
-	return at, nil
-}
-
 func (at *AccessToken) ExecuteRequest(r IRequest) {
 
 	request := Request{
@@ -88,7 +58,6 @@ func (at *AccessToken) ExecuteRequest(r IRequest) {
 		r.GetPayload(),
 		r.GetHeader(),
 		false,
-		at,
 	}
 	_ = request.Execute()
 	body := request.GetResponse()
@@ -97,7 +66,6 @@ func (at *AccessToken) ExecuteRequest(r IRequest) {
 		fmt.Println("unmarshal body response: ", err)
 	}
 }
-
 
 func (at *AccessToken) GetUrl() string {
 

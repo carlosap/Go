@@ -65,11 +65,7 @@ func (r *StorageAccountAvailability) getStorageAccountAvailability(resurceGroup 
 func (r *StorageAccountAvailability) executeRequest(subscriptionId string, resourceGroup string, storageAccount string, startD string, endD string, cKey string) (*StorageAccountAvailability, error) {
 
 	var at = &AccessToken{}
-	at, err := at.getAccessToken()
-	if err != nil {
-		return nil, err
-	}
-
+	at.ExecuteRequest(at)
 	url := fmt.Sprintf("https://management.azure.com/subscriptions/"+
 		"%s/resourceGroups/"+
 		"%s/providers/Microsoft.Storage/storageAccounts/"+
