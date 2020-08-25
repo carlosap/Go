@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Go/azuremonitor/azure/oauth2"
 	"github.com/Go/azuremonitor/db/cache"
 	"io/ioutil"
 	"net/http"
@@ -64,7 +65,7 @@ func (r *StorageAccountAvailability) getStorageAccountAvailability(resurceGroup 
 
 func (r *StorageAccountAvailability) executeRequest(subscriptionId string, resourceGroup string, storageAccount string, startD string, endD string, cKey string) (*StorageAccountAvailability, error) {
 
-	var at = &AccessToken{}
+	at := &oauth2.AccessToken{}
 	at.ExecuteRequest(at)
 	url := fmt.Sprintf("https://management.azure.com/subscriptions/"+
 		"%s/resourceGroups/"+

@@ -3,6 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Go/azuremonitor/azure/oauth2"
+	"github.com/Go/azuremonitor/common/httpclient"
 	"github.com/spf13/cobra"
 	"net/http"
 	"os"
@@ -114,7 +116,7 @@ func (r ResourceGroups) getPayload() string {
 	return payload
 }
 func (r ResourceGroups) getHeader() http.Header {
-	var at = &AccessToken{}
+	at := &oauth2.AccessToken{}
 	at.ExecuteRequest(at)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
 	var header = http.Header{}
@@ -130,10 +132,10 @@ func (r ResourceGroupList) getResourceGroups() (ResourceGroupList, error) {
 
 	payload := rg.getPayload()
 	header := rg.getHeader()
-	request := Request{
+	request := httpclient.Request{
 		"ResourceGroups",
 		configuration.ResourceGroups.URL,
-		Methods.POST,
+		httpclient.Methods.POST,
 		payload,
 		header,
 		false,

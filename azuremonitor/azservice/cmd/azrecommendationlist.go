@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Go/azuremonitor/common/httpclient"
 	"github.com/spf13/cobra"
 	"os"
 	"time"
@@ -83,10 +84,10 @@ func setRecommendationListCommand() (*cobra.Command, error) {
 }
 
 func (r *RecommendationList) getAzureRecommendationList() (*RecommendationList, error) {
-	request := Request{
+	request := httpclient.Request{
 		"RecommendationList_RL",
 		configuration.RecommendationList.URL,
-		Methods.GET,
+		httpclient.Methods.GET,
 		"",
 		r.getHeader(),
 		false,

@@ -3,6 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Go/azuremonitor/azure/oauth2"
+	"github.com/Go/azuremonitor/common/httpclient"
 	"github.com/spf13/cobra"
 	"net/http"
 	"os"
@@ -65,10 +67,10 @@ func setResourcesCommand() (*cobra.Command, error) {
 		r := &Resource{}
 
 		clearTerminal()
-		request := Request{
+		request := httpclient.Request{
 			Name:    "resources",
 			Url:     r.getUrl(),
-			Method:  Methods.GET,
+			Method: httpclient.Methods.GET,
 			Payload: "",
 			Header:  r.getHeader(),
 			IsCache: false,
@@ -85,7 +87,7 @@ func setResourcesCommand() (*cobra.Command, error) {
 }
 
 func (r *Resource) getHeader() http.Header {
-	var at = &AccessToken{}
+	at := &oauth2.AccessToken{}
 	at.ExecuteRequest(at)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
 	var header = http.Header{}

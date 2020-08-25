@@ -1,7 +1,9 @@
-package cmd
+package httpclient
 
 import (
 	"fmt"
+	"github.com/Go/azuremonitor/common/reflection"
+	c "github.com/Go/azuremonitor/config"
 	"github.com/Go/azuremonitor/db/cache"
 	"io/ioutil"
 	"net/http"
@@ -27,11 +29,19 @@ type Request struct {
 	IsCache bool
 }
 type Requests []Request
-
 type RequestMethods struct {
 	POST string
 	GET  string
 }
+
+var (
+	configuration    c.CmdConfig
+	lock             sync.Mutex
+	parallel, _   = reflection.GetCpuParallelCapabilities()
+	Methods          = &RequestMethods{POST: "POST", GET: "GET"}
+	startDate        string
+	endDate          string
+)
 
 func (r Requests) Execute() []string {
 	var errorLock sync.Mutex
@@ -125,3 +135,4 @@ func (r Request) Execute() []string {
 	errors := requests.Execute()
 	return errors
 }
+

@@ -26,8 +26,6 @@ var (
 	lock             sync.Mutex
 	developer        string
 	version          = "0.3"
-	parallel, cpus   = getCpuParallelCapabilities()
-	Methods          = &RequestMethods{POST: "POST", GET: "GET"}
 	csvRgcReportName = "resource_group_cost.csv"
 	csvRguReportName = "resource_group_usage.csv"
 )

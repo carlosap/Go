@@ -3,6 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Go/azuremonitor/azure/oauth2"
+	"github.com/Go/azuremonitor/common/httpclient"
 	"net/http"
 	"strings"
 )
@@ -31,10 +33,10 @@ func (r *ResourceUsageVirtualMachine) getVmUsage(resourceGroup string, resourceI
 		return nil, fmt.Errorf("resource id and resource group names are required")
 	}
 
-	request := Request{
+	request := httpclient.Request{
 		Name:    "vm" + "_" + resourceGroup + "_" + resourceID,
 		Url:     r.getUrl(),
-		Method:  Methods.POST,
+		Method:  httpclient.Methods.POST,
 		Payload: r.getPayload(resourceGroup, resourceID),
 		Header:  r.getHeader(),
 		IsCache: false,
@@ -96,7 +98,7 @@ func (r *ResourceUsageVirtualMachine) getPayload(resourceGroup string, resourceI
 }
 
 func (r *ResourceUsageVirtualMachine) getHeader() http.Header {
-	var at = &AccessToken{}
+	at := &oauth2.AccessToken{}
 	at.ExecuteRequest(at)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
 	var header = http.Header{}

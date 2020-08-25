@@ -141,20 +141,7 @@ func loadFile(path string) ([]byte, error) {
 	return data, nil
 }
 
-func getCpuParallelCapabilities() (int, int) {
-	var parallel int
-	cpus := runtime.NumCPU()
-	if cpus < 2 {
-		parallel = 1
-	} else {
-		parallel = cpus - 1
-	}
 
-	if runtime.GOOS == "solaris" {
-		parallel = 3
-	}
-	return parallel, cpus
-}
 
 func getStructNameByInterface(v interface{}) string {
 	rv := reflect.ValueOf(v)

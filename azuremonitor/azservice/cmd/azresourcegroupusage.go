@@ -3,6 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Go/azuremonitor/azure/oauth2"
+	"github.com/Go/azuremonitor/common/httpclient"
 	"github.com/spf13/cobra"
 	"net/http"
 	"os"
@@ -80,17 +82,17 @@ func setResourceGroupUsageCommand() (*cobra.Command, error) {
 	return cmd, nil
 }
 
-func (r *ResourceGroupUsage) getRequests(rsgroups []string) Requests {
-	requests := Requests{}
+func (r *ResourceGroupUsage) getRequests(rsgroups []string) httpclient.Requests {
+	requests := httpclient.Requests{}
 	header := r.getHeader()
 	for i := 0; i < len(rsgroups); i++ {
 		rgName := rsgroups[i]
-		request := Request{}
+		request := httpclient.Request{}
 		request.Name = rgName
 		request.Header = header
 		request.Payload = r.getPayload()
 		request.Url = r.getUrl(rgName)
-		request.Method = Methods.POST
+		request.Method = httpclient.Methods.POST
 		request.IsCache = true
 		requests = append(requests, request)
 
@@ -119,7 +121,7 @@ func (r *ResourceGroupUsage) getPayload() string {
 	)
 }
 func (r *ResourceGroupUsage) getHeader() http.Header {
-	var at = &AccessToken{}
+	at := &oauth2.AccessToken{}
 	at.ExecuteRequest(at)
 	var header = http.Header{}
 
