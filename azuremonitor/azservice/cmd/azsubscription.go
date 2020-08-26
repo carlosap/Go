@@ -55,7 +55,7 @@ func setSubscriptionInfoCommand() (*cobra.Command, error) {
 		request := httpclient.Request{
 			Name:    "subscriptionInfo",
 			Url:     s.getUrl(),
-			Method: httpclient.Methods.GET,
+			Method:  httpclient.Methods.GET,
 			Payload: "",
 			Header:  s.getHeader(),
 			IsCache: true,

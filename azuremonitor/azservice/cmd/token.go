@@ -9,7 +9,6 @@ import (
 	"os"
 )
 
-
 func init() {
 	at, err := setAccessTokenCommand()
 	if err != nil {
@@ -41,7 +40,3 @@ func setAccessTokenCommand() (*cobra.Command, error) {
 	}
 	return cmd, nil
 }
-
-
-
-

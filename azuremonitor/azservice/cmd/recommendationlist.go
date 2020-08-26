@@ -9,7 +9,6 @@ import (
 	"os"
 )
 
-
 func init() {
 
 	r, err := setRecommendationListCommand()

@@ -48,8 +48,6 @@ func stringToFloat(s string) (float64, error) {
 	return f * factor, nil
 }
 
-
-
 func clearCache(fileName string) {
 	path := filepath.Join("cache", fileName)
 	_ = os.Remove(path)
@@ -133,8 +131,6 @@ func loadFile(path string) ([]byte, error) {
 	}
 	return data, nil
 }
-
-
 
 func getStructNameByInterface(v interface{}) string {
 	rv := reflect.ValueOf(v)

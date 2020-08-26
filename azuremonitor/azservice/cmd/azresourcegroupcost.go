@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Go/azuremonitor/azure/batch"
 	"github.com/Go/azuremonitor/azure/oauth2"
 	"github.com/Go/azuremonitor/common/httpclient"
 	"github.com/Go/azuremonitor/common/terminal"
@@ -52,16 +53,12 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
-		var r = &ResourceGroupCost{}
-		rgList := ResourceGroupList{}
-
-		rgList, err := rgList.getResourceGroups()
-		if err != nil {
-			return err
-		}
-
 		terminal.Clear()
-		requests := r.getRequests(rgList)
+		var r = &ResourceGroupCost{}
+		rgl := batch.ResourceGroupList{}
+		rgl.ExecuteRequest(&rgl)
+
+		requests := r.getRequests(rgl)
 		errors := requests.Execute()
 		IfErrorsPrintThem(errors)
 
