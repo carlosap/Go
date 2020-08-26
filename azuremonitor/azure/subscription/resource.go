@@ -1,16 +1,22 @@
-package cmd
+package subscription
 
 import (
-	"encoding/json"
-	"fmt"
+"encoding/json"
+"fmt"
 	"github.com/Go/azuremonitor/azure/oauth2"
 	"github.com/Go/azuremonitor/common/httpclient"
-	"github.com/Go/azuremonitor/common/terminal"
-	"github.com/spf13/cobra"
-	"net/http"
-	"os"
-	"strings"
+c "github.com/Go/azuremonitor/config"
+"net/http"
+"strings"
 )
+
+var (
+	configuration    c.CmdConfig
+)
+
+func init(){
+	configuration, _ = c.GetCmdConfig()
+}
 
 type Resource struct {
 	Values []Value `json:"value"`
@@ -42,54 +48,37 @@ type Tags struct {
 	MsResourceUsage string `json:"ms-resource-usage"`
 }
 
-func init() {
+func (resource *Resource) ExecuteRequest(r httpclient.IRequest) {
 
-	r, err := setResourcesCommand()
+	request := httpclient.Request{
+		"AccessToken",
+		r.GetUrl(),
+		r.GetMethod(),
+		r.GetPayload(),
+		r.GetHeader(),
+		true,
+	}
+	_ = request.Execute()
+	body := request.GetResponse()
+	err := json.Unmarshal(body, resource)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		fmt.Println("unmarshal body response: ", err)
 	}
-	rootCmd.AddCommand(r)
 }
-
-func setResourcesCommand() (*cobra.Command, error) {
-
-	description := fmt.Sprintf("%s\n%s\n%s",
-		configuration.Resources.DescriptionLine1,
-		configuration.Resources.DescriptionLine2,
-		configuration.Resources.DescriptionLine3)
-
-	cmd := &cobra.Command{
-		Use:   configuration.Resources.Command,
-		Short: configuration.Resources.CommandComments,
-		Long:  description}
-
-	cmd.RunE = func(*cobra.Command, []string) error {
-		r := &Resource{}
-
-		terminal.Clear()
-		request := httpclient.Request{
-			Name:    "resources",
-			Url:     r.getUrl(),
-			Method: httpclient.Methods.GET,
-			Payload: "",
-			Header:  r.getHeader(),
-			IsCache: false,
-		}
-		errors := request.Execute()
-		IfErrorsPrintThem(errors)
-
-		body := request.GetResponse()
-		_ = json.Unmarshal(body, r)
-		r.Print()
-		return nil
-	}
-	return cmd, nil
+func (resource *Resource) GetUrl() string {
+	url := strings.Replace(configuration.Resources.URL, "{{subscriptionID}}", configuration.AccessToken.SubscriptionID, 1)
+	return url
 }
+func (resource *Resource) GetMethod() string {
+	return httpclient.Methods.GET
+}
+func (resource *Resource) GetPayload() string {
+	return ""
+}
+func (resource *Resource) GetHeader() http.Header {
 
-func (r *Resource) getHeader() http.Header {
-	at := &oauth2.AccessToken{}
-	at.ExecuteRequest(at)
+	at := oauth2.AccessToken{}
+	at.ExecuteRequest(&at)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
 	var header = http.Header{}
 	header.Add("Authorization", token)
@@ -97,18 +86,15 @@ func (r *Resource) getHeader() http.Header {
 	header.Add("Content-Type", "application/json")
 	return header
 }
-func (r *Resource) getUrl() string {
-	url := strings.Replace(configuration.Resources.URL, "{{subscriptionID}}", configuration.AccessToken.SubscriptionID, 1)
-	return url
-}
-func (r *Resource) Print() {
+func (resource *Resource) Print() {
+
 	fmt.Println("Resource Report:")
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
 	fmt.Println("Name,Type,Kind,Location,ManageBy,Sku Name, Sku Tier,Tags,Plan Name, Plan Promotion Code, Plan Product, Plan Publisher")
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
-	for i := 0; i < len(r.Values); i++ {
+	for i := 0; i < len(resource.Values); i++ {
 		var resourceType, resourceManageby string
-		item := r.Values[i]
+		item := resource.Values[i]
 
 		//remove path
 		if strings.Contains(item.Type, "/") {
@@ -125,5 +111,4 @@ func (r *Resource) Print() {
 			item.Sku.Name, item.Sku.Tier, item.Tags.MsResourceUsage, item.Plan.Name,
 			item.Plan.PromotionCode, item.Plan.Product, item.Plan.Publisher)
 	}
-
 }
