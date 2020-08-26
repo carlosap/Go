@@ -49,7 +49,7 @@ func (r Requests) Execute() []string {
 	errors := make([]string, 0)
 	var wg sync.WaitGroup
 	semaphore := make(chan int, parallel)
-	c := &cache.Cache{}
+	cdb := &cache.Cache{}
 	for _, request := range r {
 		wg.Add(1)
 		go func(requestItem Request) {
@@ -57,7 +57,7 @@ func (r Requests) Execute() []string {
 			semaphore <- 1
 			cKey := getCKey(requestItem)
 			if requestItem.IsCache {
-				strBody := c.Get(cKey)
+				strBody := cdb.Get(cKey)
 				if len(strBody) <= 0 {
 					body, err := makeRequest(requestItem)
 					if err != nil {
@@ -68,11 +68,12 @@ func (r Requests) Execute() []string {
 					} else {
 						updateLock.Lock()
 						defer updateLock.Unlock()
-						c.Set(cKey, string(body))
+						cdb.Set(cKey, string(body))
 					}
 				}
 			} else {
-				c.Delete(cKey)
+				cdb.Delete(cKey)
+				//fmt.Println(cKey)
 				body, err := makeRequest(requestItem)
 				if err != nil {
 					errorLock.Lock()
@@ -82,7 +83,7 @@ func (r Requests) Execute() []string {
 				} else {
 					updateLock.Lock()
 					defer updateLock.Unlock()
-					c.Set(cKey, string(body))
+					cdb.Set(cKey, string(body))
 				}
 			}
 			<-semaphore
@@ -119,13 +120,15 @@ func makeRequest(r Request) ([]byte, error) {
 
 	defer res.Body.Close()
 	body, err = ioutil.ReadAll(res.Body)
+
+	//fmt.Println("the url: ", r.Url)
 	return body, err
 }
 
 func (r Request) GetResponse() []byte {
 	cKey := getCKey(r)
-	c := &cache.Cache{}
-	body := c.Get(cKey)
+	cdb := &cache.Cache{}
+	body := cdb.Get(cKey)
 	return []byte(body)
 }
 

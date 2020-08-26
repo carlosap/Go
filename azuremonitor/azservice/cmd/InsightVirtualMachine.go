@@ -42,8 +42,8 @@ func (r *ResourceUsageVirtualMachine) getVmUsage(resourceGroup string, resourceI
 		IsCache: false,
 	}
 
-	errors := request.Execute()
-	IfErrorsPrintThem(errors)
+	_ = request.Execute()
+	//IfErrorsPrintThem(errors)
 
 	body := request.GetResponse()
 	_ = json.Unmarshal(body, r)

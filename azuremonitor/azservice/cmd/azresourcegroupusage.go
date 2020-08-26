@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/Go/azuremonitor/azure/batch"
 	"github.com/Go/azuremonitor/azure/oauth2"
+	"github.com/Go/azuremonitor/common/csv"
+	"github.com/Go/azuremonitor/common/filesystem"
 	"github.com/Go/azuremonitor/common/httpclient"
 	"github.com/Go/azuremonitor/common/terminal"
 	"github.com/spf13/cobra"
@@ -59,11 +61,11 @@ func setResourceGroupUsageCommand() (*cobra.Command, error) {
 		rgl.ExecuteRequest(&rgl)
 
 		requests := r.getRequests(rgl)
-		errors := requests.Execute()
-		IfErrorsPrintThem(errors)
+		_= requests.Execute()
+		//IfErrorsPrintThem(errors)
 
 		if saveCsv {
-			RemoveFile(csvRguReportName)
+			filesystem.RemoveFile(csvRguReportName)
 			r.PrintHeader()
 		}
 
@@ -139,7 +141,7 @@ func (r ResourceGroupUsage) PrintHeader() {
 		var matrix [][]string
 		rec := []string{"ResourceID", "Resource Group", "Service Name", "Cost", "Resource Type", "Resource Location", "Consumption Type", "Meter", "CPU Utilization Avg", "Available Memory", "Logical Disk Latency", "Disk IOPs", "Disk Bytes/sec", "Network Sent Rate", "Network Received Rate"}
 		matrix = append(matrix, rec)
-		saveCSV(csvRguReportName, matrix)
+		csv.SaveMatrixToFile(csvRguReportName, matrix)
 	}
 }
 
@@ -255,7 +257,7 @@ func (r ResourceGroupUsage) writeCSV() {
 				}
 			}
 		}
-		saveCSV(csvRguReportName, matrix)
+		csv.SaveMatrixToFile(csvRguReportName, matrix)
 	}
 }
 

@@ -60,8 +60,8 @@ func setSubscriptionInfoCommand() (*cobra.Command, error) {
 			Header:  s.getHeader(),
 			IsCache: true,
 		}
-		errors := request.Execute()
-		IfErrorsPrintThem(errors)
+		_ = request.Execute()
+		//IfErrorsPrintThem(errors)
 
 		body := request.GetResponse()
 		_ = json.Unmarshal(body, s)

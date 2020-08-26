@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/Go/azuremonitor/common/filesystem"
 	"github.com/spf13/cobra"
 )
 
@@ -17,16 +18,16 @@ var cleanCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		dirName := "cache"
 		dbName := "spartan"
-		isSuccess := RemoveFile(dbName)
+		isSuccess := filesystem.RemoveFile(dbName)
 		if !isSuccess {
 			fmt.Println("failed to remove cache file")
 		} else {
 			fmt.Println("...done.")
 		}
 
-		isSuccess = IsDirectoryExist(dirName)
+		isSuccess = filesystem.IsDirectoryExist(dirName)
 		if isSuccess {
-			RemoveDirectory(dirName)
+			filesystem.RemoveDirectory(dirName)
 		}
 
 	},

@@ -23,7 +23,7 @@ type ResourceGroups struct {
 }
 
 type ResourceGroupList []string
-var resourceGroup ResourceGroupList
+var resourceGroupList ResourceGroupList
 
 var (
 	configuration    c.CmdConfig
@@ -111,9 +111,13 @@ func (rgl *ResourceGroupList) Print() {
 
 	fmt.Println("Resource Groups:")
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
-	for i := 0; i < len(resourceGroup); i++ {
-		fmt.Println(resourceGroup[i])
+	for i := 0; i < len(resourceGroupList); i++ {
+		fmt.Println(resourceGroupList[i])
 	}
+}
+
+func (rgl *ResourceGroupList) ToList() []string {
+	return resourceGroupList
 }
 
 func setResourceGroup(rg ResourceGroups) {
@@ -125,7 +129,7 @@ func setResourceGroup(rg ResourceGroups) {
 				row := rp.Content.Data.Rows[x]
 				if len(row) > 0 {
 					str := fmt.Sprintf("%v", row[0])
-					resourceGroup = append(resourceGroup, str)
+					resourceGroupList = append(resourceGroupList, str)
 				}
 			}
 		}
