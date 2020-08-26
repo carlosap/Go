@@ -4,48 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Go/azuremonitor/common/httpclient"
+	"github.com/Go/azuremonitor/common/terminal"
 	"github.com/spf13/cobra"
 	"os"
 	"time"
 )
 
-type RecommendationList struct {
-	Value []RecommendationValue `json:"value"`
-}
-
-type RecommendationValue struct {
-	Properties Properties `json:"properties,omitempty"`
-	ID         string     `json:"id"`
-	Type       string     `json:"type"`
-	Name       string     `json:"name"`
-}
-type SupportedValues struct {
-	RecommendationCategory string       `json:"recommendationCategory"`
-	RecommendationImpact   string       `json:"recommendationImpact"`
-	SupportedResourceType  string       `json:"supportedResourceType"`
-	ID                     string       `json:"id"`
-	DisplayName            string       `json:"displayName"`
-	Properties             []Properties `json:"properties"`
-}
-type Properties struct {
-	Name                string            `json:"name"`
-	Value               string            `json:"value"`
-	DisplayName         string            `json:"displayName"`
-	DependsOn           []string          `json:"dependsOn"`
-	ApplicableScenarios []string          `json:"applicableScenarios"`
-	SupportedValues     []SupportedValues `json:"supportedValues"`
-
-	//adding additional fields to support recommendaitons by subscription
-	Category             string             `json:"category"`
-	Impact               string             `json:"impact"`
-	ImpactedField        string             `json:"impactedField"`
-	ImpactedValue        string             `json:"impactedValue"`
-	LastUpdated          time.Time          `json:"lastUpdated"`
-	RecommendationTypeID string             `json:"recommendationTypeId"`
-	ShortDescription     ShortDescription   `json:"shortDescription"`
-	ExtendedProperties   ExtendedProperties `json:"extendedProperties"`
-	ResourceMetadata     ResourceMetadata   `json:"resourceMetadata"`
-}
 
 func init() {
 
@@ -76,7 +40,7 @@ func setRecommendationListCommand() (*cobra.Command, error) {
 			return err
 		}
 
-		clearTerminal()
+		terminal.Clear()
 		r.Print()
 		return nil
 	}

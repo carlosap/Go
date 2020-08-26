@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/Go/azuremonitor/common/terminal"
 	"github.com/spf13/cobra"
 	"gopkg.in/robfig/cron.v3"
 	"os"
@@ -35,7 +36,7 @@ func setScheduleCronCommand() (*cobra.Command, error) {
 		c.AddFunc("@every 0h0m15s", func() {
 			ctr++
 			delta := time.Now().Sub(startTime)
-			clearTerminal()
+			terminal.Clear()
 			fmt.Printf("[%d] auto discovery running since: [%vhr]:[%vmin]:[%vsec]\n", ctr, delta.Hours(), delta.Minutes(), delta.Seconds())
 
 		})

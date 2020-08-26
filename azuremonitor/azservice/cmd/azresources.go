@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Go/azuremonitor/azure/oauth2"
 	"github.com/Go/azuremonitor/common/httpclient"
+	"github.com/Go/azuremonitor/common/terminal"
 	"github.com/spf13/cobra"
 	"net/http"
 	"os"
@@ -66,7 +67,7 @@ func setResourcesCommand() (*cobra.Command, error) {
 	cmd.RunE = func(*cobra.Command, []string) error {
 		r := &Resource{}
 
-		clearTerminal()
+		terminal.Clear()
 		request := httpclient.Request{
 			Name:    "resources",
 			Url:     r.getUrl(),

@@ -34,8 +34,8 @@ func setAccessTokenCommand() (*cobra.Command, error) {
 
 	cmd.RunE = func(*cobra.Command, []string) error {
 		terminal.Clear()
-		at := &oauth2.AccessToken{}
-		at.ExecuteRequest(at)
+		at := oauth2.AccessToken{}
+		at.ExecuteRequest(&at)
 		at.Print()
 		return nil
 	}

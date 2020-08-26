@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Go/azuremonitor/azure/oauth2"
 	"github.com/Go/azuremonitor/common/httpclient"
+	"github.com/Go/azuremonitor/common/terminal"
 	"github.com/spf13/cobra"
 	"net/http"
 	"os"
@@ -69,7 +70,7 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 			return err
 		}
 
-		clearTerminal()
+		terminal.Clear()
 		requests := r.getRequests(rgList)
 		errors := requests.Execute()
 		IfErrorsPrintThem(errors)

@@ -12,6 +12,11 @@ import (
 var (
 	configuration    c.CmdConfig
 )
+
+func init(){
+	configuration, _ = c.GetCmdConfig()
+}
+
 type AccessToken struct {
 	TokenType    string `json:"token_type"`
 	ExpiresIn    int    `json:"expires_in"`
@@ -27,7 +32,7 @@ func (at *AccessToken) ExecuteRequest(r httpclient.IRequest) {
 		r.GetMethod(),
 		r.GetPayload(),
 		r.GetHeader(),
-		false,
+		true,
 	}
 	_ = request.Execute()
 	body := request.GetResponse()
