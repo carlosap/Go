@@ -9,9 +9,10 @@ import (
 	"os"
 )
 
+
 func init() {
 
-	r, err := setRecommendationCommand()
+	r, err := setRecommendationListCommand()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -19,24 +20,25 @@ func init() {
 	rootCmd.AddCommand(r)
 }
 
-func setRecommendationCommand() (*cobra.Command, error) {
+func setRecommendationListCommand() (*cobra.Command, error) {
 
 	configuration, _ = c.GetCmdConfig()
 	description := fmt.Sprintf("%s\n%s\n%s",
-		configuration.Recommendation.DescriptionLine1,
-		configuration.Recommendation.DescriptionLine2,
-		configuration.Recommendation.DescriptionLine3)
+		configuration.RecommendationList.DescriptionLine1,
+		configuration.RecommendationList.DescriptionLine2,
+		configuration.RecommendationList.DescriptionLine3)
 
+	fmt.Println(description)
 	cmd := &cobra.Command{
-		Use:   configuration.Recommendation.Command,
-		Short: configuration.Recommendation.CommandComments,
+		Use:   configuration.RecommendationList.Command,
+		Short: configuration.RecommendationList.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
 		terminal.Clear()
-		recommendations := advisor.Recommendations{}
-		recommendations.ExecuteRequest(&recommendations)
-		recommendations.Print()
+		rlist := advisor.RecommendationList{}
+		rlist.ExecuteRequest(&rlist)
+		rlist.Print()
 		return nil
 	}
 	return cmd, nil

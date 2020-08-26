@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"github.com/Go/azuremonitor/azure/oauth2"
 	"github.com/Go/azuremonitor/common/httpclient"
-
 	c "github.com/Go/azuremonitor/config"
-
 	"net/http"
 	"strings"
 	"time"
@@ -35,7 +33,7 @@ type ExtendedProperties struct {
 type ResourceMetadata struct {
 	ResourceID string `json:"resourceId"`
 }
-type RecommendationList struct {
+type Recommendations struct {
 	Value []RecommendationValue `json:"value"`
 }
 
@@ -81,7 +79,7 @@ func init(){
 	configuration, _ = c.GetCmdConfig()
 }
 
-func (rlist *RecommendationList) ExecuteRequest(r httpclient.IRequest) {
+func (rlist *Recommendations) ExecuteRequest(r httpclient.IRequest) {
 
 	request := httpclient.Request{
 		"recommendations",
@@ -99,25 +97,19 @@ func (rlist *RecommendationList) ExecuteRequest(r httpclient.IRequest) {
 	}
 }
 
-func (rlist *RecommendationList) GetUrl() string {
+func (rlist *Recommendations) GetUrl() string {
 
 	return strings.Replace(configuration.Recommendation.URL,
 		"{{subscriptionID}}",
 		configuration.AccessToken.SubscriptionID, 1)
 }
-func (rlist *RecommendationList) GetMethod() string {
-	return httpclient.Methods.POST
+func (rlist *Recommendations) GetMethod() string {
+	return httpclient.Methods.GET
 }
-func (rlist *RecommendationList) GetPayload() string {
-	strPayload := fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&scope=%s",
-		configuration.AccessToken.GrantType,
-		configuration.AccessToken.ClientID,
-		configuration.AccessToken.ClientSecret,
-		configuration.AccessToken.Scope)
-
-	return strPayload
+func (rlist *Recommendations) GetPayload() string {
+	return ""
 }
-func (rlist *RecommendationList) GetHeader() http.Header {
+func (rlist *Recommendations) GetHeader() http.Header {
 
 	at := oauth2.AccessToken{}
 	at.ExecuteRequest(&at)
@@ -128,7 +120,7 @@ func (rlist *RecommendationList) GetHeader() http.Header {
 	header.Add("Content-Type", "application/json")
 	return header
 }
-func (rlist *RecommendationList) Print() {
+func (rlist *Recommendations) Print() {
 
 	fmt.Println("Subscription Recommendations:")
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")

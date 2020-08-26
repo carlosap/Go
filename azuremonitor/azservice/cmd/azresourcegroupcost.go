@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 )
 
 type ResourceGroupCost struct {
@@ -32,15 +31,6 @@ type ResourceGroupCost struct {
 }
 
 func init() {
-
-	now := time.Now()
-	month := now.AddDate(0, 0, -29)
-	rootCmd.PersistentFlags().StringVar(&startDate, "from", month.Format(layoutISO), "start date of report (i.e. YYYY-MM-DD)")
-	rootCmd.PersistentFlags().StringVar(&endDate, "to", now.Format(layoutISO), "end date of report (i.e. YYYY-MM-DD)")
-	rootCmd.PersistentFlags().BoolVar(&saveDb, "db", false, "[=true]saves records to Postgres db")
-	rootCmd.PersistentFlags().BoolVar(&saveCsv, "csv", false, "[=true]saves records into a csv output file")
-	rootCmd.PersistentFlags().BoolVar(&ignoreZeroCost, "izcost", false, "[=true] ignores resources with zero cost")
-
 	r, err := setResourceGroupCostCommand()
 	if err != nil {
 		fmt.Println(err)

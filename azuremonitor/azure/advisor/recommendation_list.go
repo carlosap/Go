@@ -1,77 +1,70 @@
-package cmd
+package advisor
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Go/azuremonitor/azure/oauth2"
 	"github.com/Go/azuremonitor/common/httpclient"
-	"github.com/Go/azuremonitor/common/terminal"
-	"github.com/spf13/cobra"
-	"os"
-	"time"
+	"net/http"
 )
 
 
-func init() {
 
-	r, err := setRecommendationListCommand()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	rootCmd.AddCommand(r)
+type RecommendationList struct {
+	Value []RecommendationValue `json:"value"`
 }
 
-func setRecommendationListCommand() (*cobra.Command, error) {
+func (rlist *RecommendationList) ExecuteRequest(r httpclient.IRequest) {
 
-	description := fmt.Sprintf("%s\n%s\n%s",
-		configuration.RecommendationList.DescriptionLine1,
-		configuration.RecommendationList.DescriptionLine2,
-		configuration.RecommendationList.DescriptionLine3)
-
-	cmd := &cobra.Command{
-		Use:   configuration.RecommendationList.Command,
-		Short: configuration.RecommendationList.CommandComments,
-		Long:  description}
-
-	cmd.RunE = func(*cobra.Command, []string) error {
-		r := &RecommendationList{}
-		r, err := r.getAzureRecommendationList()
-		if err != nil {
-			return err
-		}
-
-		terminal.Clear()
-		r.Print()
-		return nil
-	}
-	return cmd, nil
-}
-
-func (r *RecommendationList) getAzureRecommendationList() (*RecommendationList, error) {
 	request := httpclient.Request{
-		"RecommendationList_RL",
-		configuration.RecommendationList.URL,
-		httpclient.Methods.GET,
-		"",
-		r.getHeader(),
-		false,
+		"recommendation_list",
+		r.GetUrl(),
+		r.GetMethod(),
+		r.GetPayload(),
+		r.GetHeader(),
+		true,
 	}
 	_ = request.Execute()
 	body := request.GetResponse()
-	err := json.Unmarshal(body, r)
+	err := json.Unmarshal(body, rlist)
 	if err != nil {
-		fmt.Println("recommendation list unmarshal body response: ", err)
+		fmt.Println("unmarshal body response: ", err)
 	}
-	return r, nil
 }
 
-func (r *RecommendationList) Print() {
+func (rlist *RecommendationList) GetUrl() string {
+
+	return configuration.RecommendationList.URL
+}
+
+func (rlist *RecommendationList) GetMethod() string {
+	return httpclient.Methods.GET
+}
+
+func (rlist *RecommendationList) GetPayload() string {
+	return ""
+}
+
+func (rlist *RecommendationList) GetHeader() http.Header {
+
+	at := oauth2.AccessToken{}
+	at.ExecuteRequest(&at)
+	token := fmt.Sprintf("Bearer %s", at.AccessToken)
+	var header = http.Header{}
+	header.Add("Authorization", token)
+	header.Add("Accept", "application/json")
+	header.Add("Content-Type", "application/json")
+	return header
+}
+
+func (rlist *RecommendationList) Print() {
+
 	fmt.Println("Azure Recommendation List:")
 	fmt.Println("----------------------------------------")
 
-	for i := 0; i < len(r.Value); i++ {
+	for i := 0; i < len(rlist.Value); i++ {
 
-		recommendaiton := r.Value[i]
+		recommendaiton := rlist.Value[i]
 		switch recommendaiton.Properties.DisplayName {
 		case "Recommendation Type":
 			printRecommendationTypes(recommendaiton)
@@ -90,7 +83,6 @@ func (r *RecommendationList) Print() {
 		default:
 			fmt.Printf("default: a is %s\n", recommendaiton.Properties.DisplayName)
 		}
-
 	}
 }
 
