@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/Go/azuremonitor/azure/costmanagement"
+	"github.com/Go/azuremonitor/common/filesystem"
 	"github.com/Go/azuremonitor/common/terminal"
 	c "github.com/Go/azuremonitor/config"
 	"github.com/spf13/cobra"
@@ -36,10 +37,14 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 		costmanagement.StartDate = startDate
 		costmanagement.EndDate = endDate
 		costmanagement.IgnoreZeroCost = ignoreZeroCost
-		costmanagement.SaveCsv = saveCsv
 		rgc := costmanagement.ResourceGroupCost{}
 		rgc.ExecuteRequest(&rgc)
 		rgc.Print()
+		if saveCsv {
+			filesystem.RemoveFile(csvRgcReportName)
+			rgc.WriteCSV(csvRgcReportName)
+		}
+
 		return nil
 	}
 	return cmd, nil

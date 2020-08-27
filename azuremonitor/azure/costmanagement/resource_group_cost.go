@@ -3,11 +3,10 @@ package costmanagement
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Go/azuremonitor/azure"
 	"github.com/Go/azuremonitor/azure/batch"
 	"github.com/Go/azuremonitor/azure/oauth2"
 	"github.com/Go/azuremonitor/common/csv"
-	"github.com/Go/azuremonitor/common/errors"
-	"github.com/Go/azuremonitor/common/filesystem"
 	"github.com/Go/azuremonitor/common/httpclient"
 	c "github.com/Go/azuremonitor/config"
 	"net/http"
@@ -37,59 +36,22 @@ var (
 	configuration    c.CmdConfig
 	StartDate        string
 	EndDate          string
-	SaveCsv bool
 	IgnoreZeroCost bool
-	csvRgcReportName = "resource_group_cost.csv"
+	Resources = azure.Resources{}
 )
+
+
 
 func init(){
 	configuration, _ = c.GetCmdConfig()
 }
-
-func (rgc *ResourceGroupCost) getRequests() httpclient.Requests {
-	requests := httpclient.Requests{}
-	rgl := batch.ResourceGroupList{}
-	rgl.ExecuteRequest(&rgl)
-
-	for _, item := range rgl.ToList() {
-		rgc.Name = item
-		rgc.ResourceGroupName = item
-		request := httpclient.Request{}
-		request.Name = item
-		request.Header = rgc.GetHeader()
-		request.Payload = rgc.GetPayload()
-		request.Url = rgc.GetUrl()
-		request.Method = rgc.GetMethod()
-		request.IsCache = true
-		requests = append(requests, request)
-	}
-	return requests
-}
-
-
 func (rgc *ResourceGroupCost) ExecuteRequest(r httpclient.IRequest) {
 
 	requests := rgc.getRequests()
-	errorItems := requests.Execute()
-	errors.IfErrorsPrintThem(errorItems)
+	requests.Execute()
 
-	if SaveCsv {
-		filesystem.RemoveFile(csvRgcReportName)
-		rgc.PrintHeader()
-	}
+	rgc.parseRequests(requests)
 
-	for _, item := range requests {
-		if len(item.GetResponse()) > 0 {
-			bData := item.GetResponse()
-			//fmt.Printf("%s\n %s\n\n", item.Name, string(bData))
-			if len(bData) > 0 {
-				_ = json.Unmarshal(bData, rgc)
-				rgc.ResourceGroupName = item.Name
-				rgc.Print()
-				rgc.writeCSV()
-			}
-		}
-	}
 }
 
 func (rgc *ResourceGroupCost) GetUrl() string {
@@ -135,7 +97,74 @@ func (rgc *ResourceGroupCost) GetHeader() http.Header {
 	return header
 }
 func (rgc *ResourceGroupCost) Print() {
-	fmt.Printf("%s\n", rgc.ResourceGroupName)
+	if len(Resources) > 0 {
+		fmt.Println("Consumption Report:")
+		fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
+		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Consumption Type,Meter,Cost")
+		fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
+		for _, item := range Resources {
+			fmt.Printf("%s,%s,%s,%s,%s,%s,$%s\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType, item.Location,item.Meter, item.Cost)
+		}
+	} else {
+		fmt.Printf("-")
+	}
+}
+func (rgc *ResourceGroupCost) WriteCSV(filepath string) {
+
+	if len(Resources) > 0 {
+		var matrix [][]string
+		rec := []string{"Resource Group", "ResourceID", "Service Name", "Resource Type", "Resource Location", "Consumption Type", "Meter", "Cost"}
+		matrix = append(matrix, rec)
+		for _, item := range Resources {
+			fmt.Printf("%s,%s,%s,%s,%s,%s,$%s\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType, item.Location,item.Meter, item.Cost)
+			var rec []string
+			rec = append(rec, item.ResourceGroup)
+			rec = append(rec, item.ResourceID)
+			rec = append(rec, item.Service)
+			rec = append(rec, item.ServiceType)
+			rec = append(rec, item.Location)
+			rec = append(rec, item.ChargeType)
+			rec = append(rec, item.Meter)
+			rec = append(rec, item.Cost)
+			matrix = append(matrix, rec)
+		}
+		csv.SaveMatrixToFile(filepath, matrix)
+	}
+}
+func (rgc *ResourceGroupCost) getRequests() httpclient.Requests {
+	requests := httpclient.Requests{}
+	rgl := batch.ResourceGroupList{}
+	rgl.ExecuteRequest(&rgl)
+
+	for _, item := range rgl.ToList() {
+		rgc.Name = item
+		rgc.ResourceGroupName = item
+		request := httpclient.Request{}
+		request.Name = item
+		request.Header = rgc.GetHeader()
+		request.Payload = rgc.GetPayload()
+		request.Url = rgc.GetUrl()
+		request.Method = rgc.GetMethod()
+		request.IsCache = true
+		requests = append(requests, request)
+	}
+	return requests
+}
+func (rgc *ResourceGroupCost) parseRequests(requests httpclient.Requests) {
+	for _, item := range requests {
+		if len(item.GetResponse()) > 0 {
+			bData := item.GetResponse()
+			//fmt.Printf("%s\n %s\n\n", item.Name, string(bData))
+			if len(bData) > 0 {
+				_ = json.Unmarshal(bData, rgc)
+				rgc.ResourceGroupName = item.Name
+				rgc.addResource()
+			}
+		}
+	}
+}
+func (rgc *ResourceGroupCost) addResource() {
+
 	for i := 0; i < len(rgc.Properties.Rows); i++ {
 		row := rgc.Properties.Rows[i]
 		if len(row) > 0 {
@@ -169,72 +198,19 @@ func (rgc *ResourceGroupCost) Print() {
 				resourceId = pArray[len(pArray)-1]
 			}
 
-			fmt.Printf("\t%s,%s,%s,%s,%s,%s,$%s\n", resourceId, serviceName, resourceType, resourceLocation, chargeType, meter, costUSD)
-		}
-	}
-}
-func (rgc *ResourceGroupCost) PrintHeader() {
-	fmt.Println("Consumption Report:")
-	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
-	fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Consumption Type,Meter,Cost")
-	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
-	if SaveCsv {
-		var matrix [][]string
-		rec := []string{"Resource Group", "ResourceID", "Service Name", "Resource Type", "Resource Location", "Consumption Type", "Meter", "Cost"}
-		matrix = append(matrix, rec)
-		csv.SaveMatrixToFile(csvRgcReportName, matrix)
-	}
-}
-func (rgc ResourceGroupCost) writeCSV() {
-
-	if SaveCsv {
-		var matrix [][]string
-		for i := 0; i < len(rgc.Properties.Rows); i++ {
-			row := rgc.Properties.Rows[i]
-			if len(row) > 0 {
-				costUSD := fmt.Sprintf("%v", row[1])
-				resourceId := fmt.Sprintf("%v", row[2])
-				resourceType := fmt.Sprintf("%v", row[3])
-				resourceLocation := fmt.Sprintf("%v", row[4])
-				chargeType := fmt.Sprintf("%v", row[5])
-				serviceName := fmt.Sprintf("%v", row[8])
-				meter := fmt.Sprintf("%v", row[9])
-
-				//format cost
-				if len(costUSD) > 5 {
-					costUSD = costUSD[0:5]
-
-				}
-
-				if IgnoreZeroCost {
-					if costUSD == "0" {
-						continue
-					}
-				}
-
-				//remove path
-				if strings.Contains(resourceType, "/") {
-					pArray := strings.Split(resourceType, "/")
-					resourceType = pArray[len(pArray)-1]
-				}
-
-				if strings.Contains(resourceId, "/") {
-					pArray := strings.Split(resourceId, "/")
-					resourceId = pArray[len(pArray)-1]
-				}
-
-				var rec []string
-				rec = append(rec, rgc.ResourceGroupName)
-				rec = append(rec, resourceId)
-				rec = append(rec, serviceName)
-				rec = append(rec, resourceType)
-				rec = append(rec, resourceLocation)
-				rec = append(rec, chargeType)
-				rec = append(rec, meter)
-				rec = append(rec, costUSD)
-				matrix = append(matrix, rec)
+			resource := azure.Resource{
+				ResourceGroup: rgc.ResourceGroupName,
+				ResourceID: resourceId,
+				Service: serviceName,
+				ServiceType: resourceType,
+				Location: resourceLocation,
+				ChargeType: chargeType,
+				Meter: meter,
+				Cost: costUSD,
 			}
+			Resources = append(Resources, resource)
 		}
-		csv.SaveMatrixToFile(csvRgcReportName, matrix)
 	}
 }
+
+

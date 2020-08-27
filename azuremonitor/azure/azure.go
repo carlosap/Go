@@ -1,5 +1,20 @@
 package azure
 
+type Resource struct {
+	ResourceGroup string `json:"resourcegroup"`
+	ResourceID    string `json:"resourceid"`
+	Service       string `json:"service"`
+	ServiceType   string `json:"serviceType"`
+	Location      string `json:"location"`
+	ChargeType    string `json:"chargetype"`
+	Meter         string `json:"meter"`
+	Cost          string `json:"cost"`
+}
+
+type Resources []Resource
+
+
+
 var LocationNames = "location == 'eastus','East US'," +
 	"location == 'eastus2','East US 2',"+
 	"location == 'southcentralus','South Central US'," +

@@ -24,6 +24,7 @@ type AccessToken struct {
 	AccessToken  string `json:"access_token"`
 }
 
+
 func (at *AccessToken) ExecuteRequest(r httpclient.IRequest) {
 
 	request := httpclient.Request{
@@ -40,6 +41,7 @@ func (at *AccessToken) ExecuteRequest(r httpclient.IRequest) {
 	if err != nil {
 		fmt.Println("unmarshal body response: ", err)
 	}
+
 }
 func (at *AccessToken) GetUrl() string {
 
