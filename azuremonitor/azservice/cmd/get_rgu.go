@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/Go/azuremonitor/azure/costmanagement"
-	"github.com/Go/azuremonitor/common/filesystem"
 	"github.com/Go/azuremonitor/common/terminal"
 	c "github.com/Go/azuremonitor/config"
 	"github.com/spf13/cobra"
@@ -11,7 +10,7 @@ import (
 )
 
 func init() {
-	r, err := setResourceGroupCostCommand()
+	r, err := setResourceGroupUsageCommand()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -19,17 +18,17 @@ func init() {
 	rootCmd.AddCommand(r)
 }
 
-func setResourceGroupCostCommand() (*cobra.Command, error) {
+func setResourceGroupUsageCommand() (*cobra.Command, error) {
 
 	configuration, _ = c.GetCmdConfig()
 	description := fmt.Sprintf("%s\n%s\n%s",
-		configuration.ResourceGroupCost.DescriptionLine1,
-		configuration.ResourceGroupCost.DescriptionLine2,
-		configuration.ResourceGroupCost.DescriptionLine3)
+		configuration.ResourceGroupUsage.DescriptionLine1,
+		configuration.ResourceGroupUsage.DescriptionLine2,
+		configuration.ResourceGroupUsage.DescriptionLine3)
 
 	cmd := &cobra.Command{
-		Use:   configuration.ResourceGroupCost.Command,
-		Short: configuration.ResourceGroupCost.CommandComments,
+		Use:   configuration.ResourceGroupUsage.Command,
+		Short: configuration.ResourceGroupUsage.CommandComments,
 		Long:  description}
 
 	cmd.RunE = func(*cobra.Command, []string) error {
@@ -37,14 +36,9 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 		costmanagement.StartDate = startDate
 		costmanagement.EndDate = endDate
 		costmanagement.IgnoreZeroCost = ignoreZeroCost
-		rgc := costmanagement.ResourceGroupCost{}
-		rgc.ExecuteRequest(&rgc)
-		rgc.Print()
-		if saveCsv {
-			filesystem.RemoveFile(csvRgcReportName)
-			rgc.WriteCSV(csvRgcReportName)
-		}
-
+		vm := costmanagement.VirtualMachine{}
+		vm.ExecuteRequest(&vm)
+		
 		return nil
 	}
 	return cmd, nil

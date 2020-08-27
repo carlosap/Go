@@ -12,33 +12,8 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-
-	"strconv"
-	"unicode/utf8"
 )
 
-
-
-func stringToFloat(s string) (float64, error) {
-	f, err := strconv.ParseFloat(s, 64)
-	if err == nil {
-		return f, nil
-	}
-	r, size := utf8.DecodeLastRuneInString(s)
-	if r == utf8.RuneError {
-		return 0, err
-	}
-	symbol := s[len(s)-size : len(s)]
-	factor, ok := siFactors[symbol]
-	if !ok {
-		return 0, err
-	}
-	f, e := strconv.ParseFloat(s[:len(s)-len(symbol)], 64)
-	if e != nil {
-		return 0, err
-	}
-	return f * factor, nil
-}
 
 func clearCache(fileName string) {
 	path := filepath.Join("cache", fileName)
@@ -129,6 +104,3 @@ func getStructNameByInterface(v interface{}) string {
 	typ := rv.Type()
 	return typ.Name()
 }
-
-
-

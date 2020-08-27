@@ -53,7 +53,6 @@ func (rgc *ResourceGroupCost) ExecuteRequest(r httpclient.IRequest) {
 	rgc.parseRequests(requests)
 
 }
-
 func (rgc *ResourceGroupCost) GetUrl() string {
 
 	url := strings.Replace(configuration.ResourceGroupCost.URL, "{{subscriptionID}}", configuration.AccessToken.SubscriptionID, 1)
@@ -198,6 +197,7 @@ func (rgc *ResourceGroupCost) addResource() {
 				resourceId = pArray[len(pArray)-1]
 			}
 
+
 			resource := azure.Resource{
 				ResourceGroup: rgc.ResourceGroupName,
 				ResourceID: resourceId,
@@ -211,6 +211,37 @@ func (rgc *ResourceGroupCost) addResource() {
 			Resources = append(Resources, resource)
 		}
 	}
+
+	//Additional requests
+	//if serviceName == "virtual machines" && resourceType == "virtualmachines" && len(costUSD) > 0 && chargeType == "usage" {
+	//
+	//	var vm = &ResourceUsageVirtualMachine{}
+	//	vm, err := vm.getVmUsage(resourceGroupName, resourceId)
+	//	if err != nil {
+	//		fmt.Printf("Error: failed to retrieve vm resouce usage %v\n", err)
+	//	}
+	//
+	//	fmt.Printf("%s,%s,%s,$%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", resourceId, resourceGroupName, serviceName, costUSD, resourceType, resourceLocation, chargeType, meter, vm.CpuUtilization, vm.MemoryAvailable, vm.DiskLatency, vm.DiskIOPs, vm.DiskBytes, vm.NetworkSentRate, vm.NetworkSentRate)
+	//
+	//}
+
+	//if len(Resources) > 0 {
+	//	vms := azure.VirtualMachines{}
+	//	for _, resource := range Resources {
+	//		if resource.Service == "virtual machines" && resource.ServiceType == "virtualmachines" &&
+	//			len(resource.Cost) > 0 && resource.ChargeType == "usage" {
+	//			vm := azure.VirtualMachine{
+	//				SubscriptionID: resource.SubscriptionID,
+	//				ResourceGroup: resource.ResourceGroup,
+	//				ResourceID: resource.ResourceID,
+	//
+	//			}
+	//
+	//		}
+	//	}
+	//
+	//
+	//}
 }
 
 
