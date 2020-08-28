@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/Go/azuremonitor/azure/costmanagement"
+	"github.com/Go/azuremonitor/common/filesystem"
 	"github.com/Go/azuremonitor/common/terminal"
 	c "github.com/Go/azuremonitor/config"
 	"github.com/spf13/cobra"
@@ -39,7 +40,11 @@ func setResourceGroupUsageCommand() (*cobra.Command, error) {
 		vm := costmanagement.VirtualMachine{}
 		vm.ExecuteRequest(&vm)
 		vm.Print()
-
+		if saveCsv {
+			filesystem.RemoveFile(csvRguReportName)
+			vm.WriteCSV(csvRguReportName)
+			fmt.Printf("Done. report was generated - %s\n", csvRguReportName)
+		}
 		return nil
 	}
 	return cmd, nil

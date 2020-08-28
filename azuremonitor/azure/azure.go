@@ -7,6 +7,7 @@ type Resource struct {
 	Service       string `json:"service"`
 	ServiceType   string `json:"service_type"`
 	Location      string `json:"location"`
+	LocationPrefix string `json:"location_prefix"`
 	ChargeType    string `json:"charge_type"`
 	Meter         string `json:"meter"`
 	Cost          string `json:"cost"`
@@ -17,9 +18,10 @@ type Resources []Resource
 
 
 //TODO:::this may require some location
+//example: "-eus"
 var QueryUrl = "https://management.azure.com/subscriptions/" +
-	"{{subscriptionid}}/resourcegroups/defaultresourcegroup-eus/providers/microsoft.operationalinsights/workspaces/" +
-	"defaultworkspace-{{subscriptionid}}-eus/query?api-version=2017-10-01"
+	"{{subscriptionid}}/resourcegroups/defaultresourcegroup-{{locationprefix}}/providers/microsoft.operationalinsights/workspaces/" +
+	"defaultworkspace-{{subscriptionid}}-{{locationprefix}}/query?api-version=2017-10-01"
 
 var VmUsagePayload = "{\"query\": " +
 	"\"let startDateTime = datetime('{{startdate}}T08:00:00.000Z');" +
@@ -129,3 +131,6 @@ var LocationNames = "location == 'eastus','East US'," +
 //called DefaultResourceGroup-XXX (the XXX is related to your region) and
 //within that same resource group you have a DefaultWorkspace-<SubscriptionID>-XXX,
 //there is a logical explanation, and it is associated with Azure Security Center.
+
+//====================================Action Items===========================================
+// - Need to determine geo per vm request to optian usage. there may be an easier way on doing that.

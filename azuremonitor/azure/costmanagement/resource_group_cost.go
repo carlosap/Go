@@ -98,10 +98,10 @@ func (rgc *ResourceGroupCost) Print() {
 	if len(Resources) > 0 {
 		fmt.Println("Consumption Report:")
 		fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
-		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Consumption Type,Meter,Cost")
+		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Location Prefix,Consumption Type,Meter,Cost")
 		fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
 		for _, item := range Resources {
-			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,$%s\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType, item.Location,item.ChargeType, item.Meter, item.Cost)
+			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%s\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType, item.Location,item.LocationPrefix,item.ChargeType, item.Meter, item.Cost)
 		}
 	} else {
 		fmt.Printf("-")
@@ -111,16 +111,17 @@ func (rgc *ResourceGroupCost) WriteCSV(filepath string) {
 
 	if len(Resources) > 0 {
 		var matrix [][]string
-		rec := []string{"Resource Group", "ResourceID", "Service Name", "Resource Type", "Resource Location", "Consumption Type", "Meter", "Cost"}
+		rec := []string{"Resource Group", "ResourceID", "Service Name", "Resource Type", "Resource Location","Location Prefix", "Consumption Type", "Meter", "Cost"}
 		matrix = append(matrix, rec)
 		for _, item := range Resources {
-			fmt.Printf("%s,%s,%s,%s,%s,%s,$%s\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType, item.Location,item.Meter, item.Cost)
+			//fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%s\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType,item.Location,item.LocationPrefix, item.ChargeType,item.Meter, item.Cost)
 			var rec []string
 			rec = append(rec, item.ResourceGroup)
 			rec = append(rec, item.ResourceID)
 			rec = append(rec, item.Service)
 			rec = append(rec, item.ServiceType)
 			rec = append(rec, item.Location)
+			rec = append(rec, item.LocationPrefix)
 			rec = append(rec, item.ChargeType)
 			rec = append(rec, item.Meter)
 			rec = append(rec, item.Cost)
@@ -197,6 +198,17 @@ func (rgc *ResourceGroupCost) addResource() {
 				resourceId = pArray[len(pArray)-1]
 			}
 
+			//temp: need to pulls this from a map
+			var lprefix string
+			switch resourceLocation {
+			case "us east":
+				lprefix = "eus"
+			case "us west":
+				lprefix = "westus"
+				//lprefix = "wus"
+			default:
+				lprefix = ""
+			}
 
 			resource := azure.Resource{
 				ResourceGroup: rgc.ResourceGroupName,
@@ -204,6 +216,7 @@ func (rgc *ResourceGroupCost) addResource() {
 				Service: serviceName,
 				ServiceType: resourceType,
 				Location: resourceLocation,
+				LocationPrefix: lprefix,
 				ChargeType: chargeType,
 				Meter: meter,
 				Cost: costUSD,

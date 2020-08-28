@@ -30,7 +30,7 @@ func RemoveFile(path string) bool {
 	err := os.Remove(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			fmt.Printf("file doesn't exist\n")
+			//fmt.Printf("file doesn't exist\n")
 		} else {
 			_, _ = fmt.Fprintf(os.Stderr, "--> %s\n", err)
 		}

@@ -6,6 +6,7 @@ import (
 	"github.com/Go/azuremonitor/azure"
 	"github.com/Go/azuremonitor/azure/oauth2"
 	"github.com/Go/azuremonitor/common/convert"
+	"github.com/Go/azuremonitor/common/csv"
 	"github.com/Go/azuremonitor/common/httpclient"
 	"net/http"
 	"strings"
@@ -56,6 +57,8 @@ func (vm *VirtualMachine) ExecuteRequest(r httpclient.IRequest) {
 func (vm *VirtualMachine) GetUrl() string {
 	url := azure.QueryUrl
 	url = strings.ReplaceAll(url, "{{subscriptionid}}", configuration.AccessToken.SubscriptionID)
+	url = strings.ReplaceAll(url, "{{locationprefix}}", vm.Resource.LocationPrefix)
+	//fmt.Printf("the name: %s url is : %s\n", vm.Resource.ResourceID, url)
 	return url
 }
 func (vm *VirtualMachine) GetMethod() string {
@@ -85,11 +88,11 @@ func (vm *VirtualMachine) Print() {
 	if len(Virtual_Machines) > 0 {
 		fmt.Printf("Usage Report:\n")
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Consumption Type,Meter,Cost,CPU Utilization Avg,Available Memory,Logical Disk Latency,Disk IOPs,Disk Bytes/sec,Network Sent Rate, Network Received Rate")
+		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Location Prefix,Consumption Type,Meter,Cost,CPU Utilization Avg,Available Memory,Logical Disk Latency,Disk IOPs,Disk Bytes/sec,Network Sent Rate, Network Received Rate")
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 		for _, item := range Virtual_Machines {
-			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,$%s,%s,%s,%s,%s,%s,%s,%s\n",item.Resource.ResourceGroup, item.Resource.ResourceID, item.Resource.Service,
-				item.Resource.ServiceType, item.Resource.Location, item.Resource.ChargeType, item.Resource.Meter,
+			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%s,%s,%s,%s,%s,%s,%s,%s\n",item.Resource.ResourceGroup, item.Resource.ResourceID, item.Resource.Service,
+				item.Resource.ServiceType, item.Resource.Location,item.Resource.LocationPrefix, item.Resource.ChargeType, item.Resource.Meter,
 				item.Resource.Cost, item.CpuUtilization, item.MemoryAvailable,item.DiskLatency, item.DiskIOPs, item.DiskBytes,
 				item.NetworkSentRate, item.NetworkReceivedRate)
 		}
@@ -170,7 +173,38 @@ func (vm *VirtualMachine) parseRequests(requests httpclient.Requests) VirtualMac
 	}
 	return vms
 }
+func (vm *VirtualMachine) WriteCSV(filepath string) {
 
+	if len(Virtual_Machines) > 0 {
+		var matrix [][]string
+		rec := []string{"Resource Group","ResourceID","Service Name","Resource Type","Resource Location","Location Prefix","Consumption Type","Meter","Cost",
+			"CPU Utilization Avg","Available Memory","Logical Disk Latency","Disk IOPs","Disk Bytes/sec","Network Sent Rate","Network Received Rate"}
+		matrix = append(matrix, rec)
+		for _, item := range Virtual_Machines {
+			//fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%s,%s,%s,%s,%s,%s,%s,%s\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType, item.Location,item.Meter, item.Cost)
+			var rec []string
+			rec = append(rec, item.Resource.ResourceGroup)
+			rec = append(rec, item.Resource.ResourceID)
+			rec = append(rec, item.Resource.Service)
+			rec = append(rec, item.Resource.ServiceType)
+			rec = append(rec, item.Resource.Location)
+			rec = append(rec, item.Resource.LocationPrefix)
+			rec = append(rec, item.Resource.ChargeType)
+			rec = append(rec, item.Resource.Meter)
+			rec = append(rec, item.Resource.Cost)
+
+			rec = append(rec, item.CpuUtilization)
+			rec = append(rec, item.MemoryAvailable)
+			rec = append(rec, item.DiskLatency)
+			rec = append(rec, item.DiskIOPs)
+			rec = append(rec, item.DiskBytes)
+			rec = append(rec, item.NetworkSentRate)
+			rec = append(rec, item.NetworkReceivedRate)
+			matrix = append(matrix, rec)
+		}
+		csv.SaveMatrixToFile(filepath, matrix)
+	}
+}
 //-------------------------Helper Functions Related to VM Parser-------------------------------------
 // interface raw is in Kilo Bytes - need to convert to MegaBytes
 func getVmAvailableMemory(row []interface{}) (float64, float64, string) {

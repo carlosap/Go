@@ -43,6 +43,7 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 		if saveCsv {
 			filesystem.RemoveFile(csvRgcReportName)
 			rgc.WriteCSV(csvRgcReportName)
+			fmt.Printf("Done. report was generated - %s\n", csvRgcReportName)
 		}
 
 		return nil
