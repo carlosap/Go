@@ -38,7 +38,8 @@ func setResourceGroupUsageCommand() (*cobra.Command, error) {
 		costmanagement.IgnoreZeroCost = ignoreZeroCost
 		vm := costmanagement.VirtualMachine{}
 		vm.ExecuteRequest(&vm)
-		
+		vm.Print()
+
 		return nil
 	}
 	return cmd, nil

@@ -46,13 +46,13 @@ var VmUsagePayload = "{\"query\": " +
 	"let rawDataCached = cpuMemory| union networkDisk| " +
 	"extend Val = iif(Name in ('WriteLatencyMs', 'ReadLatencyMs', 'TransferLatencyMs'), Val/1000.0, Val)| " +
 	"project TimeGenerated,cName = case(Namespace == 'Processor' and Name == 'UtilizationPercentage', '% Processor Time'," +
-	"Namespace == 'Memory' and Name == 'AvailableMB', 'Available MBytes',        " +
-	"Namespace == 'LogicalDisk' and Name == 'TransfersPerSecond', 'Disk Transfers/sec',        " +
-	"Namespace == 'LogicalDisk' and Name == 'BytesPerSecond', 'Disk Bytes/sec',        " +
-	"Namespace == 'LogicalDisk' and Name == 'TransferLatencyMs', 'Avg. Disk sec/Transfer',        " +
-	"Namespace == 'Network' and Name == 'WriteBytesPerSecond', 'Bytes Sent/sec',        " +
-	"Namespace == 'Network' and Name == 'ReadBytesPerSecond', 'Bytes Received/sec',        " +
-	"Name),cValue = case(Val < 0, real(0),Val);rawDataCached| summarize min(cValue),    " +
+	"Namespace == 'Memory' and Name == 'AvailableMB', 'Available MBytes'," +
+	"Namespace == 'LogicalDisk' and Name == 'TransfersPerSecond', 'Disk Transfers/sec'," +
+	"Namespace == 'LogicalDisk' and Name == 'BytesPerSecond', 'Disk Bytes/sec'," +
+	"Namespace == 'LogicalDisk' and Name == 'TransferLatencyMs', 'Avg. Disk sec/Transfer'," +
+	"Namespace == 'Network' and Name == 'WriteBytesPerSecond', 'Bytes Sent/sec'," +
+	"Namespace == 'Network' and Name == 'ReadBytesPerSecond', 'Bytes Received/sec'," +
+	"Name),cValue = case(Val < 0, real(0),Val);rawDataCached| summarize min(cValue)," +
 	"avg(cValue),max(cValue),percentiles(cValue, 5, 10, 50, 90, 95) by bin(TimeGenerated, trendBinSize), " +
 	"cName| sort by TimeGenerated asc| summarize makelist(TimeGenerated, maxListSize),    makelist(min_cValue, maxListSize)," +
 	"makelist(avg_cValue, maxListSize),makelist(max_cValue, maxListSize),makelist(percentile_cValue_5, maxListSize),    " +
@@ -122,3 +122,10 @@ var LocationNames = "location == 'eastus','East US'," +
 	"location == 'switzerlandwest','Switzerland West'," +
 	"location == 'ukwest','UK West'," +
 	"location == 'uaecentral','UAE Central',"
+
+
+//===================================prefix region and workspace=============================
+//If you are wondering why your Azure subscription has a resource group
+//called DefaultResourceGroup-XXX (the XXX is related to your region) and
+//within that same resource group you have a DefaultWorkspace-<SubscriptionID>-XXX,
+//there is a logical explanation, and it is associated with Azure Security Center.

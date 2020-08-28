@@ -100,7 +100,9 @@ func getCKey(requestItem Request) string {
 }
 
 func makeRequest(r Request) ([]byte, error) {
+
 	client := &http.Client{}
+	//client.Timeout = time.Second * 10
 	var body []byte
 	payload := strings.NewReader(r.Payload)
 	req, err := http.NewRequest(r.Method, r.Url, payload)
@@ -115,10 +117,16 @@ func makeRequest(r Request) ([]byte, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		return body, err
+		return []byte{}, nil
 	}
 
+	//fmt.Printf("the response status was : %d\n\n%s", res.StatusCode,r.Url)
 	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		return []byte{}, nil
+	}
+
 	body, err = ioutil.ReadAll(res.Body)
 
 	//fmt.Println("the url: ", r.Url)

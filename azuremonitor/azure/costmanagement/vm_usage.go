@@ -1,6 +1,7 @@
 package costmanagement
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/Go/azuremonitor/azure"
 	"github.com/Go/azuremonitor/azure/oauth2"
@@ -29,14 +30,27 @@ type VirtualMachine struct {
 	} `json:"tables"`
 }
 type VirtualMachines []VirtualMachine
+var (
+
+	mapVirtualMachines = make(map[string]VirtualMachine)
+	Virtual_Machines = VirtualMachines{}
+)
 
 
 func (vm *VirtualMachine) ExecuteRequest(r httpclient.IRequest) {
+
+	//1-Three Node of Resources
 	rg := ResourceGroupCost{}
 	rg.ExecuteRequest(&rg)
-	if len(Resources) > 0 {
-		fmt.Printf("The resources are : %v\n", Resources)
-	}
+
+	//2-Filters Virtual Machines only
+	requests := vm.getRequests()
+	requests.Execute()
+
+	//3-Serializes All VMs and Sets Metrics
+	Virtual_Machines = vm.parseRequests(requests)
+
+	//4-Virtual Machine can be used through any output requirements
 }
 
 func (vm *VirtualMachine) GetUrl() string {
@@ -68,18 +82,22 @@ func (vm *VirtualMachine) GetHeader() http.Header {
 	return header
 }
 func (vm *VirtualMachine) Print() {
-	if len(Resources) > 0 {
-		fmt.Println("Consumption Report:")
-		fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
-		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Consumption Type,Meter,Cost")
-		fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
-		for _, item := range Resources {
-			fmt.Printf("%s,%s,%s,%s,%s,%s,$%s\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType, item.Location,item.Meter, item.Cost)
+	if len(Virtual_Machines) > 0 {
+		fmt.Printf("Usage Report:\n")
+		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Consumption Type,Meter,Cost,CPU Utilization Avg,Available Memory,Logical Disk Latency,Disk IOPs,Disk Bytes/sec,Network Sent Rate, Network Received Rate")
+		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+		for _, item := range Virtual_Machines {
+			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,$%s,%s,%s,%s,%s,%s,%s,%s\n",item.Resource.ResourceGroup, item.Resource.ResourceID, item.Resource.Service,
+				item.Resource.ServiceType, item.Resource.Location, item.Resource.ChargeType, item.Resource.Meter,
+				item.Resource.Cost, item.CpuUtilization, item.MemoryAvailable,item.DiskLatency, item.DiskIOPs, item.DiskBytes,
+				item.NetworkSentRate, item.NetworkReceivedRate)
 		}
 	} else {
 		fmt.Printf("-")
 	}
 }
+
 func (vm *VirtualMachine) setUsageValue() {
 
 	for i := 0; i < len(vm.Tables); i++ {
@@ -108,6 +126,49 @@ func (vm *VirtualMachine) setUsageValue() {
 			}
 		}
 	}
+}
+func (vm *VirtualMachine) getRequests() httpclient.Requests {
+	requests := httpclient.Requests{}
+	if len(Resources) > 0 {
+		for _, resource := range Resources {
+			if resource.Service == "virtual machines" && resource.ServiceType == "virtualmachines" &&
+				len(resource.Cost) > 0 && resource.ChargeType == "usage" {
+
+				rName := "vm_" + resource.ResourceID
+				vm.Resource = resource
+				request := httpclient.Request{
+					Name:    rName,
+					Header:  vm.GetHeader(),
+					Payload: vm.GetPayload(),
+					Url:     vm.GetUrl(),
+					Method:  vm.GetMethod(),
+					IsCache: true,
+				}
+				//fmt.Printf("saving request with name: %s\n", rName)
+				mapVirtualMachines[rName] = *vm
+				requests = append(requests, request)
+			}
+		}
+	}
+	return requests
+}
+func (vm *VirtualMachine) parseRequests(requests httpclient.Requests) VirtualMachines {
+	vms := VirtualMachines{}
+	for _, item := range requests {
+		bData := item.GetResponse()
+		if len(bData) > 0 {
+			_ = json.Unmarshal(bData, vm)
+			vmRef, hasKey := mapVirtualMachines[item.Name]
+			if hasKey {
+				//fmt.Printf("retrieved vm with name: %s\n", item.Name)
+				//fmt.Printf("%v\n", vm.Tables)
+				vm.Resource = vmRef.Resource
+				vm.setUsageValue()
+				vms = append(vms, *vm)
+			}
+		}
+	}
+	return vms
 }
 
 //-------------------------Helper Functions Related to VM Parser-------------------------------------

@@ -49,7 +49,6 @@ func (rgc *ResourceGroupCost) ExecuteRequest(r httpclient.IRequest) {
 
 	requests := rgc.getRequests()
 	requests.Execute()
-
 	rgc.parseRequests(requests)
 
 }
@@ -102,7 +101,7 @@ func (rgc *ResourceGroupCost) Print() {
 		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Consumption Type,Meter,Cost")
 		fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
 		for _, item := range Resources {
-			fmt.Printf("%s,%s,%s,%s,%s,%s,$%s\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType, item.Location,item.Meter, item.Cost)
+			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,$%s\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType, item.Location,item.ChargeType, item.Meter, item.Cost)
 		}
 	} else {
 		fmt.Printf("-")
@@ -151,14 +150,15 @@ func (rgc *ResourceGroupCost) getRequests() httpclient.Requests {
 }
 func (rgc *ResourceGroupCost) parseRequests(requests httpclient.Requests) {
 	for _, item := range requests {
-		if len(item.GetResponse()) > 0 {
-			bData := item.GetResponse()
+		bData := item.GetResponse()
+		//empty resource group
+		if len(bData) > 0 {
+			//fmt.Printf("%s-%d\n", item.Url, len(bData))
 			//fmt.Printf("%s\n %s\n\n", item.Name, string(bData))
-			if len(bData) > 0 {
-				_ = json.Unmarshal(bData, rgc)
-				rgc.ResourceGroupName = item.Name
-				rgc.addResource()
-			}
+			//fmt.Println("------------------------------------------------")
+			_ = json.Unmarshal(bData, rgc)
+			rgc.ResourceGroupName = item.Name
+			rgc.addResource()
 		}
 	}
 }
