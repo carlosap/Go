@@ -36,7 +36,10 @@ var (
 	configuration    c.CmdConfig
 	StartDate        string
 	EndDate          string
+	CsvRguReportName string
+	CsvRgcReportName string
 	IgnoreZeroCost bool
+	SaveCsv bool
 	Resources = azure.Resources{}
 )
 
@@ -152,11 +155,7 @@ func (rgc *ResourceGroupCost) getRequests() httpclient.Requests {
 func (rgc *ResourceGroupCost) parseRequests(requests httpclient.Requests) {
 	for _, item := range requests {
 		bData := item.GetResponse()
-		//empty resource group
 		if len(bData) > 0 {
-			//fmt.Printf("%s-%d\n", item.Url, len(bData))
-			//fmt.Printf("%s\n %s\n\n", item.Name, string(bData))
-			//fmt.Println("------------------------------------------------")
 			_ = json.Unmarshal(bData, rgc)
 			rgc.ResourceGroupName = item.Name
 			rgc.addResource()
@@ -198,17 +197,6 @@ func (rgc *ResourceGroupCost) addResource() {
 				resourceId = pArray[len(pArray)-1]
 			}
 
-			//temp: need to pulls this from a map
-			var lprefix string
-			switch resourceLocation {
-			case "us east":
-				lprefix = "eus"
-			case "us west":
-				lprefix = "westus"
-				//lprefix = "wus"
-			default:
-				lprefix = ""
-			}
 
 			resource := azure.Resource{
 				ResourceGroup: rgc.ResourceGroupName,
@@ -216,7 +204,7 @@ func (rgc *ResourceGroupCost) addResource() {
 				Service: serviceName,
 				ServiceType: resourceType,
 				Location: resourceLocation,
-				LocationPrefix: lprefix,
+				LocationPrefix: resourceLocation,
 				ChargeType: chargeType,
 				Meter: meter,
 				Cost: costUSD,
@@ -224,37 +212,6 @@ func (rgc *ResourceGroupCost) addResource() {
 			Resources = append(Resources, resource)
 		}
 	}
-
-	//Additional requests
-	//if serviceName == "virtual machines" && resourceType == "virtualmachines" && len(costUSD) > 0 && chargeType == "usage" {
-	//
-	//	var vm = &ResourceUsageVirtualMachine{}
-	//	vm, err := vm.getVmUsage(resourceGroupName, resourceId)
-	//	if err != nil {
-	//		fmt.Printf("Error: failed to retrieve vm resouce usage %v\n", err)
-	//	}
-	//
-	//	fmt.Printf("%s,%s,%s,$%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", resourceId, resourceGroupName, serviceName, costUSD, resourceType, resourceLocation, chargeType, meter, vm.CpuUtilization, vm.MemoryAvailable, vm.DiskLatency, vm.DiskIOPs, vm.DiskBytes, vm.NetworkSentRate, vm.NetworkSentRate)
-	//
-	//}
-
-	//if len(Resources) > 0 {
-	//	vms := azure.VirtualMachines{}
-	//	for _, resource := range Resources {
-	//		if resource.Service == "virtual machines" && resource.ServiceType == "virtualmachines" &&
-	//			len(resource.Cost) > 0 && resource.ChargeType == "usage" {
-	//			vm := azure.VirtualMachine{
-	//				SubscriptionID: resource.SubscriptionID,
-	//				ResourceGroup: resource.ResourceGroup,
-	//				ResourceID: resource.ResourceID,
-	//
-	//			}
-	//
-	//		}
-	//	}
-	//
-	//
-	//}
 }
 
 

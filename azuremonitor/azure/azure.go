@@ -19,50 +19,87 @@ type Resources []Resource
 
 //TODO:::this may require some location
 //example: "-eus"
-var QueryUrl = "https://management.azure.com/subscriptions/" +
-	"{{subscriptionid}}/resourcegroups/defaultresourcegroup-{{locationprefix}}/providers/microsoft.operationalinsights/workspaces/" +
-	"defaultworkspace-{{subscriptionid}}-{{locationprefix}}/query?api-version=2017-10-01"
+//var QueryUrl = "https://management.azure.com/subscriptions/" +
+//	"{{subscriptionid}}/resourcegroups/defaultresourcegroup-{{locationprefix}}/providers/microsoft.operationalinsights/workspaces/" +
+//	"defaultworkspace-{{subscriptionid}}-{{locationprefix}}/query?api-version=2017-10-01"
 
-var VmUsagePayload = "{\"query\": " +
-	"\"let startDateTime = datetime('{{startdate}}T08:00:00.000Z');" +
-	"let endDateTime = datetime('{{enddate}}T16:00:00.000Z');" +
-	"let trendBinSize = 8h;let maxListSize = 1000;" +
-	"let cpuMemory = materialize(InsightsMetrics| where TimeGenerated between (startDateTime .. endDateTime)| " +
-	"where _ResourceId =~ '/subscriptions/{{subscriptionid}}/resourcegroups/{{resourcegroup}}/providers/microsoft.compute/" +
-	"virtualmachines/{{resourceid}}'| " +
-	"where Origin == 'vm.azm.ms'| where (Namespace == 'Processor' and Name == 'UtilizationPercentage') or (Namespace == 'Memory' and Name == 'AvailableMB')| " +
-	"project TimeGenerated, Name, Namespace, Val);" +
-	"let networkDisk = materialize(InsightsMetrics| " +
-	"where TimeGenerated between (startDateTime .. endDateTime)| " +
-	"where _ResourceId =~ '/subscriptions/" +
-	"{{subscriptionid}}/resourcegroups/" +
-	"{{resourcegroup}}/providers/microsoft.compute/" +
-	"virtualmachines/" +
-	"{{resourceid}}'| " +
-	"where Origin == 'vm.azm.ms'| " +
-	"where (Namespace == 'Network' and Name in ('WriteBytesPerSecond', 'ReadBytesPerSecond'))    " +
-	"or (Namespace == 'LogicalDisk' and Name in ('TransfersPerSecond', 'BytesPerSecond', 'TransferLatencyMs'))| " +
-	"extend ComputerId = iff(isempty(_ResourceId), Computer, _ResourceId)| " +
-	"summarize Val = sum(Val) by bin(TimeGenerated, 1m), " +
-	"ComputerId, Name, Namespace| project TimeGenerated, Name, Namespace, Val);" +
-	"let rawDataCached = cpuMemory| union networkDisk| " +
-	"extend Val = iif(Name in ('WriteLatencyMs', 'ReadLatencyMs', 'TransferLatencyMs'), Val/1000.0, Val)| " +
-	"project TimeGenerated,cName = case(Namespace == 'Processor' and Name == 'UtilizationPercentage', '% Processor Time'," +
-	"Namespace == 'Memory' and Name == 'AvailableMB', 'Available MBytes'," +
-	"Namespace == 'LogicalDisk' and Name == 'TransfersPerSecond', 'Disk Transfers/sec'," +
-	"Namespace == 'LogicalDisk' and Name == 'BytesPerSecond', 'Disk Bytes/sec'," +
-	"Namespace == 'LogicalDisk' and Name == 'TransferLatencyMs', 'Avg. Disk sec/Transfer'," +
-	"Namespace == 'Network' and Name == 'WriteBytesPerSecond', 'Bytes Sent/sec'," +
-	"Namespace == 'Network' and Name == 'ReadBytesPerSecond', 'Bytes Received/sec'," +
-	"Name),cValue = case(Val < 0, real(0),Val);rawDataCached| summarize min(cValue)," +
-	"avg(cValue),max(cValue),percentiles(cValue, 5, 10, 50, 90, 95) by bin(TimeGenerated, trendBinSize), " +
-	"cName| sort by TimeGenerated asc| summarize makelist(TimeGenerated, maxListSize),    makelist(min_cValue, maxListSize)," +
-	"makelist(avg_cValue, maxListSize),makelist(max_cValue, maxListSize),makelist(percentile_cValue_5, maxListSize),    " +
-	"makelist(percentile_cValue_10, maxListSize),makelist(percentile_cValue_50, maxListSize)," +
-	"makelist(percentile_cValue_90, maxListSize),makelist(percentile_cValue_95, maxListSize) by cName| " +
-	"join(rawDataCached    | summarize min(cValue), avg(cValue), max(cValue), " +
-	"percentiles(cValue, 5, 10, 50, 90, 95) by cName)on cName\"," +
-	"\"timespan\": \"{{startdate}}T08:00:00.000Z/{{enddate}}T16:00:00.000Z\"}"
+var QueryUrl = "https://management.azure.com/batch?api-version=2015-11-01"
+
+var VmUsagePayload = "{\"requests\": [{\"httpMethod\": \"GET\",\"relativeUrl\": " +
+	"\"/subscriptions/{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Compute/virtualMachines/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?timespan=" +
+	"{{startdate}}T19:45:00.000Z/{{enddate}}T19:45:00.000Z&" +
+	"interval=FULL&metricnames=Percentage CPU&aggregation=average&" +
+	"metricNamespace=microsoft.compute%2Fvirtualmachines&" +
+	"validatedimensions=false&api-version=2019-07-01\"}, {\"httpMethod\": \"GET\",\"relativeUrl\": " +
+	"\"/subscriptions/{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Compute/virtualMachines/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?timespan=" +
+	"{{startdate}}T19:45:00.000Z/{{enddate}}T19:45:00.000Z&" +
+	"interval=FULL&metricnames=Disk Read Bytes&" +
+	"aggregation=total&metricNamespace=microsoft.compute%2Fvirtualmachines&" +
+	"validatedimensions=false&api-version=2019-07-01\"}, {\"httpMethod\": \"GET\",\"relativeUrl\": " +
+	"\"/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Compute/virtualMachines/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?timespan=" +
+	"{{startdate}}T19:45:00.000Z/{{enddate}}T19:45:00.000Z&" +
+	"interval=FULL&metricnames=Disk Write Bytes&aggregation=total" +
+	"&metricNamespace=microsoft.compute%2Fvirtualmachines&validatedimensions=false&api-version=2019-07-01\"}, {\"httpMethod\": \"GET\",\"relativeUrl\": " +
+	"\"/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Compute/virtualMachines/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?timespan=" +
+	"{{startdate}}T19:45:00.000Z/{{enddate}}T19:45:00.000Z" +
+	"&interval=FULL&metricnames=Network In Total&aggregation=total&" +
+	"metricNamespace=microsoft.compute%2Fvirtualmachines&validatedimensions=false&api-version=2019-07-01\"}, {\"httpMethod\": \"GET\"," +
+	"\"relativeUrl\": \"/subscriptions/{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Compute/virtualMachines/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?timespan=" +
+	"{{startdate}}T19:45:00.000Z/{{enddate}}T19:45:00.000Z&" +
+	"interval=FULL&metricnames=Network Out Total" +
+	"&aggregation=total&metricNamespace=microsoft.compute%2Fvirtualmachines&validatedimensions=false&api-version=2019-07-01\"}]}"
+//var VmUsagePayload = "{\"query\": " +
+//	"\"let startDateTime = datetime('{{startdate}}T08:00:00.000Z');" +
+//	"let endDateTime = datetime('{{enddate}}T16:00:00.000Z');" +
+//	"let trendBinSize = 8h;let maxListSize = 1000;" +
+//	"let cpuMemory = materialize(InsightsMetrics| where TimeGenerated between (startDateTime .. endDateTime)| " +
+//	"where _ResourceId =~ '/subscriptions/{{subscriptionid}}/resourcegroups/{{resourcegroup}}/providers/microsoft.compute/" +
+//	"virtualmachines/{{resourceid}}'| " +
+//	"where Origin == 'vm.azm.ms'| where (Namespace == 'Processor' and Name == 'UtilizationPercentage') or (Namespace == 'Memory' and Name == 'AvailableMB')| " +
+//	"project TimeGenerated, Name, Namespace, Val);" +
+//	"let networkDisk = materialize(InsightsMetrics| " +
+//	"where TimeGenerated between (startDateTime .. endDateTime)| " +
+//	"where _ResourceId =~ '/subscriptions/" +
+//	"{{subscriptionid}}/resourcegroups/" +
+//	"{{resourcegroup}}/providers/microsoft.compute/" +
+//	"virtualmachines/" +
+//	"{{resourceid}}'| " +
+//	"where Origin == 'vm.azm.ms'| " +
+//	"where (Namespace == 'Network' and Name in ('WriteBytesPerSecond', 'ReadBytesPerSecond'))    " +
+//	"or (Namespace == 'LogicalDisk' and Name in ('TransfersPerSecond', 'BytesPerSecond', 'TransferLatencyMs'))| " +
+//	"extend ComputerId = iff(isempty(_ResourceId), Computer, _ResourceId)| " +
+//	"summarize Val = sum(Val) by bin(TimeGenerated, 1m), " +
+//	"ComputerId, Name, Namespace| project TimeGenerated, Name, Namespace, Val);" +
+//	"let rawDataCached = cpuMemory| union networkDisk| " +
+//	"extend Val = iif(Name in ('WriteLatencyMs', 'ReadLatencyMs', 'TransferLatencyMs'), Val/1000.0, Val)| " +
+//	"project TimeGenerated,cName = case(Namespace == 'Processor' and Name == 'UtilizationPercentage', '% Processor Time'," +
+//	"Namespace == 'Memory' and Name == 'AvailableMB', 'Available MBytes'," +
+//	"Namespace == 'LogicalDisk' and Name == 'TransfersPerSecond', 'Disk Transfers/sec'," +
+//	"Namespace == 'LogicalDisk' and Name == 'BytesPerSecond', 'Disk Bytes/sec'," +
+//	"Namespace == 'LogicalDisk' and Name == 'TransferLatencyMs', 'Avg. Disk sec/Transfer'," +
+//	"Namespace == 'Network' and Name == 'WriteBytesPerSecond', 'Bytes Sent/sec'," +
+//	"Namespace == 'Network' and Name == 'ReadBytesPerSecond', 'Bytes Received/sec'," +
+//	"Name),cValue = case(Val < 0, real(0),Val);rawDataCached| summarize min(cValue)," +
+//	"avg(cValue),max(cValue),percentiles(cValue, 5, 10, 50, 90, 95) by bin(TimeGenerated, trendBinSize), " +
+//	"cName| sort by TimeGenerated asc| summarize makelist(TimeGenerated, maxListSize),    makelist(min_cValue, maxListSize)," +
+//	"makelist(avg_cValue, maxListSize),makelist(max_cValue, maxListSize),makelist(percentile_cValue_5, maxListSize),    " +
+//	"makelist(percentile_cValue_10, maxListSize),makelist(percentile_cValue_50, maxListSize)," +
+//	"makelist(percentile_cValue_90, maxListSize),makelist(percentile_cValue_95, maxListSize) by cName| " +
+//	"join(rawDataCached    | summarize min(cValue), avg(cValue), max(cValue), " +
+//	"percentiles(cValue, 5, 10, 50, 90, 95) by cName)on cName\"," +
+//	"\"timespan\": \"{{startdate}}T08:00:00.000Z/{{enddate}}T16:00:00.000Z\"}"
 
 var LocationNames = "location == 'eastus','East US'," +
 	"location == 'eastus2','East US 2'," +

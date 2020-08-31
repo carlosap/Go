@@ -9,9 +9,15 @@ import (
 	"github.com/Go/azuremonitor/common/httpclient"
 	"net/http"
 	"strings"
+	"time"
 )
 
-type VirtualMachine struct {
+type StorageDiskResponse struct {
+	Responses []Responses `json:"responses"`
+}
+
+
+type StorageDisk struct {
 	Resource azure.Resource `json:"resource"`
 	CpuUtilization      float64 `json:"cpu_utilization"`
 	DiskReads     float64 `json:"memory_reads"`
@@ -21,50 +27,52 @@ type VirtualMachine struct {
 	Responses []Responses `json:"responses"`
 }
 
-type VirtualMachines []VirtualMachine
+type StorageDisks []StorageDisk
 
 var (
-
-	mapVirtualMachines = make(map[string]VirtualMachine)
-	Virtual_Machines = VirtualMachines{}
+	mapStorageDisks = make(map[string]VirtualMachine)
+	Storage_Disks = StorageDisk{}
 )
 
 
-func (vm *VirtualMachine) ExecuteRequest(r httpclient.IRequest) {
+
+
+
+func (sd *StorageDisk) ExecuteRequest(r httpclient.IRequest) {
 
 	//1-Three Node of Resources
 	rg := ResourceGroupCost{}
 	rg.ExecuteRequest(&rg)
 
-	//2-Filters Virtual Machines only
-	requests := vm.getRequests()
+	//2-Filters Storage Disk only
+	requests := sd.getRequests()
 	requests.Execute()
 
-	//3-Serializes All VMs and Sets Metrics
-	Virtual_Machines = vm.parseRequests(requests)
+	//3-Serializes All Storage Disks and Sets Metrics
+	Virtual_Machines = sd.parseRequests(requests)
 
-	//4-Virtual Machine can be used through any output requirements
+	//4-Storage Disks can be used through any output requirements
 }
 
-func (vm *VirtualMachine) GetUrl() string {
+func (sd *StorageDisk) GetUrl() string {
 
 	url := azure.QueryUrl
 	return url
 }
-func (vm *VirtualMachine) GetMethod() string {
+func (sd *StorageDisk) GetMethod() string {
 	return httpclient.Methods.POST
 }
-func (vm *VirtualMachine) GetPayload() string {
+func (sd *StorageDisk) GetPayload() string {
 
 	payload := azure.VmUsagePayload
 	payload = strings.ReplaceAll(payload, "{{startdate}}", StartDate)
 	payload = strings.ReplaceAll(payload, "{{enddate}}", EndDate)
 	payload = strings.ReplaceAll(payload, "{{subscriptionid}}", configuration.AccessToken.SubscriptionID)
-	payload = strings.ReplaceAll(payload, "{{resourcegroup}}", vm.Resource.ResourceGroup)
-	payload = strings.ReplaceAll(payload, "{{resourceid}}", vm.Resource.ResourceID)
+	payload = strings.ReplaceAll(payload, "{{resourcegroup}}", sd.Resource.ResourceGroup)
+	payload = strings.ReplaceAll(payload, "{{resourceid}}", sd.Resource.ResourceID)
 	return payload
 }
-func (vm *VirtualMachine) GetHeader() http.Header {
+func (sd *StorageDisk) GetHeader() http.Header {
 	at := oauth2.AccessToken{}
 	at.ExecuteRequest(&at)
 	token := fmt.Sprintf("Bearer %s", at.AccessToken)
@@ -74,7 +82,7 @@ func (vm *VirtualMachine) GetHeader() http.Header {
 	header.Add("Content-Type", "application/json")
 	return header
 }
-func (vm *VirtualMachine) Print() {
+func (sd *StorageDisk) Print() {
 	if len(Virtual_Machines) > 0 {
 		fmt.Printf("Usage Report:\n")
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
@@ -92,7 +100,7 @@ func (vm *VirtualMachine) Print() {
 }
 
 //---------------Other Functions --------------------------------------------------------------
-func (vm *VirtualMachine) getRequests() httpclient.Requests {
+func (sd *StorageDisk) getRequests() httpclient.Requests {
 	requests := httpclient.Requests{}
 	if len(Resources) > 0 {
 		for _, resource := range Resources {
@@ -116,7 +124,7 @@ func (vm *VirtualMachine) getRequests() httpclient.Requests {
 	}
 	return requests
 }
-func (vm *VirtualMachine) parseRequests(requests httpclient.Requests) VirtualMachines {
+func (sd *StorageDisk) parseRequests(requests httpclient.Requests) VirtualMachines {
 	vms := VirtualMachines{}
 	var vmResponse BatchResponse
 	for _, item := range requests {
@@ -125,41 +133,39 @@ func (vm *VirtualMachine) parseRequests(requests httpclient.Requests) VirtualMac
 			_ = json.Unmarshal(bData, &vmResponse)
 			vmRef, hasKey := mapVirtualMachines[item.Name]
 			if hasKey {
-				vm.Resource = vmRef.Resource
-				vm.Responses = vmResponse.Responses
-				vm.setUsageValue()
+				sd.Resource = vmRef.Resource
+				sd.Responses = vmResponse.Responses
+				sd.setUsageValue()
 				vms = append(vms, *vm)
 			}
 		}
 	}
 	return vms
 }
-func (vm *VirtualMachine) setUsageValue() {
+func (sd *StorageDisk) setUsageValue() {
 
-	if len(vm.Responses) > 0 {
-		for _, response := range vm.Responses {
+	if len(sd.Responses) > 0 {
+		for _, response := range sd.Responses {
 			if len(response.Content.Value) > 0 {
 				for _, valueItem := range response.Content.Value {
 					switch valueItem.Name.Value {
 					case "Percentage CPU":
-						vm.CpuUtilization = valueItem.Timeseries[0].Data[0].Average
+						sd.CpuUtilization = valueItem.Timeseries[0].Data[0].Average
 					case "Disk Read Bytes":
-						vm.DiskReads = valueItem.Timeseries[0].Data[0].Total
+						sd.DiskReads = valueItem.Timeseries[0].Data[0].Total
 					case "Disk Write Bytes":
-						vm.DiskWrites = valueItem.Timeseries[0].Data[0].Total
+						sd.DiskWrites = valueItem.Timeseries[0].Data[0].Total
 					case "Network In Total":
-						vm.NetworkReceivedRate = valueItem.Timeseries[0].Data[0].Total
+						sd.NetworkReceivedRate = valueItem.Timeseries[0].Data[0].Total
 					case "Network Out Total":
-						vm.NetworkSentRate = valueItem.Timeseries[0].Data[0].Total
+						sd.NetworkSentRate = valueItem.Timeseries[0].Data[0].Total
 					}
 				}
 			}
 		}
 	}
-
-
 }
-func (vm *VirtualMachine) WriteCSV(filepath string) {
+func (sd *StorageDisk) WriteCSV(filepath string) {
 
 	if len(Virtual_Machines) > 0 {
 		var matrix [][]string

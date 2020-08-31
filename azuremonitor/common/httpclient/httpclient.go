@@ -103,6 +103,7 @@ func makeRequest(r Request) ([]byte, error) {
 
 	client := &http.Client{}
 	//client.Timeout = time.Second * 10
+
 	var body []byte
 	payload := strings.NewReader(r.Payload)
 	req, err := http.NewRequest(r.Method, r.Url, payload)
@@ -123,11 +124,12 @@ func makeRequest(r Request) ([]byte, error) {
 	//fmt.Printf("the response status was : %d\n\n%s", res.StatusCode,r.Url)
 	defer res.Body.Close()
 
+	body, err = ioutil.ReadAll(res.Body)
+
 	if res.StatusCode != 200 {
+		fmt.Printf("\n\nthe url : %s-%s\n%s\n%v\n\n%s",r.Method, r.Url, r.Payload,r.Header, string(body))
 		return []byte{}, nil
 	}
-
-	body, err = ioutil.ReadAll(res.Body)
 
 	//fmt.Println("the url: ", r.Url)
 	return body, err
