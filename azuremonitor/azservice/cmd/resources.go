@@ -34,7 +34,7 @@ func setResourcesCommand() (*cobra.Command, error) {
 
 	cmd.RunE = func(*cobra.Command, []string) error {
 		terminal.Clear()
-		resource := subscription.Resource{}
+		resource := subscription.ResourceSubscription{}
 		resource.ExecuteRequest(&resource)
 		resource.Print()
 		return nil

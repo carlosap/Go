@@ -18,7 +18,7 @@ func init(){
 	configuration, _ = c.GetCmdConfig()
 }
 
-type Resource struct {
+type ResourceSubscription struct {
 	Values []Value `json:"value"`
 }
 
@@ -48,10 +48,10 @@ type Tags struct {
 	MsResourceUsage string `json:"ms-resource-usage"`
 }
 
-func (resource *Resource) ExecuteRequest(r httpclient.IRequest) {
+func (resource *ResourceSubscription) ExecuteRequest(r httpclient.IRequest) {
 
 	request := httpclient.Request{
-		"AccessToken",
+		"resourcesubscription",
 		r.GetUrl(),
 		r.GetMethod(),
 		r.GetPayload(),
@@ -65,17 +65,17 @@ func (resource *Resource) ExecuteRequest(r httpclient.IRequest) {
 		fmt.Println("unmarshal body response: ", err)
 	}
 }
-func (resource *Resource) GetUrl() string {
+func (resource *ResourceSubscription) GetUrl() string {
 	url := strings.Replace(configuration.Resources.URL, "{{subscriptionID}}", configuration.AccessToken.SubscriptionID, 1)
 	return url
 }
-func (resource *Resource) GetMethod() string {
+func (resource *ResourceSubscription) GetMethod() string {
 	return httpclient.Methods.GET
 }
-func (resource *Resource) GetPayload() string {
+func (resource *ResourceSubscription) GetPayload() string {
 	return ""
 }
-func (resource *Resource) GetHeader() http.Header {
+func (resource *ResourceSubscription) GetHeader() http.Header {
 
 	at := oauth2.AccessToken{}
 	at.ExecuteRequest(&at)
@@ -86,11 +86,11 @@ func (resource *Resource) GetHeader() http.Header {
 	header.Add("Content-Type", "application/json")
 	return header
 }
-func (resource *Resource) Print() {
+func (resource *ResourceSubscription) Print() {
 
-	fmt.Println("Resource Report:")
+	fmt.Println("ResourceSubscription Report:")
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
-	fmt.Println("Name,Type,Kind,Location,ManageBy,Sku Name, Sku Tier,Tags,Plan Name, Plan Promotion Code, Plan Product, Plan Publisher")
+	fmt.Println("ResourceId,Type,Kind,Location,Sku Name, Sku Tier,Tags,Plan Name, Plan Promotion Code, Plan Product, Plan Publisher, Manage By ResourceID")
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
 	for i := 0; i < len(resource.Values); i++ {
 		var resourceType, resourceManageby string
@@ -107,8 +107,26 @@ func (resource *Resource) Print() {
 			resourceManageby = pArray[len(pArray)-1]
 		}
 
-		fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", item.Name, resourceType, item.Kind, item.Location, resourceManageby,
+		fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", item.Name, resourceType, item.Kind, item.Location,
 			item.Sku.Name, item.Sku.Tier, item.Tags.MsResourceUsage, item.Plan.Name,
-			item.Plan.PromotionCode, item.Plan.Product, item.Plan.Publisher)
+			item.Plan.PromotionCode, item.Plan.Product, item.Plan.Publisher, resourceManageby)
 	}
+}
+func (resource *ResourceSubscription) GetManageByResourceId(resourceid string) string {
+	var retVal string
+	for i := 0; i < len(resource.Values); i++ {
+		item := resource.Values[i]
+
+		if resourceid == item.Name {
+			if strings.Contains(item.ManagedBy, "/") {
+				pArray := strings.Split(item.ManagedBy, "/")
+				retVal = pArray[len(pArray)-1]
+			} else {
+				retVal = item.ManagedBy
+			}
+			break
+		}
+	}
+
+	return retVal
 }

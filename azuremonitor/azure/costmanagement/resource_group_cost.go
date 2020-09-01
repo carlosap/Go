@@ -6,6 +6,7 @@ import (
 	"github.com/Go/azuremonitor/azure"
 	"github.com/Go/azuremonitor/azure/batch"
 	"github.com/Go/azuremonitor/azure/oauth2"
+	"github.com/Go/azuremonitor/common/convert"
 	"github.com/Go/azuremonitor/common/csv"
 	"github.com/Go/azuremonitor/common/httpclient"
 	c "github.com/Go/azuremonitor/config"
@@ -104,7 +105,7 @@ func (rgc *ResourceGroupCost) Print() {
 		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Location Prefix,Consumption Type,Meter,Cost")
 		fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
 		for _, item := range Resources {
-			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%s\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType, item.Location,item.LocationPrefix,item.ChargeType, item.Meter, item.Cost)
+			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%f\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType, item.Location,item.LocationPrefix,item.ChargeType, item.Meter, item.Cost)
 		}
 	} else {
 		fmt.Printf("-")
@@ -127,7 +128,7 @@ func (rgc *ResourceGroupCost) WriteCSV(filepath string) {
 			rec = append(rec, item.LocationPrefix)
 			rec = append(rec, item.ChargeType)
 			rec = append(rec, item.Meter)
-			rec = append(rec, item.Cost)
+			rec = append(rec, fmt.Sprintf("%f", item.Cost))
 			matrix = append(matrix, rec)
 		}
 		csv.SaveMatrixToFile(filepath, matrix)
@@ -166,6 +167,7 @@ func (rgc *ResourceGroupCost) addResource() {
 
 	for i := 0; i < len(rgc.Properties.Rows); i++ {
 		row := rgc.Properties.Rows[i]
+		//fmt.Printf("Properties: %v\n", rgc.Properties)
 		if len(row) > 0 {
 			costUSD := fmt.Sprintf("%v", row[1])
 			resourceId := fmt.Sprintf("%v", row[2])
@@ -176,12 +178,12 @@ func (rgc *ResourceGroupCost) addResource() {
 			meter := fmt.Sprintf("%v", row[9])
 
 			//format cost
-			if len(costUSD) > 5 {
-				costUSD = costUSD[0:5]
-			}
-
+			//if len(costUSD) > 5 {
+			//	costUSD = costUSD[0:5]
+			//}
+			cost, _ := convert.StringToFloat(costUSD)
 			if IgnoreZeroCost {
-				if costUSD == "0" {
+				if cost <= 0.0 {
 					continue
 				}
 			}
@@ -207,7 +209,7 @@ func (rgc *ResourceGroupCost) addResource() {
 				LocationPrefix: resourceLocation,
 				ChargeType: chargeType,
 				Meter: meter,
-				Cost: costUSD,
+				Cost: cost,
 			}
 			Resources = append(Resources, resource)
 		}

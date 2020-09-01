@@ -5,53 +5,44 @@ import (
 	"fmt"
 	"github.com/Go/azuremonitor/azure"
 	"github.com/Go/azuremonitor/azure/oauth2"
+	"github.com/Go/azuremonitor/azure/subscription"
 	"github.com/Go/azuremonitor/common/csv"
 	"github.com/Go/azuremonitor/common/httpclient"
 	"net/http"
 	"strings"
-	"time"
 )
 
 type StorageDiskResponse struct {
 	Responses []Responses `json:"responses"`
 }
 
-
 type StorageDisk struct {
 	Resource azure.Resource `json:"resource"`
-	CpuUtilization      float64 `json:"cpu_utilization"`
-	DiskReads     float64 `json:"memory_reads"`
-	DiskWrites         float64 `json:"disk_writes"`
-	NetworkSentRate     float64 `json:"network_sent_rate"`
-	NetworkReceivedRate float64 `json:"network_received_rate"`
+	DiskReads     float64 `json:"disk_reads"`
+	DiskWrite     float64 `json:"disk_write"`
+	DiskReadOperations         float64 `json:"disk_read_operations"`
+	DiskWriteOperations     float64 `json:"disk_write_operations"`
+	QueueDepth float64 `json:"queue_depth"`
 	Responses []Responses `json:"responses"`
 }
 
 type StorageDisks []StorageDisk
 
 var (
-	mapStorageDisks = make(map[string]VirtualMachine)
-	Storage_Disks = StorageDisk{}
+	mapStorageDisks = make(map[string]StorageDisk)
+	Storage_Disks = StorageDisks{}
 )
-
-
-
 
 
 func (sd *StorageDisk) ExecuteRequest(r httpclient.IRequest) {
 
-	//1-Three Node of Resources
-	rg := ResourceGroupCost{}
-	rg.ExecuteRequest(&rg)
-
-	//2-Filters Storage Disk only
+	//1-Filters Storage Disk only
 	requests := sd.getRequests()
 	requests.Execute()
 
-	//3-Serializes All Storage Disks and Sets Metrics
-	Virtual_Machines = sd.parseRequests(requests)
+	//2-Serializes All Storage Disks and Sets Metrics
+	Storage_Disks = sd.parseRequests(requests)
 
-	//4-Storage Disks can be used through any output requirements
 }
 
 func (sd *StorageDisk) GetUrl() string {
@@ -64,12 +55,16 @@ func (sd *StorageDisk) GetMethod() string {
 }
 func (sd *StorageDisk) GetPayload() string {
 
-	payload := azure.VmUsagePayload
+	resource := subscription.ResourceSubscription{}
+	resource.ExecuteRequest(&resource)
+	resource.GetManageByResourceId(sd.Resource.ResourceID)
+	vmsourceid := resource.GetManageByResourceId(sd.Resource.ResourceID)
+	payload := azure.StorageDiskUsagePayload
 	payload = strings.ReplaceAll(payload, "{{startdate}}", StartDate)
 	payload = strings.ReplaceAll(payload, "{{enddate}}", EndDate)
 	payload = strings.ReplaceAll(payload, "{{subscriptionid}}", configuration.AccessToken.SubscriptionID)
 	payload = strings.ReplaceAll(payload, "{{resourcegroup}}", sd.Resource.ResourceGroup)
-	payload = strings.ReplaceAll(payload, "{{resourceid}}", sd.Resource.ResourceID)
+	payload = strings.ReplaceAll(payload, "{{resourceid}}",vmsourceid )
 	return payload
 }
 func (sd *StorageDisk) GetHeader() http.Header {
@@ -83,19 +78,20 @@ func (sd *StorageDisk) GetHeader() http.Header {
 	return header
 }
 func (sd *StorageDisk) Print() {
-	if len(Virtual_Machines) > 0 {
-		fmt.Printf("Usage Report:\n")
+
+	if len(Storage_Disks) > 0 {
+		fmt.Printf("Usage Report Storage Disk:\n")
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Location Prefix,Consumption Type,Meter,Cost,Percentage CPU Avg,Bytes read from disk during monitoring period,Bytes written to disk during monitoring period,Incoming Traffic,Outgoing Traffic")
+		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Location Prefix,Consumption Type,Meter,Cost," +
+			"OS Disk Read Bytes/sec Avg,OS Disk Write Bytes/sec Avg,OS Disk Read Operations/Sec Avg,OS Disk Write Operations/Sec Avg,OS Disk Queue Depth")
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-		for _, item := range Virtual_Machines {
-			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%s,%f,%f,%f,%f,%f,%f,%f\n",item.Resource.ResourceGroup, item.Resource.ResourceID, item.Resource.Service,
+		for _, item := range Storage_Disks {
+			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%f,%f,%f,%f,%f,%f\n",item.Resource.ResourceGroup, item.Resource.ResourceID, item.Resource.Service,
 				item.Resource.ServiceType, item.Resource.Location,item.Resource.LocationPrefix, item.Resource.ChargeType, item.Resource.Meter, item.Resource.Cost,
-				item.CpuUtilization, item.DiskReads,item.DiskWrites, item.NetworkReceivedRate, item.NetworkSentRate,
-				item.NetworkSentRate, item.NetworkReceivedRate)
+				item.DiskReads, item.DiskWrite,item.DiskReadOperations, item.DiskWriteOperations, item.QueueDepth)
 		}
 	} else {
-		fmt.Printf("-")
+		fmt.Printf("-\n\n\n")
 	}
 }
 
@@ -103,62 +99,66 @@ func (sd *StorageDisk) Print() {
 func (sd *StorageDisk) getRequests() httpclient.Requests {
 	requests := httpclient.Requests{}
 	if len(Resources) > 0 {
-		for _, resource := range Resources {
-			if resource.Service == "virtual machines" && resource.ServiceType == "virtualmachines" &&
-				len(resource.Cost) > 0 && resource.ChargeType == "usage" {
-
-				rName := "vm_" + resource.ResourceID
-				vm.Resource = resource
+		for index, resource := range Resources {
+			if resource.Service == "storage" && resource.ServiceType == "disks" && resource.ChargeType == "usage" && resource.Cost > 0.0 {
+				rName := "sd_" + resource.ResourceID + "_" + fmt.Sprintf("%d", index)
+				sd.Resource = resource
 				request := httpclient.Request{
 					Name:    rName,
-					Header:  vm.GetHeader(),
-					Payload: vm.GetPayload(),
-					Url:     vm.GetUrl(),
-					Method:  vm.GetMethod(),
+					Header:  sd.GetHeader(),
+					Payload: sd.GetPayload(),
+					Url:     sd.GetUrl(),
+					Method:  sd.GetMethod(),
 					IsCache: false,
 				}
-				mapVirtualMachines[rName] = *vm
+				mapStorageDisks[rName] = *sd
 				requests = append(requests, request)
 			}
 		}
 	}
 	return requests
 }
-func (sd *StorageDisk) parseRequests(requests httpclient.Requests) VirtualMachines {
-	vms := VirtualMachines{}
-	var vmResponse BatchResponse
+func (sd *StorageDisk) parseRequests(requests httpclient.Requests) StorageDisks {
+	sds := StorageDisks{}
+	var sdResponse BatchResponse
 	for _, item := range requests {
 		bData := item.GetResponse()
 		if len(bData) > 0 {
-			_ = json.Unmarshal(bData, &vmResponse)
-			vmRef, hasKey := mapVirtualMachines[item.Name]
+			err := json.Unmarshal(bData, &sdResponse)
+			if err != nil {
+				fmt.Printf("error: failed to unmarshal - %v\n\n", err)
+			}
+			//fmt.Printf("data: %s\n\n", string(bData))
+			sdRef, hasKey := mapStorageDisks[item.Name]
 			if hasKey {
-				sd.Resource = vmRef.Resource
-				sd.Responses = vmResponse.Responses
+				sd.Resource = sdRef.Resource
+				sd.Responses = sdResponse.Responses
 				sd.setUsageValue()
-				vms = append(vms, *vm)
+				sds = append(sds, *sd)
 			}
 		}
 	}
-	return vms
+	return sds
 }
 func (sd *StorageDisk) setUsageValue() {
 
 	if len(sd.Responses) > 0 {
 		for _, response := range sd.Responses {
 			if len(response.Content.Value) > 0 {
+				//fmt.Printf("value: %v\n",response.Content.Value)
 				for _, valueItem := range response.Content.Value {
 					switch valueItem.Name.Value {
-					case "Percentage CPU":
-						sd.CpuUtilization = valueItem.Timeseries[0].Data[0].Average
-					case "Disk Read Bytes":
-						sd.DiskReads = valueItem.Timeseries[0].Data[0].Total
-					case "Disk Write Bytes":
-						sd.DiskWrites = valueItem.Timeseries[0].Data[0].Total
-					case "Network In Total":
-						sd.NetworkReceivedRate = valueItem.Timeseries[0].Data[0].Total
-					case "Network Out Total":
-						sd.NetworkSentRate = valueItem.Timeseries[0].Data[0].Total
+					//Bytes/Sec read from a single disk during monitoring period for OS disk
+					case "OS Disk Read Bytes/sec":
+						sd.DiskReads = valueItem.Timeseries[0].Data[0].Average
+					case "OS Disk Write Bytes/sec":
+						sd.DiskWrite = valueItem.Timeseries[0].Data[0].Average
+					case "OS Disk Read Operations/Sec":
+						sd.DiskReadOperations = valueItem.Timeseries[0].Data[0].Average
+					case "OS Disk Write Operations/Sec":
+						sd.DiskWriteOperations = valueItem.Timeseries[0].Data[0].Average
+					case "OS Disk Queue Depth":
+						sd.QueueDepth = valueItem.Timeseries[0].Data[0].Average
 					}
 				}
 			}
@@ -167,13 +167,12 @@ func (sd *StorageDisk) setUsageValue() {
 }
 func (sd *StorageDisk) WriteCSV(filepath string) {
 
-	if len(Virtual_Machines) > 0 {
+	if len(Storage_Disks) > 0 {
 		var matrix [][]string
 		rec := []string{"Resource Group","ResourceID","Service Name","Resource Type","Resource Location","Location Prefix","Consumption Type","Meter","Cost",
-			"Percentage CPU Avg","Bytes read from disk during monitoring period","Bytes written to disk during monitoring period","Incoming Traffic","Outgoing Traffic"}
+			"OS Disk Read Bytes/sec Avg","OS Disk Write Bytes/sec Avg","OS Disk Read Operations/Sec Avg","OS Disk Write Operations/Sec Avg","OS Disk Queue Depth"}
 		matrix = append(matrix, rec)
-		for _, item := range Virtual_Machines {
-			//fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%s,%s,%s,%s,%s,%s,%s,%s\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType, item.Location,item.Meter, item.Cost)
+		for _, item := range Storage_Disks {
 			var rec []string
 			rec = append(rec, item.Resource.ResourceGroup)
 			rec = append(rec, item.Resource.ResourceID)
@@ -183,13 +182,13 @@ func (sd *StorageDisk) WriteCSV(filepath string) {
 			rec = append(rec, item.Resource.LocationPrefix)
 			rec = append(rec, item.Resource.ChargeType)
 			rec = append(rec, item.Resource.Meter)
-			rec = append(rec, item.Resource.Cost)
+			rec = append(rec, fmt.Sprintf("%f",item.Resource.Cost))
 
-			rec = append(rec, fmt.Sprintf("%f",item.CpuUtilization))
 			rec = append(rec, fmt.Sprintf("%f",item.DiskReads))
-			rec = append(rec, fmt.Sprintf("%f",item.DiskWrites))
-			rec = append(rec, fmt.Sprintf("%f",item.NetworkReceivedRate))
-			rec = append(rec, fmt.Sprintf("%f",item.NetworkSentRate))
+			rec = append(rec, fmt.Sprintf("%f",item.DiskWrite))
+			rec = append(rec, fmt.Sprintf("%f",item.DiskReadOperations))
+			rec = append(rec, fmt.Sprintf("%f",item.DiskWriteOperations))
+			rec = append(rec, fmt.Sprintf("%f",item.QueueDepth))
 			matrix = append(matrix, rec)
 		}
 		csv.SaveMatrixToFile(filepath, matrix)

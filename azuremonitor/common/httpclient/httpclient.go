@@ -127,7 +127,7 @@ func makeRequest(r Request) ([]byte, error) {
 	body, err = ioutil.ReadAll(res.Body)
 
 	if res.StatusCode != 200 {
-		fmt.Printf("\n\nthe url : %s-%s\n%s\n%v\n\n%s",r.Method, r.Url, r.Payload,r.Header, string(body))
+		fmt.Printf("\n\nstatus code: %d - url : %s-%s\n%s\n%v\n\n%s",res.StatusCode, r.Method, r.Url, r.Payload,r.Header, string(body))
 		return []byte{}, nil
 	}
 

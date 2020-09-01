@@ -10,22 +10,85 @@ type Resource struct {
 	LocationPrefix string `json:"location_prefix"`
 	ChargeType    string `json:"charge_type"`
 	Meter         string `json:"meter"`
-	Cost          string `json:"cost"`
+	Cost          float64 `json:"cost"`
 }
 
 type Resources []Resource
 
 
-
-//TODO:::this may require some location
-//example: "-eus"
-//var QueryUrl = "https://management.azure.com/subscriptions/" +
-//	"{{subscriptionid}}/resourcegroups/defaultresourcegroup-{{locationprefix}}/providers/microsoft.operationalinsights/workspaces/" +
-//	"defaultworkspace-{{subscriptionid}}-{{locationprefix}}/query?api-version=2017-10-01"
-
 var QueryUrl = "https://management.azure.com/batch?api-version=2015-11-01"
 
-var VmUsagePayload = "{\"requests\": [{\"httpMethod\": \"GET\",\"relativeUrl\": " +
+var LogicAppUsagePayload = "{\"requests\": [{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Logic/workflows/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?timespan=" +
+	"{{startdate}}T16:00:00.000Z/{{enddate}}T16:00:00.000Z&interval=FULL&metricnames=TotalBillableExecutions" +
+	"&aggregation=average&metricNamespace=microsoft.logic%2Fworkflows&validatedimensions=false&api-version=2019-07-01\"}, " +
+	"{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Logic/workflows/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?timespan=" +
+	"{{startdate}}T16:00:00.000Z/{{enddate}}T16:00:00.000Z&interval=FULL&metricnames=BillableActionExecutions" +
+	"&aggregation=total&metricNamespace=microsoft.logic%2Fworkflows&validatedimensions=false&api-version=2019-07-01\"}, " +
+	"{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Logic/workflows/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?timespan=" +
+	"{{startdate}}T16:00:00.000Z/{{enddate}}T16:00:00.000Z&interval=FULL&" +
+	"metricnames=BillingUsageNativeOperation&aggregation=total&metricNamespace=microsoft.logic%2Fworkflows&validatedimensions=false&api-version=2019-07-01\"},  " +
+	"{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Logic/workflows/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?timespan=" +
+	"{{startdate}}T16:00:00.000Z/{{enddate}}T16:00:00.000Z&interval=FULL&metricnames=BillingUsageStandardConnector" +
+	"&aggregation=average&metricNamespace=microsoft.logic%2Fworkflows&validatedimensions=false&api-version=2019-07-01\"}, " +
+	"{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Logic/workflows/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?timespan=" +
+	"{{startdate}}T16:00:00.000Z/{{enddate}}T16:00:00.000Z&interval=FULL&metricnames=BillingUsageStorageConsumption&" +
+	"aggregation=average&metricNamespace=microsoft.logic%2Fworkflows&validatedimensions=false&api-version=2019-07-01\"}]}"
+
+var StorageDiskUsagePayload = "{\"requests\": [{\"httpMethod\": \"GET\",\"url\": " +
+	"\"https://management.azure.com/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Compute/virtualMachines/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?" +
+	"timespan={{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=OS%20Disk%20Read%20Bytes%2Fsec&" +
+	"aggregation=average&validatedimensions=false&api-version=2019-07-01\"}, {\"httpMethod\": \"GET\",\"url\": " +
+	"\"https://management.azure.com/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Compute/virtualMachines/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?" +
+	"timespan={{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=OS%20Disk%20Write%20Bytes%2Fsec&" +
+	"aggregation=average&validatedimensions=false&api-version=2019-07-01\"}, {\"httpMethod\": \"GET\",\"url\": " +
+	"\"https://management.azure.com/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Compute/virtualMachines/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?" +
+	"timespan={{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&" +
+	"metricnames=OS%20Disk%20Read%20Operations%2FSec&" +
+	"aggregation=average&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\": \"GET\",\"url\": " +
+	"\"https://management.azure.com/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Compute/virtualMachines/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?" +
+	"timespan={{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=OS%20Disk%20Write%20Operations%2FSec&" +
+	"aggregation=average&validatedimensions=false&api-version=2019-07-01\"}, {\"httpMethod\": \"GET\",\"url\": " +
+	"\"https://management.azure.com/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Compute/virtualMachines/" +
+	"{{resourceid}}/providers/microsoft.Insights/metrics?" +
+	"timespan={{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=OS%20Disk%20Queue%20Depth&aggregation=average&" +
+	"validatedimensions=false&api-version=2019-07-01\"}]}"
+
+
+var VmUsagePayload = "{\"requests\": [{\"httpMethod\": \"GET\",\"url\": " +
+	"\"https://management.azure.com/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Compute/virtualMachines/" +
+	"{{resourceid}}?api-version=2020-06-01&$expand=instanceView\"}," +
+	"{\"httpMethod\": \"GET\",\"relativeUrl\": " +
 	"\"/subscriptions/{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Compute/virtualMachines/" +
 	"{{resourceid}}/providers/microsoft.Insights/metrics?timespan=" +

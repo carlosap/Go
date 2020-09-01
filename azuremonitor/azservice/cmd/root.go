@@ -21,9 +21,9 @@ func init() {
 	month := now.AddDate(0, 0, -29)
 	rootCmd.PersistentFlags().StringVar(&startDate, "from", month.Format(layoutISO), "start date of report (i.e. YYYY-MM-DD)")
 	rootCmd.PersistentFlags().StringVar(&endDate, "to", now.Format(layoutISO), "end date of report (i.e. YYYY-MM-DD)")
-	rootCmd.PersistentFlags().BoolVar(&saveDb, "db", false, "[=true]saves records to Postgres db")
-	rootCmd.PersistentFlags().BoolVar(&saveCsv, "csv", false, "[=true]saves records into a csv output file")
-	rootCmd.PersistentFlags().BoolVar(&ignoreZeroCost, "izcost", false, "[=true] ignores resources with zero cost")
+	rootCmd.PersistentFlags().BoolVar(&saveDb, "db", false, "[default=false]saves records to Postgres db")
+	rootCmd.PersistentFlags().BoolVar(&saveCsv, "csv", false, "[default=false]saves records into a csv output file")
+	rootCmd.PersistentFlags().BoolVar(&ignoreZeroCost, "izcost", false, "[default=true] ignores resources with zero cost")
 
 }
 

@@ -18,6 +18,7 @@ type VirtualMachine struct {
 	DiskWrites         float64 `json:"disk_writes"`
 	NetworkSentRate     float64 `json:"network_sent_rate"`
 	NetworkReceivedRate float64 `json:"network_received_rate"`
+	OsDisk  OsDisk `json:"osdisk"`
 	Responses []Responses `json:"responses"`
 }
 
@@ -32,18 +33,12 @@ var (
 
 func (vm *VirtualMachine) ExecuteRequest(r httpclient.IRequest) {
 
-	//1-Three Node of Resources
-	rg := ResourceGroupCost{}
-	rg.ExecuteRequest(&rg)
-
-	//2-Filters Virtual Machines only
+	//1-Filters Virtual Machines only
 	requests := vm.getRequests()
 	requests.Execute()
 
-	//3-Serializes All VMs and Sets Metrics
+	//2-Serializes All VMs and Sets Metrics
 	Virtual_Machines = vm.parseRequests(requests)
-
-	//4-Virtual Machine can be used through any output requirements
 }
 
 func (vm *VirtualMachine) GetUrl() string {
@@ -64,6 +59,7 @@ func (vm *VirtualMachine) GetPayload() string {
 	payload = strings.ReplaceAll(payload, "{{resourceid}}", vm.Resource.ResourceID)
 	return payload
 }
+
 func (vm *VirtualMachine) GetHeader() http.Header {
 	at := oauth2.AccessToken{}
 	at.ExecuteRequest(&at)
@@ -76,13 +72,16 @@ func (vm *VirtualMachine) GetHeader() http.Header {
 }
 func (vm *VirtualMachine) Print() {
 	if len(Virtual_Machines) > 0 {
-		fmt.Printf("Usage Report:\n")
+		fmt.Printf("VM Usage Report:\n")
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Location Prefix,Consumption Type,Meter,Cost,Percentage CPU Avg,Bytes read from disk during monitoring period,Bytes written to disk during monitoring period,Incoming Traffic,Outgoing Traffic")
+		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Location Prefix,Consumption Type,Meter,Cost," +
+			"OS Type, Disk Name, Storage Account Type" +
+			"Percentage CPU Avg,Bytes read from disk during monitoring period,Bytes written to disk during monitoring period,Incoming Traffic,Outgoing Traffic")
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 		for _, item := range Virtual_Machines {
-			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%s,%f,%f,%f,%f,%f,%f,%f\n",item.Resource.ResourceGroup, item.Resource.ResourceID, item.Resource.Service,
+			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%f,%s,%s,%s,%f,%f,%f,%f,%f,%f,%f\n",item.Resource.ResourceGroup, item.Resource.ResourceID, item.Resource.Service,
 				item.Resource.ServiceType, item.Resource.Location,item.Resource.LocationPrefix, item.Resource.ChargeType, item.Resource.Meter, item.Resource.Cost,
+				item.OsDisk.OsType, item.OsDisk.Name, item.OsDisk.ManagedDisk.StorageAccountType,
 				item.CpuUtilization, item.DiskReads,item.DiskWrites, item.NetworkReceivedRate, item.NetworkSentRate,
 				item.NetworkSentRate, item.NetworkReceivedRate)
 		}
@@ -97,7 +96,7 @@ func (vm *VirtualMachine) getRequests() httpclient.Requests {
 	if len(Resources) > 0 {
 		for _, resource := range Resources {
 			if resource.Service == "virtual machines" && resource.ServiceType == "virtualmachines" &&
-				len(resource.Cost) > 0 && resource.ChargeType == "usage" {
+				resource.Cost > 0.0 && resource.ChargeType == "usage" {
 
 				rName := "vm_" + resource.ResourceID
 				vm.Resource = resource
@@ -137,7 +136,9 @@ func (vm *VirtualMachine) parseRequests(requests httpclient.Requests) VirtualMac
 func (vm *VirtualMachine) setUsageValue() {
 
 	if len(vm.Responses) > 0 {
+		vm.OsDisk = vm.Responses[0].Content.Properties.StorageProfile.OsDisk
 		for _, response := range vm.Responses {
+
 			if len(response.Content.Value) > 0 {
 				for _, valueItem := range response.Content.Value {
 					switch valueItem.Name.Value {
@@ -156,9 +157,8 @@ func (vm *VirtualMachine) setUsageValue() {
 			}
 		}
 	}
-
-
 }
+
 func (vm *VirtualMachine) WriteCSV(filepath string) {
 
 	if len(Virtual_Machines) > 0 {
@@ -167,7 +167,6 @@ func (vm *VirtualMachine) WriteCSV(filepath string) {
 			"Percentage CPU Avg","Bytes read from disk during monitoring period","Bytes written to disk during monitoring period","Incoming Traffic","Outgoing Traffic"}
 		matrix = append(matrix, rec)
 		for _, item := range Virtual_Machines {
-			//fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%s,%s,%s,%s,%s,%s,%s,%s\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType, item.Location,item.Meter, item.Cost)
 			var rec []string
 			rec = append(rec, item.Resource.ResourceGroup)
 			rec = append(rec, item.Resource.ResourceID)
@@ -177,7 +176,7 @@ func (vm *VirtualMachine) WriteCSV(filepath string) {
 			rec = append(rec, item.Resource.LocationPrefix)
 			rec = append(rec, item.Resource.ChargeType)
 			rec = append(rec, item.Resource.Meter)
-			rec = append(rec, item.Resource.Cost)
+			rec = append(rec, fmt.Sprintf("%f",item.Resource.Cost))
 
 			rec = append(rec, fmt.Sprintf("%f",item.CpuUtilization))
 			rec = append(rec, fmt.Sprintf("%f",item.DiskReads))
