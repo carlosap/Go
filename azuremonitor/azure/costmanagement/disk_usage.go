@@ -63,7 +63,7 @@ func (sd *StorageDisk) GetPayload() string {
 	payload = strings.ReplaceAll(payload, "{{startdate}}", StartDate)
 	payload = strings.ReplaceAll(payload, "{{enddate}}", EndDate)
 	payload = strings.ReplaceAll(payload, "{{subscriptionid}}", configuration.AccessToken.SubscriptionID)
-	payload = strings.ReplaceAll(payload, "{{resourcegroup}}", sd.Resource.ResourceGroup)
+	payload = strings.ReplaceAll(payload, "{{resourcegroup}}", sd.Resource.ResourceGroupName)
 	payload = strings.ReplaceAll(payload, "{{resourceid}}",vmsourceid )
 	return payload
 }
@@ -82,13 +82,55 @@ func (sd *StorageDisk) Print() {
 	if len(Storage_Disks) > 0 {
 		fmt.Printf("Usage Report Storage Disk:\n")
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Location Prefix,Consumption Type,Meter,Cost," +
-			"OS Disk Read Bytes/sec Avg,OS Disk Write Bytes/sec Avg,OS Disk Read Operations/Sec Avg,OS Disk Write Operations/Sec Avg,OS Disk Queue Depth")
+		fmt.Println("Resource Group," +
+			"ResourceID," +
+			"Resource Type," +
+			"Resource Location," +
+			"Charge Type," +
+			"Service Name," +
+			"Meter," +
+			"Meter Category," +
+			"Meter SubCategory," +
+			"Service Family," +
+			"Unit Of Measure," +
+			"Cost Allocation Rule Name," +
+			"Product," +
+			"Frequency," +
+			"Pricing Model," +
+			"Currency," +
+			"UsageQuantity," +
+			"PreTaxCostUSD," +
+			"Disk Read Bytes/sec Avg," +
+			"Disk Write Bytes/sec Avg," +
+			"Disk Read Operations/Sec Avg," +
+			"Disk Write Operations/Sec Avg," +
+			"OS Disk Queue Depth")
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 		for _, item := range Storage_Disks {
-			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%f,%f,%f,%f,%f,%f\n",item.Resource.ResourceGroup, item.Resource.ResourceID, item.Resource.Service,
-				item.Resource.ServiceType, item.Resource.Location,item.Resource.LocationPrefix, item.Resource.ChargeType, item.Resource.Meter, item.Resource.Cost,
-				item.DiskReads, item.DiskWrite,item.DiskReadOperations, item.DiskWriteOperations, item.QueueDepth)
+			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%f,$%f,%f,%f,%f,%f,%f\n",
+				item.Resource.ResourceGroupName,
+				item.Resource.ResourceID,
+				item.Resource.ResourceType,
+				item.Resource.ResourceLocation,
+				item.Resource.ChargeType,
+				item.Resource.ServiceName,
+				item.Resource.Meter,
+				item.Resource.MeterCategory,
+				item.Resource.MeterSubCategory,
+				item.Resource.ServiceFamily,
+				item.Resource.UnitOfMeasure,
+				item.Resource.CostAllocationRuleName,
+				item.Resource.Product,
+				item.Resource.Frequency,
+				item.Resource.PricingModel,
+				item.Resource.Currency,
+				item.Resource.UsageQuantity,
+				item.Resource.PreTaxCostUSD,
+				item.DiskReads,
+				item.DiskWrite,
+				item.DiskReadOperations,
+				item.DiskWriteOperations,
+				item.QueueDepth)
 		}
 	} else {
 		fmt.Printf("-\n\n\n")
@@ -100,7 +142,7 @@ func (sd *StorageDisk) getRequests() httpclient.Requests {
 	requests := httpclient.Requests{}
 	if len(Resources) > 0 {
 		for index, resource := range Resources {
-			if resource.Service == "storage" && resource.ServiceType == "disks" && resource.ChargeType == "usage" && resource.Cost > 0.0 {
+			if resource.ServiceName == "storage" && resource.ResourceType == "disks" && resource.ChargeType == "usage" && resource.PreTaxCostUSD > 0.0 {
 				rName := "sd_" + resource.ResourceID + "_" + fmt.Sprintf("%d", index)
 				sd.Resource = resource
 				request := httpclient.Request{
@@ -169,21 +211,51 @@ func (sd *StorageDisk) WriteCSV(filepath string) {
 
 	if len(Storage_Disks) > 0 {
 		var matrix [][]string
-		rec := []string{"Resource Group","ResourceID","Service Name","Resource Type","Resource Location","Location Prefix","Consumption Type","Meter","Cost",
-			"OS Disk Read Bytes/sec Avg","OS Disk Write Bytes/sec Avg","OS Disk Read Operations/Sec Avg","OS Disk Write Operations/Sec Avg","OS Disk Queue Depth"}
+		rec := []string{
+			"Resource Group",
+			"ResourceID",
+			"Resource Type",
+			"Resource Location",
+			"Charge Type",
+			"Service Name",
+			"Meter",
+			"Meter Category",
+			"Meter SubCategory",
+			"Service Family",
+			"Unit Of Measure",
+			"Cost Allocation Rule Name",
+			"Product",
+			"Frequency",
+			"Pricing Model",
+			"Currency",
+			"UsageQuantity",
+			"PreTaxCostUSD",
+			"Disk Read Bytes/sec Avg",
+			"Disk Write Bytes/sec Avg",
+			"Disk Read Operations/Sec Avg",
+			"Disk Write Operations/Sec Avg",
+			"Disk Queue Depth"}
 		matrix = append(matrix, rec)
 		for _, item := range Storage_Disks {
 			var rec []string
-			rec = append(rec, item.Resource.ResourceGroup)
+			rec = append(rec, item.Resource.ResourceGroupName)
 			rec = append(rec, item.Resource.ResourceID)
-			rec = append(rec, item.Resource.Service)
-			rec = append(rec, item.Resource.ServiceType)
-			rec = append(rec, item.Resource.Location)
-			rec = append(rec, item.Resource.LocationPrefix)
+			rec = append(rec, item.Resource.ResourceType)
+			rec = append(rec, item.Resource.ResourceLocation)
 			rec = append(rec, item.Resource.ChargeType)
+			rec = append(rec, item.Resource.ServiceName)
 			rec = append(rec, item.Resource.Meter)
-			rec = append(rec, fmt.Sprintf("%f",item.Resource.Cost))
-
+			rec = append(rec, item.Resource.MeterCategory)
+			rec = append(rec, item.Resource.MeterSubCategory)
+			rec = append(rec, item.Resource.ServiceFamily)
+			rec = append(rec, item.Resource.UnitOfMeasure)
+			rec = append(rec, item.Resource.CostAllocationRuleName)
+			rec = append(rec, item.Resource.Product)
+			rec = append(rec, item.Resource.Frequency)
+			rec = append(rec, item.Resource.PricingModel)
+			rec = append(rec, item.Resource.Currency)
+			rec = append(rec, fmt.Sprintf("%f", item.Resource.UsageQuantity))
+			rec = append(rec, fmt.Sprintf("%f", item.Resource.PreTaxCostUSD))
 			rec = append(rec, fmt.Sprintf("%f",item.DiskReads))
 			rec = append(rec, fmt.Sprintf("%f",item.DiskWrite))
 			rec = append(rec, fmt.Sprintf("%f",item.DiskReadOperations))

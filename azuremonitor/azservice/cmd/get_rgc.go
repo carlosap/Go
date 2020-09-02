@@ -34,6 +34,7 @@ func setResourceGroupCostCommand() (*cobra.Command, error) {
 
 	cmd.RunE = func(*cobra.Command, []string) error {
 		terminal.Clear()
+		csvRgcReportName := "resource_group_cost.csv"
 		costmanagement.StartDate = startDate
 		costmanagement.EndDate = endDate
 		costmanagement.IgnoreZeroCost = ignoreZeroCost

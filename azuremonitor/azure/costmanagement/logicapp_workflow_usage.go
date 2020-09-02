@@ -57,7 +57,7 @@ func (lg *LogicAppWorkFlow) GetPayload() string {
 	payload = strings.ReplaceAll(payload, "{{startdate}}", StartDate)
 	payload = strings.ReplaceAll(payload, "{{enddate}}", EndDate)
 	payload = strings.ReplaceAll(payload, "{{subscriptionid}}", configuration.AccessToken.SubscriptionID)
-	payload = strings.ReplaceAll(payload, "{{resourcegroup}}", lg.Resource.ResourceGroup)
+	payload = strings.ReplaceAll(payload, "{{resourcegroup}}", lg.Resource.ResourceGroupName)
 	payload = strings.ReplaceAll(payload, "{{resourceid}}",lg.Resource.ResourceID )
 	return payload
 }
@@ -76,13 +76,55 @@ func (lg *LogicAppWorkFlow) Print() {
 	if len(LogicApp_Workflows) > 0 {
 		fmt.Printf("Usage Report Logic App Workflow:\n")
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Location Prefix,Consumption Type,Meter,Cost," +
-			"Workflow Executions Avg,Workflow Action Executions Avg,Native Operation Executions Avg,Standard Connector Executions Avg,Storage Consumption Executions Avg")
+		fmt.Println("Resource Group," +
+			"ResourceID," +
+			"Resource Type," +
+			"Resource Location," +
+			"Charge Type," +
+			"Service Name," +
+			"Meter," +
+			"Meter Category," +
+			"Meter SubCategory," +
+			"Service Family," +
+			"Unit Of Measure," +
+			"Cost Allocation Rule Name," +
+			"Product," +
+			"Frequency," +
+			"Pricing Model," +
+			"Currency," +
+			"UsageQuantity," +
+			"PreTaxCostUSD," +
+			"Workflow Executions Avg," +
+			"Workflow Action Executions Avg," +
+			"Native Operation Executions Avg," +
+			"Standard Connector Executions Avg," +
+			"Storage Consumption Executions Avg")
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 		for _, item := range LogicApp_Workflows {
-			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%f,%f,%f,%f,%f,%f\n",item.Resource.ResourceGroup, item.Resource.ResourceID, item.Resource.Service,
-				item.Resource.ServiceType, item.Resource.Location,item.Resource.LocationPrefix, item.Resource.ChargeType, item.Resource.Meter, item.Resource.Cost,
-				item.WorkflowExecutionsAvg, item.WorkflowActionExecutionsAvg,item.NativeOperationExecutionsAvg, item.StandardConnectorExecutionsAvg, item.StorageConsumptionExecutionsAvg)
+			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%f,$%f,%f,%f,%f,%f,%f\n",
+				item.Resource.ResourceGroupName,
+				item.Resource.ResourceID,
+				item.Resource.ResourceType,
+				item.Resource.ResourceLocation,
+				item.Resource.ChargeType,
+				item.Resource.ServiceName,
+				item.Resource.Meter,
+				item.Resource.MeterCategory,
+				item.Resource.MeterSubCategory,
+				item.Resource.ServiceFamily,
+				item.Resource.UnitOfMeasure,
+				item.Resource.CostAllocationRuleName,
+				item.Resource.Product,
+				item.Resource.Frequency,
+				item.Resource.PricingModel,
+				item.Resource.Currency,
+				item.Resource.UsageQuantity,
+				item.Resource.PreTaxCostUSD,
+				item.WorkflowExecutionsAvg,
+				item.WorkflowActionExecutionsAvg,
+				item.NativeOperationExecutionsAvg,
+				item.StandardConnectorExecutionsAvg,
+				item.StorageConsumptionExecutionsAvg)
 		}
 	} else {
 		fmt.Printf("-\n\n\n")
@@ -94,7 +136,7 @@ func (lg *LogicAppWorkFlow) getRequests() httpclient.Requests {
 	requests := httpclient.Requests{}
 	if len(Resources) > 0 {
 		for index, resource := range Resources {
-			if resource.Service == "logic apps" && resource.ServiceType == "workflows" && resource.ChargeType == "usage" && resource.Cost > 0.0 {
+			if resource.ServiceName == "logic apps" && resource.ResourceType == "workflows" && resource.ChargeType == "usage" && resource.PreTaxCostUSD > 0.0 {
 				rName := "lg_" + resource.ResourceID + "_" + fmt.Sprintf("%d", index)
 				lg.Resource = resource
 				request := httpclient.Request{
@@ -161,20 +203,51 @@ func (lg *LogicAppWorkFlow) WriteCSV(filepath string) {
 
 	if len(LogicApp_Workflows) > 0 {
 		var matrix [][]string
-		rec := []string{"Resource Group","ResourceID","Service Name","Resource Type","Resource Location","Location Prefix","Consumption Type","Meter","Cost",
-			"Workflow Executions Avg","Workflow Action Executions Avg","Native Operation Executions Avg","Standard Connector Executions Avg","Storage Consumption Executions Avg"}
+		rec := []string{
+			"Resource Group",
+			"ResourceID",
+			"Resource Type",
+			"Resource Location",
+			"Charge Type",
+			"Service Name",
+			"Meter",
+			"Meter Category",
+			"Meter SubCategory",
+			"Service Family",
+			"Unit Of Measure",
+			"Cost Allocation Rule Name",
+			"Product",
+			"Frequency",
+			"Pricing Model",
+			"Currency",
+			"UsageQuantity",
+			"PreTaxCostUSD",
+			"Workflow Executions Avg",
+			"Workflow Action Executions Avg",
+			"Native Operation Executions Avg",
+			"Standard Connector Executions Avg",
+			"Storage Consumption Executions Avg"}
 		matrix = append(matrix, rec)
 		for _, item := range LogicApp_Workflows {
 			var rec []string
-			rec = append(rec, item.Resource.ResourceGroup)
+			rec = append(rec, item.Resource.ResourceGroupName)
 			rec = append(rec, item.Resource.ResourceID)
-			rec = append(rec, item.Resource.Service)
-			rec = append(rec, item.Resource.ServiceType)
-			rec = append(rec, item.Resource.Location)
-			rec = append(rec, item.Resource.LocationPrefix)
+			rec = append(rec, item.Resource.ResourceType)
+			rec = append(rec, item.Resource.ResourceLocation)
 			rec = append(rec, item.Resource.ChargeType)
+			rec = append(rec, item.Resource.ServiceName)
 			rec = append(rec, item.Resource.Meter)
-			rec = append(rec, fmt.Sprintf("%f",item.Resource.Cost))
+			rec = append(rec, item.Resource.MeterCategory)
+			rec = append(rec, item.Resource.MeterSubCategory)
+			rec = append(rec, item.Resource.ServiceFamily)
+			rec = append(rec, item.Resource.UnitOfMeasure)
+			rec = append(rec, item.Resource.CostAllocationRuleName)
+			rec = append(rec, item.Resource.Product)
+			rec = append(rec, item.Resource.Frequency)
+			rec = append(rec, item.Resource.PricingModel)
+			rec = append(rec, item.Resource.Currency)
+			rec = append(rec, fmt.Sprintf("%f", item.Resource.UsageQuantity))
+			rec = append(rec, fmt.Sprintf("%f", item.Resource.PreTaxCostUSD))
 
 			rec = append(rec, fmt.Sprintf("%f",item.WorkflowExecutionsAvg))
 			rec = append(rec, fmt.Sprintf("%f",item.WorkflowActionExecutionsAvg))

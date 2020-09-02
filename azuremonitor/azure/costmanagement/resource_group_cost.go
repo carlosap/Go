@@ -40,6 +40,7 @@ var (
 	IgnoreZeroCost bool
 	SaveCsv bool
 	Resources = azure.Resources{}
+
 )
 
 

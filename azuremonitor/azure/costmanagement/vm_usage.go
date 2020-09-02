@@ -121,7 +121,6 @@ func (vm *VirtualMachine) Print() {
 				item.Resource.Currency,
 				item.Resource.UsageQuantity,
 				item.Resource.PreTaxCostUSD,
-
 				item.OsDisk.OsType,
 				item.OsDisk.Name,
 				item.OsDisk.ManagedDisk.StorageAccountType,
@@ -141,9 +140,8 @@ func (vm *VirtualMachine) getRequests() httpclient.Requests {
 	requests := httpclient.Requests{}
 	if len(Resources) > 0 {
 		for _, resource := range Resources {
-			if resource.Service == "virtual machines" && resource.ServiceType == "virtualmachines" &&
-				resource.Cost > 0.0 && resource.ChargeType == "usage" {
-
+			if resource.ServiceName == "virtual machines" && resource.ResourceType == "virtualmachines" &&
+				resource.PreTaxCostUSD > 0.0 && resource.ChargeType == "usage" {
 				rName := "vm_" + resource.ResourceID
 				vm.Resource = resource
 				request := httpclient.Request{
@@ -209,21 +207,57 @@ func (vm *VirtualMachine) WriteCSV(filepath string) {
 
 	if len(Virtual_Machines) > 0 {
 		var matrix [][]string
-		rec := []string{"Resource Group","ResourceID","Service Name","Resource Type","Resource Location","Location Prefix","Consumption Type","Meter","Cost",
-			"Percentage CPU Avg","Bytes read from disk during monitoring period","Bytes written to disk during monitoring period","Incoming Traffic","Outgoing Traffic"}
+		rec := []string{"" +
+			"Resource Group",
+			"ResourceID",
+				"Resource Type",
+				"Resource Location",
+				"Charge Type",
+				"Service Name",
+				"Meter",
+				"Meter Category",
+				"Meter SubCategory",
+				"Service Family",
+				"Unit Of Measure",
+				"Cost Allocation Rule Name",
+				"Product",
+				"Frequency",
+				"Pricing Model",
+				"Currency",
+				"UsageQuantity",
+				"PreTaxCostUSD",
+			    "OS Type",
+				"Disk Name",
+				"Storage Account Type",
+				"Percentage CPU Avg",
+				"Bytes Read",
+				"Bytes Written",
+				"Incoming Traffic (Network Received)",
+				"Outgoing Traffic (Network Sent)"}
 		matrix = append(matrix, rec)
 		for _, item := range Virtual_Machines {
 			var rec []string
-			rec = append(rec, item.Resource.ResourceGroup)
+			rec = append(rec, item.Resource.ResourceGroupName)
 			rec = append(rec, item.Resource.ResourceID)
-			rec = append(rec, item.Resource.Service)
-			rec = append(rec, item.Resource.ServiceType)
-			rec = append(rec, item.Resource.Location)
-			rec = append(rec, item.Resource.LocationPrefix)
+			rec = append(rec, item.Resource.ResourceType)
+			rec = append(rec, item.Resource.ResourceLocation)
 			rec = append(rec, item.Resource.ChargeType)
+			rec = append(rec, item.Resource.ServiceName)
 			rec = append(rec, item.Resource.Meter)
-			rec = append(rec, fmt.Sprintf("%f",item.Resource.Cost))
-
+			rec = append(rec, item.Resource.MeterCategory)
+			rec = append(rec, item.Resource.MeterSubCategory)
+			rec = append(rec, item.Resource.ServiceFamily)
+			rec = append(rec, item.Resource.UnitOfMeasure)
+			rec = append(rec, item.Resource.CostAllocationRuleName)
+			rec = append(rec, item.Resource.Product)
+			rec = append(rec, item.Resource.Frequency)
+			rec = append(rec, item.Resource.PricingModel)
+			rec = append(rec, item.Resource.Currency)
+			rec = append(rec, fmt.Sprintf("%f", item.Resource.UsageQuantity))
+			rec = append(rec, fmt.Sprintf("%f", item.Resource.PreTaxCostUSD))
+			rec = append(rec, item.OsDisk.OsType)
+			rec = append(rec, item.OsDisk.Name)
+			rec = append(rec, item.OsDisk.ManagedDisk.StorageAccountType)
 			rec = append(rec, fmt.Sprintf("%f",item.CpuUtilization))
 			rec = append(rec, fmt.Sprintf("%f",item.DiskReads))
 			rec = append(rec, fmt.Sprintf("%f",item.DiskWrites))

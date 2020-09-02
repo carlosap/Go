@@ -37,8 +37,6 @@ func setResourceGroupUsageCommand() (*cobra.Command, error) {
 		costmanagement.EndDate = endDate
 		costmanagement.IgnoreZeroCost = ignoreZeroCost
 		costmanagement.SaveCsv = saveCsv
-		costmanagement.CsvRguReportName = csvRguReportName
-		costmanagement.CsvRgcReportName = csvRgcReportName
 		usage := costmanagement.ResourceGroupUsage{}
 		usage.RunAll()
 		return nil
