@@ -17,11 +17,6 @@ const AppContextProvider = (props) => {
         }
     })
 
-    // useEffect(() => {localStorage.setItem('weather', JSON.stringify(state.weather))}, [state.weather]);
-    // useEffect(() => {localStorage.setItem('forecast', JSON.stringify(state.forecast))}, [state.forecast]);
-    // useEffect(() => {localStorage.setItem('ipinfo', JSON.stringify(state.ipinfo))}, [state.ipinfo]);
-    // useEffect(() => {localStorage.setItem('news', JSON.stringify(state.news))}, [state.news]);
-    
     const wsUpdateListener = () => {
         socket.onmessage = (e) => {
             console.log(e.data)
