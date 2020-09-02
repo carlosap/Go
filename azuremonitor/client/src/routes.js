@@ -1,5 +1,6 @@
 import HomePage from './pages/HomePage';
 import AnalysisPage from './pages/AnalysisPage'
+import UsagePage from './pages/UsagePage'
 import React from 'react';
 import { Redirect } from "react-router-dom";
 
@@ -30,6 +31,12 @@ const NavbarRoutes = {
             icon: "",
             hidden: true,
             component: AnalysisPage
+        },
+        {
+            path: "/usage/:id",
+            name: "Usage",
+            icon: "",
+            component: UsagePage
         },
         {
             path: "/",

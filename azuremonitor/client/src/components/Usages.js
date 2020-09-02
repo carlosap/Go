@@ -1,59 +1,120 @@
 import React, {useState} from 'react'
-import {Divider, Tooltip, IconButton, Typography} from '@material-ui/core'
+import {makeStyles} from '@material-ui/core/styles'
+import {Grid, Divider, Tooltip, IconButton, Typography} from '@material-ui/core'
 import {Dialog, DialogActions, DialogTitle, DialogContent} from '@material-ui/core'
 import DataUsageIcon from '@material-ui/icons/DataUsage'
 import CloseIcon from '@material-ui/icons/Close';
+import ComputerIcon from '@material-ui/icons/Computer';
+import InfoIcon from '@material-ui/icons/Info';
+
+const useStyles = makeStyles({
+	titleContainer: {
+		textAlign:'center', 
+		paddingBottom: 8
+	},
+	usageContainer: {
+		display: 'flex',
+		overflow: 'hidden'
+	},
+	infoHeaderContainer:{
+		display: 'flex',
+		alignItems: 'center',
+	},
+
+})
+
+const InfoHeader = (props) => {
+	const styles = useStyles()
+	const {icon, title} = props 
+
+	return (
+		<div className={styles.infoHeaderContainer}>
+			{icon}
+			<Typography style={{fontWeight:'bold'}} variant='subtitle1'>
+				{title}
+			</Typography>
+		</div>
+	)
+}
+
+const InfoLine = (props) => {
+	const {name, value} = props
+	return (
+		<div style={{display:'flex', marginTop: 5}}>
+			<div style={{width:'50%'}}>
+				<Typography 
+					color='textSecondary'
+				> 
+					{name} 
+				</Typography>
+			</div>
+			<div style={{width: '50%'}}>
+				<Typography> {value} </Typography>
+			</div>
+		</div>
+	)
+}
 
 const Usages = (props) => {
-    const [open, setOpen] = useState(false)
+	const styles = useStyles()
+	const [open, setOpen] = useState(false)
 
-    const handleClick = () => {
-        setOpen(true)
-    }
+	const handleClick = () => {
+			setOpen(true)
+	}
 
-    const {usage} = props
+	const {resource} = props
 
-    return (
-        <div>
-            <Tooltip title='Usages'>
-                <IconButton onClick={handleClick}>
-                    <DataUsageIcon color="primary"/>
-                </IconButton>
-            </Tooltip>
+	return (
+		<div>
+			<Tooltip title='Usages'>
+				<IconButton onClick={handleClick}>
+					<DataUsageIcon color="primary"/>
+				</IconButton>
+			</Tooltip>
 
-            <Dialog maxWidth='xs' fullWidth open={open} onClose={() => setOpen(false)}>
+			<Dialog maxWidth='md' fullWidth open={open} onClose={() => setOpen(false)}>
 
-            <DialogTitle style={{textAlign:'center', paddingBottom:'8px'}}>
-                <div>
-                    <Typography variant='h4' style={{fontWeight:'bold'}}> Usages </Typography>
-                    <Divider/>
-                </div>
-            </DialogTitle>
+			<DialogTitle className={styles.titleContainer}>
+					<Typography style={{fontWeight:'bold'}} variant='h4'> Usages </Typography>
+					<Divider/>
+			</DialogTitle>
 
-            <DialogContent>
-                <Typography style={{marginBottom:' 10px'}} color="primary" variant="h6">
-                    {`${usage.length} detected`}
-                </Typography>
-                {usage.length > 0 ? 
-                    usage.map((u, idx) => (
-                        <Typography key={idx} style={{marginBottom:'4px'}} color="textPrimary">{`- ${u}`}</Typography>
-                    ))
-                : 
-                    <Typography> No Usage Detected </Typography>
-                }
-            </DialogContent>
+			<DialogContent className={styles.usageContainer}>
+				<div style={{width: '50%'}}>
+					<InfoHeader 
+						title={resource.type} 
+						icon={<ComputerIcon color="primary" style={{marginRight: 5}}/>}
+					/>
 
-            <DialogActions style={{alignSelf:'center'}}>
-                <Tooltip title="Close">
-                    <IconButton onClick={() => setOpen(false)}>
-                        <CloseIcon/>
-                    </IconButton>
-                </Tooltip>
-            </DialogActions>
+					{resource.resourceInfo.map((info) => (
+						<InfoLine name={info.displayName} value={info.displayValue}/>
+					))}
+				</div>
 
-            </Dialog>
-        </div>
-    )
+				<div style={{width: '50%'}}>
+					<InfoHeader 
+						title="Usage" 
+						icon={<InfoIcon color="primary" style={{marginRight: 5}}/>}
+					/>
+
+					{resource.resourceUsage.map((info) => (
+						<InfoLine name={info.displayName} value={info.displayValue}/>
+					))}
+				</div>
+			</DialogContent>
+
+			<DialogActions style={{alignSelf:'center'}}>
+				<Tooltip title="Close">
+					<IconButton onClick={() => setOpen(false)}>
+						<CloseIcon/>
+					</IconButton>
+				</Tooltip>
+			</DialogActions>
+
+			</Dialog>
+		</div>
+	)
 }
 
 export default Usages

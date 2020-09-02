@@ -54,7 +54,7 @@ const ResourceGroups = (props) => {
   const styles = {
     padding: {
       paddingBottom: '0', 
-      paddingTop:'0'
+      paddingTop:'0',
     },
     collapseRow: {
       paddingBottom: '8px', 
@@ -114,7 +114,7 @@ const ResourceGroups = (props) => {
                                 <BorderlessCell align='center' style={styles.padding}>{resource.savings}</BorderlessCell>
                                 <BorderlessCell align='center' style={styles.padding}>
                                   <div style={{display:'flex', justifyContent:'center'}}>
-                                    <Usages usage={resource.usage}/>
+                                    <Usages resource={resource}/>
                                     <Recommendations recommendations={resource.recommendations}/>
                                     <Edit groupName={group.groupName} subscription={subscription} resource={resource}/>
                                     <MoreVert subscription={subscription} groupName={group.groupName} resourceName={resource.resourceName}/>
@@ -130,7 +130,7 @@ const ResourceGroups = (props) => {
                               <TableCell align='center' style={styles.padding}>{resource.savings}</TableCell>
                               <TableCell align='center' style={styles.padding}>
                                 <div style={{display:'flex', justifyContent:'center'}}>
-                                  <Usages  usage={resource.usage}/>
+                                  <Usages resource={resource}/>
                                   <Recommendations recommendations={resource.recommendations}/>
                                   <Edit groupName={group.groupName} subscription={subscription} resource={resource}/>
                                   <MoreVert subscription={subscription} groupName={group.groupName} resourceName={resource.resourceName}/>
@@ -208,7 +208,6 @@ const ResourcesTable = (props) => {
     return tableState.includes(id)
   }
 
-  console.log(tableState)
   return (
     <Paper elevation={3}>
       <Table>
