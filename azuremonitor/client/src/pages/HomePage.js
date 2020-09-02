@@ -17,7 +17,6 @@ const useStyles = makeStyles({
         maxWidth: "100%",
         height:"auto"
     },
-   
     widgetsContainer: {
         marginRight:"75px",
         display: 'flex',
@@ -68,7 +67,11 @@ const HomePage = () => {
             </Grid>
 
             <Grid style={{padding:'30px'}} item sm={12}>
-                <ResourcesTable data={state.Resources} dispatch={dispatch}/>
+                <ResourcesTable 
+                    tableState={state.tableState} 
+                    data={state.Resources} 
+                    dispatch={dispatch}
+                />
             </Grid>
 
             <Grid style={{paddingLeft:'30px', paddingRight:'30px'}} container item sm={12} spacing={2}>

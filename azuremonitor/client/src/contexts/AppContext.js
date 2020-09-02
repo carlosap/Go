@@ -13,7 +13,8 @@ const AppContextProvider = (props) => {
     const [state, dispatch] = useReducer(appReducer, {}, () => {
         return {
             Resources: Resources,
-            Questions: VMQuestions
+            Questions: VMQuestions,
+            tableState: []
         }
     })
 
