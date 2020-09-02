@@ -48,7 +48,7 @@ const InfoLine = (props) => {
 					{name} 
 				</Typography>
 			</div>
-			<div style={{width: '50%'}}>
+			<div style={{width: '50%', overflowWrap: 'break-word'}}>
 				<Typography> {value} </Typography>
 			</div>
 		</div>
