@@ -37,8 +37,6 @@ var (
 	configuration    c.CmdConfig
 	StartDate        string
 	EndDate          string
-	CsvRguReportName string
-	CsvRgcReportName string
 	IgnoreZeroCost bool
 	SaveCsv bool
 	Resources = azure.Resources{}
@@ -72,21 +70,11 @@ func (rgc *ResourceGroupCost) GetPayload() string {
 		return ""
 	}
 
-	url := fmt.Sprintf("{\"type\": \"ActualCost\",\"dataSet\": {\"granularity\": \"None\","+
-		"\"aggregation\": {\"totalCost\": {\"name\": \"Cost\",\"function\": \"Sum\"},"+
-		"\"totalCostUSD\": {\"name\": \"CostUSD\",\"function\": \"Sum\"}},"+
-		"\"grouping\": [{\"type\": \"Dimension\",\"name\": \"ResourceId\"},"+
-		" {\"type\": \"Dimension\",\"name\": \"ResourceType\"}, {\"type\": \"Dimension\",\"name\": \"ResourceLocation\"}, "+
-		"{\"type\": \"Dimension\",\"name\": \"ChargeType\"}, {\"type\": \"Dimension\",\"name\": \"ResourceGroupName\"}, "+
-		"{\"type\": \"Dimension\",\"name\": \"PublisherType\"}, {\"type\": \"Dimension\",\"name\": \"ServiceName\"}, "+
-		"{\"type\": \"Dimension\",\"name\": \"Meter\"}],\"include\": [\"Tags\"]},\"timeframe\": \"Custom\","+
-		"\"timePeriod\": {"+
-		"\"from\": \"%sT00:00:00+00:00\","+
-		"\"to\": \"%sT23:59:59+00:00\"}}",
-		StartDate,
-		EndDate,
-	)
-	return url
+	payload := azure.ActualCostManagementPayload
+	payload = strings.ReplaceAll(payload, "{{startdate}}", StartDate)
+	payload = strings.ReplaceAll(payload, "{{enddate}}", EndDate)
+
+	return payload
 }
 func (rgc *ResourceGroupCost) GetHeader() http.Header {
 	at := oauth2.AccessToken{}
@@ -102,10 +90,46 @@ func (rgc *ResourceGroupCost) Print() {
 	if len(Resources) > 0 {
 		fmt.Println("Consumption Report:")
 		fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
-		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Location Prefix,Consumption Type,Meter,Cost")
+		fmt.Println("Resource Group," +
+			"ResourceID," +
+			"Resource Type," +
+			"Resource Location," +
+			"Charge Type," +
+			"Service Name," +
+			"Meter," +
+			"Meter Category," +
+			"Meter SubCategory," +
+			"Service Family," +
+			"Unit Of Measure," +
+			"Cost Allocation Rule Name," +
+			"Product," +
+			"Frequency," +
+			"Pricing Model," +
+			"Currency," +
+			"UsageQuantity," +
+			"PreTaxCostUSD")
 		fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
+
 		for _, item := range Resources {
-			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%f\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType, item.Location,item.LocationPrefix,item.ChargeType, item.Meter, item.Cost)
+			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%f,$%f\n",
+				item.ResourceGroupName,
+				item.ResourceID,
+				item.ResourceType,
+				item.ResourceLocation,
+				item.ChargeType,
+				item.ServiceName,
+				item.Meter,
+				item.MeterCategory,
+				item.MeterSubCategory,
+				item.ServiceFamily,
+				item.UnitOfMeasure,
+				item.CostAllocationRuleName,
+				item.Product,
+				item.Frequency,
+				item.PricingModel,
+				item.Currency,
+				item.UsageQuantity,
+				item.PreTaxCostUSD)
 		}
 	} else {
 		fmt.Printf("-")
@@ -115,20 +139,47 @@ func (rgc *ResourceGroupCost) WriteCSV(filepath string) {
 
 	if len(Resources) > 0 {
 		var matrix [][]string
-		rec := []string{"Resource Group", "ResourceID", "Service Name", "Resource Type", "Resource Location","Location Prefix", "Consumption Type", "Meter", "Cost"}
+		rec := []string{
+			"Resource Group",
+			"ResourceID",
+			"Resource Type",
+			"Resource Location",
+			"Charge Type",
+			"Service Name",
+			"Meter",
+			"Meter Category",
+			"Meter SubCategory",
+			"Service Family",
+			"Unit Of Measure",
+			"Cost Allocation Rule Name",
+			"Product",
+			"Frequency",
+			"Pricing Model",
+			"Currency",
+			"UsageQuantity",
+			"PreTaxCostUSD"}
+
 		matrix = append(matrix, rec)
 		for _, item := range Resources {
-			//fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%s\n", item.ResourceGroup, item.ResourceID, item.Service, item.ServiceType,item.Location,item.LocationPrefix, item.ChargeType,item.Meter, item.Cost)
 			var rec []string
-			rec = append(rec, item.ResourceGroup)
+			rec = append(rec, item.ResourceGroupName)
 			rec = append(rec, item.ResourceID)
-			rec = append(rec, item.Service)
-			rec = append(rec, item.ServiceType)
-			rec = append(rec, item.Location)
-			rec = append(rec, item.LocationPrefix)
+			rec = append(rec, item.ResourceType)
+			rec = append(rec, item.ResourceLocation)
 			rec = append(rec, item.ChargeType)
+			rec = append(rec, item.ServiceName)
 			rec = append(rec, item.Meter)
-			rec = append(rec, fmt.Sprintf("%f", item.Cost))
+			rec = append(rec, item.MeterCategory)
+			rec = append(rec, item.MeterSubCategory)
+			rec = append(rec, item.ServiceFamily)
+			rec = append(rec, item.UnitOfMeasure)
+			rec = append(rec, item.CostAllocationRuleName)
+			rec = append(rec, item.Product)
+			rec = append(rec, item.Frequency)
+			rec = append(rec, item.PricingModel)
+			rec = append(rec, item.Currency)
+			rec = append(rec, fmt.Sprintf("%f",item.UsageQuantity))
+			rec = append(rec, fmt.Sprintf("%f", item.PreTaxCostUSD))
 			matrix = append(matrix, rec)
 		}
 		csv.SaveMatrixToFile(filepath, matrix)
@@ -169,25 +220,35 @@ func (rgc *ResourceGroupCost) addResource() {
 		row := rgc.Properties.Rows[i]
 		//fmt.Printf("Properties: %v\n", rgc.Properties)
 		if len(row) > 0 {
-			costUSD := fmt.Sprintf("%v", row[1])
+			preTaxCost := fmt.Sprintf("%v", row[0])
+			usageQuantity := fmt.Sprintf("%v", row[1])
 			resourceId := fmt.Sprintf("%v", row[2])
 			resourceType := fmt.Sprintf("%v", row[3])
 			resourceLocation := fmt.Sprintf("%v", row[4])
 			chargeType := fmt.Sprintf("%v", row[5])
-			serviceName := fmt.Sprintf("%v", row[8])
-			meter := fmt.Sprintf("%v", row[9])
+			resourceGroupName := fmt.Sprintf("%v", row[6])
+			serviceName := fmt.Sprintf("%v", row[7])
+			meter := fmt.Sprintf("%v", row[8])
+			meterCategory := fmt.Sprintf("%v", row[9])
+			meterSubCategory := fmt.Sprintf("%v", row[10])
+			serviceFamily := fmt.Sprintf("%v", row[11])
+			unitOfMeasure := fmt.Sprintf("%v", row[12])
+			costAllocationRuleName := fmt.Sprintf("%v", row[13])
+			product := fmt.Sprintf("%v", row[14])
+			frequency := fmt.Sprintf("%v", row[15])
+			pricingModel := fmt.Sprintf("%v", row[16])
+			//tags := fmt.Sprintf("%v", row[17])
+			currency := fmt.Sprintf("%v", row[18])
 
-			//format cost
-			//if len(costUSD) > 5 {
-			//	costUSD = costUSD[0:5]
-			//}
-			cost, _ := convert.StringToFloat(costUSD)
+
+			pCost, _ := convert.StringToFloat(preTaxCost)
 			if IgnoreZeroCost {
-				if cost <= 0.0 {
+				if pCost <= 0.0 {
 					continue
 				}
 			}
 
+			uQuantity, _ :=convert.StringToFloat(usageQuantity)
 			//remove path
 			if strings.Contains(resourceType, "/") {
 				pArray := strings.Split(resourceType, "/")
@@ -201,16 +262,27 @@ func (rgc *ResourceGroupCost) addResource() {
 
 
 			resource := azure.Resource{
-				ResourceGroup: rgc.ResourceGroupName,
+				ResourceGroupName: resourceGroupName,
 				ResourceID: resourceId,
-				Service: serviceName,
-				ServiceType: resourceType,
-				Location: resourceLocation,
-				LocationPrefix: resourceLocation,
+				ResourceType: resourceType,
+				ResourceLocation: resourceLocation,
 				ChargeType: chargeType,
+				ServiceName: serviceName,
 				Meter: meter,
-				Cost: cost,
+				MeterCategory: meterCategory,
+				MeterSubCategory: meterSubCategory,
+				ServiceFamily: serviceFamily,
+				UnitOfMeasure: unitOfMeasure,
+				CostAllocationRuleName: costAllocationRuleName,
+				Product: product,
+				Frequency: frequency,
+				PricingModel: pricingModel,
+				//Tags: tags
+				Currency: currency,
+				PreTaxCostUSD: pCost,
+				UsageQuantity: uQuantity,
 			}
+
 			Resources = append(Resources, resource)
 		}
 	}

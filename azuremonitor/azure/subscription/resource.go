@@ -88,7 +88,7 @@ func (resource *ResourceSubscription) GetHeader() http.Header {
 }
 func (resource *ResourceSubscription) Print() {
 
-	fmt.Println("ResourceSubscription Report:")
+	fmt.Println("Resources:")
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
 	fmt.Println("ResourceId,Type,Kind,Location,Sku Name, Sku Tier,Tags,Plan Name, Plan Promotion Code, Plan Product, Plan Publisher, Manage By ResourceID")
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")

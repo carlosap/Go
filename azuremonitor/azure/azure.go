@@ -1,22 +1,35 @@
 package azure
 
 type Resource struct {
-	SubscriptionID string `json:"subscription_id"`
-	ResourceGroup string `json:"resource_group"`
-	ResourceID    string `json:"resource_id"`
-	Service       string `json:"service"`
-	ServiceType   string `json:"service_type"`
-	Location      string `json:"location"`
-	LocationPrefix string `json:"location_prefix"`
-	ChargeType    string `json:"charge_type"`
-	Meter         string `json:"meter"`
-	Cost          float64 `json:"cost"`
+	SubscriptionID         string   `json:"subscription_id"`
+	ResourceGroupName      string   `json:"resource_group_name"`
+	ResourceID             string   `json:"resource_id"`
+	ResourceType           string   `json:"resource_type"`
+	ResourceLocation       string   `json:"resource_location"`
+	ChargeType             string   `json:"charge_type"`
+	ServiceName            string   `json:"service_name"`
+	Meter                  string   `json:"meter"`
+	MeterCategory          string   `json:"meter_category"`
+	MeterSubCategory       string   `json:"meter_subcategory"`
+	ServiceFamily          string   `json:"service_family"`
+	UnitOfMeasure          string   `json:"unit_of_measure"`
+	CostAllocationRuleName string   `json:"cost_allocation_rule_name"`
+	Product                string   `json:"product"`
+	Frequency              string   `json:"frequency"`
+	PricingModel           string   `json:"pricing_model"`
+	Tags                   []string `json:"tags"`
+	Currency               string   `json:"currency"`
+	PreTaxCostUSD          float64  `json:"pre_tax_cost_usd"`
+	UsageQuantity          float64  `json:"usage_quantity"`
 }
 
 type Resources []Resource
 
-
 var QueryUrl = "https://management.azure.com/batch?api-version=2015-11-01"
+
+var ActualCostManagementPayload = "{\"type\":\"ActualCost\",\"dataSet\":{\"granularity\":\"None\",\"aggregation\":{\"pretaxCost\":{\"name\":\"PreTaxCostUSD\",\"function\":\"Sum\"},\"usageQuantity\":{\"name\":\"UsageQuantity\",\"function\":\"Sum\"}},\"grouping\":[{\"type\":\"Dimension\",\"name\":\"ResourceId\"},{\"type\":\"Dimension\",\"name\":\"ResourceType\"},{\"type\":\"Dimension\",\"name\":\"ResourceLocation\"},{\"type\":\"Dimension\",\"name\":\"ChargeType\"},{\"type\":\"Dimension\",\"name\":\"ResourceGroupName\"},{\"type\":\"Dimension\",\"name\":\"ServiceName\"},{\"type\":\"Dimension\",\"name\":\"Meter\"},{\"type\":\"Dimension\",\"name\":\"MeterCategory\"},{\"type\":\"Dimension\",\"name\":\"MeterSubCategory\"},{\"type\":\"Dimension\",\"name\":\"ServiceFamily\"},{\"type\":\"Dimension\",\"name\":\"UnitOfMeasure\"},{\"type\":\"Dimension\",\"name\":\"CostAllocationRuleName\"},{\"type\":\"Dimension\",\"name\":\"Product\"},{\"type\":\"Dimension\",\"name\":\"Frequency\"},{\"type\":\"Dimension\",\"name\":\"PricingModel\"}],\"include\":[\"Tags\"]},\"timeframe\":\"Custom\",\"timePeriod\":" +
+	"{\"from\":\"{{startdate}}T00:00:00+00:00\"," +
+	"\"to\":\"{{enddate}}T23:59:59+00:00\"}}"
 
 var StorageStorageAccountPayload = "{\"requests\": [{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
@@ -197,7 +210,6 @@ var StorageDiskUsagePayload = "{\"requests\": [{\"httpMethod\": \"GET\",\"url\":
 	"timespan={{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=OS%20Disk%20Queue%20Depth&aggregation=average&" +
 	"validatedimensions=false&api-version=2019-07-01\"}]}"
 
-
 var VmUsagePayload = "{\"requests\": [{\"httpMethod\": \"GET\",\"url\": " +
 	"\"https://management.azure.com/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
@@ -238,6 +250,7 @@ var VmUsagePayload = "{\"requests\": [{\"httpMethod\": \"GET\",\"url\": " +
 	"{{startdate}}T19:45:00.000Z/{{enddate}}T19:45:00.000Z&" +
 	"interval=FULL&metricnames=Network Out Total" +
 	"&aggregation=total&metricNamespace=microsoft.compute%2Fvirtualmachines&validatedimensions=false&api-version=2019-07-01\"}]}"
+
 //var VmUsagePayload = "{\"query\": " +
 //	"\"let startDateTime = datetime('{{startdate}}T08:00:00.000Z');" +
 //	"let endDateTime = datetime('{{enddate}}T16:00:00.000Z');" +
@@ -339,7 +352,6 @@ var LocationNames = "location == 'eastus','East US'," +
 	"location == 'switzerlandwest','Switzerland West'," +
 	"location == 'ukwest','UK West'," +
 	"location == 'uaecentral','UAE Central',"
-
 
 //===================================prefix region and workspace=============================
 //If you are wondering why your Azure subscription has a resource group

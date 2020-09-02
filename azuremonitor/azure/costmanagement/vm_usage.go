@@ -55,7 +55,7 @@ func (vm *VirtualMachine) GetPayload() string {
 	payload = strings.ReplaceAll(payload, "{{startdate}}", StartDate)
 	payload = strings.ReplaceAll(payload, "{{enddate}}", EndDate)
 	payload = strings.ReplaceAll(payload, "{{subscriptionid}}", configuration.AccessToken.SubscriptionID)
-	payload = strings.ReplaceAll(payload, "{{resourcegroup}}", vm.Resource.ResourceGroup)
+	payload = strings.ReplaceAll(payload, "{{resourcegroup}}", vm.Resource.ResourceGroupName)
 	payload = strings.ReplaceAll(payload, "{{resourceid}}", vm.Resource.ResourceID)
 	return payload
 }
@@ -74,16 +74,62 @@ func (vm *VirtualMachine) Print() {
 	if len(Virtual_Machines) > 0 {
 		fmt.Printf("VM Usage Report:\n")
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-		fmt.Println("Resource Group,ResourceID,Service Name,Resource Type,Resource Location,Location Prefix,Consumption Type,Meter,Cost," +
-			"OS Type, Disk Name, Storage Account Type" +
-			"Percentage CPU Avg,Bytes read from disk during monitoring period,Bytes written to disk during monitoring period,Incoming Traffic,Outgoing Traffic")
+		fmt.Println("Resource Group," +
+			"ResourceID," +
+			"Resource Type," +
+			"Resource Location," +
+			"Charge Type," +
+			"Service Name," +
+			"Meter," +
+			"Meter Category," +
+			"Meter SubCategory," +
+			"Service Family," +
+			"Unit Of Measure," +
+			"Cost Allocation Rule Name," +
+			"Product," +
+			"Frequency," +
+			"Pricing Model," +
+			"Currency," +
+			"UsageQuantity," +
+			"PreTaxCostUSD," +
+			"OS Type," +
+			"Disk Name," +
+			"Storage Account Type" +
+			"Percentage CPU Avg," +
+			"Bytes Read," +
+			"Bytes Written," +
+			"Incoming Traffic (Network Received)," +
+			"Outgoing Traffic (Network Sent)")
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 		for _, item := range Virtual_Machines {
-			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,$%f,%s,%s,%s,%f,%f,%f,%f,%f,%f,%f\n",item.Resource.ResourceGroup, item.Resource.ResourceID, item.Resource.Service,
-				item.Resource.ServiceType, item.Resource.Location,item.Resource.LocationPrefix, item.Resource.ChargeType, item.Resource.Meter, item.Resource.Cost,
-				item.OsDisk.OsType, item.OsDisk.Name, item.OsDisk.ManagedDisk.StorageAccountType,
-				item.CpuUtilization, item.DiskReads,item.DiskWrites, item.NetworkReceivedRate, item.NetworkSentRate,
-				item.NetworkSentRate, item.NetworkReceivedRate)
+			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%f,$%f,%s,%s,%s,%f,%f,%f,%f,%f\n",
+				item.Resource.ResourceGroupName,
+				item.Resource.ResourceID,
+				item.Resource.ResourceType,
+				item.Resource.ResourceLocation,
+				item.Resource.ChargeType,
+				item.Resource.ServiceName,
+				item.Resource.Meter,
+				item.Resource.MeterCategory,
+				item.Resource.MeterSubCategory,
+				item.Resource.ServiceFamily,
+				item.Resource.UnitOfMeasure,
+				item.Resource.CostAllocationRuleName,
+				item.Resource.Product,
+				item.Resource.Frequency,
+				item.Resource.PricingModel,
+				item.Resource.Currency,
+				item.Resource.UsageQuantity,
+				item.Resource.PreTaxCostUSD,
+
+				item.OsDisk.OsType,
+				item.OsDisk.Name,
+				item.OsDisk.ManagedDisk.StorageAccountType,
+				item.CpuUtilization,
+				item.DiskReads,
+				item.DiskWrites,
+				item.NetworkReceivedRate,
+				item.NetworkSentRate)
 		}
 	} else {
 		fmt.Printf("-")
