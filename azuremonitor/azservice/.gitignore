@@ -9,3 +9,4 @@ config.json
 /spartan
 /resource_group_cost.csv
 *.csv
+*.xlsx
