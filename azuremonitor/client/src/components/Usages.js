@@ -22,8 +22,8 @@ const useStyles = makeStyles({
 	},
 	columnContainer: {
 		width: '50%',
-		paddingRight: 8,
-		paddingLeft: 8
+		paddingRight: 10,
+		paddingLeft: 10
 	}
 })
 
@@ -85,7 +85,7 @@ const Usages = (props) => {
 			</DialogTitle>
 
 			<DialogContent className={styles.usageContainer}>
-				<div className={styles.columnContainer}>
+				<div className={styles.columnContainer} style={{marginRight: 10}}>
 					<InfoHeader 
 						title={resource.type} 
 						icon={<ComputerIcon color="primary" style={{marginRight: 5}}/>}
@@ -96,7 +96,7 @@ const Usages = (props) => {
 					))}
 				</div>
 
-				<div className={styles.columnContainer}>
+				<div className={styles.columnContainer} style={{marginLeft:10}}>
 					<InfoHeader 
 						title="Usage" 
 						icon={<InfoIcon color="primary" style={{marginRight: 5}}/>}
