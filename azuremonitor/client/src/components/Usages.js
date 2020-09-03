@@ -20,7 +20,11 @@ const useStyles = makeStyles({
 		display: 'flex',
 		alignItems: 'center',
 	},
-
+	columnContainer: {
+		width: '50%',
+		paddingRight: 8,
+		paddingLeft: 8
+	}
 })
 
 const InfoHeader = (props) => {
@@ -40,7 +44,7 @@ const InfoHeader = (props) => {
 const InfoLine = (props) => {
 	const {name, value} = props
 	return (
-		<div style={{display:'flex', marginTop: 5}}>
+		<div style={{display:'flex', marginTop: 10}}>
 			<div style={{width:'50%'}}>
 				<Typography 
 					color='textSecondary'
@@ -73,7 +77,7 @@ const Usages = (props) => {
 				</IconButton>
 			</Tooltip>
 
-			<Dialog maxWidth='md' fullWidth open={open} onClose={() => setOpen(false)}>
+			<Dialog maxWidth='lg' fullWidth open={open} onClose={() => setOpen(false)}>
 
 			<DialogTitle className={styles.titleContainer}>
 					<Typography style={{fontWeight:'bold'}} variant='h4'> Usages </Typography>
@@ -81,7 +85,7 @@ const Usages = (props) => {
 			</DialogTitle>
 
 			<DialogContent className={styles.usageContainer}>
-				<div style={{width: '50%'}}>
+				<div className={styles.columnContainer}>
 					<InfoHeader 
 						title={resource.type} 
 						icon={<ComputerIcon color="primary" style={{marginRight: 5}}/>}
@@ -92,7 +96,7 @@ const Usages = (props) => {
 					))}
 				</div>
 
-				<div style={{width: '50%'}}>
+				<div className={styles.columnContainer}>
 					<InfoHeader 
 						title="Usage" 
 						icon={<InfoIcon color="primary" style={{marginRight: 5}}/>}

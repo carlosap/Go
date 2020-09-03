@@ -62,7 +62,7 @@ const ResourceGroups = (props) => {
       paddingLeft:'36px'
     }
   }
-  const headerTexts = ['Resource Name', 'Type', 'Consumption', 'Savings', 'Actions']
+  const headerTexts = ['Resource Name', 'Type', 'Product', 'Consumption', 'Savings', 'Actions']
   
   return (
     <React.Fragment>
@@ -110,6 +110,9 @@ const ResourceGroups = (props) => {
                               <TableRow key={idx}>
                                 <BorderlessCell style={styles.padding}>{resource.resourceName}</BorderlessCell>
                                 <BorderlessCell align='center' style={styles.padding}>{resource.type}</BorderlessCell>
+                                <BorderlessCell align='center' style={styles.padding}>
+                                  {resource.product ? resource.product : "-"}
+                                </BorderlessCell>
                                 <BorderlessCell align='center' style={styles.padding}>${resource.consumption}</BorderlessCell>
                                 <BorderlessCell align='center' style={styles.padding}>{resource.savings}</BorderlessCell>
                                 <BorderlessCell align='center' style={styles.padding}>
@@ -126,6 +129,9 @@ const ResourceGroups = (props) => {
                           <TableRow key={idx}>
                               <TableCell style={styles.padding}>{resource.resourceName}</TableCell>
                               <TableCell align='center' style={styles.padding}>{resource.type}</TableCell>
+                              <TableCell align='center' style={styles.padding}>
+                                {resource.product ? resource.product : "-"}
+                              </TableCell>
                               <TableCell align='center' style={styles.padding}>${resource.consumption}</TableCell>
                               <TableCell align='center' style={styles.padding}>{resource.savings}</TableCell>
                               <TableCell align='center' style={styles.padding}>

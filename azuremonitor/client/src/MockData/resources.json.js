@@ -55,6 +55,7 @@ export const Resources =
                     {
                         resourceName: "elysium",
                         type: "Virtual Machine",
+                        product: "Virtual Machines DV3 Series Windows - D2 V3 - us east",
                         resourceInfo: [
                             {
                                 displayName: "Resource Location",
@@ -144,7 +145,7 @@ export const Resources =
                             },
                             {
                                 displayName: "Incoming Traffic (Network Received)",
-                                displayValue: "1589708996111111111111111111111111111111"
+                                displayValue: "1589708996"
                             },
                             {
                                 displayName: "Outgoing Traffic (Network Sent)",
@@ -194,6 +195,7 @@ export const Resources =
                     {
                         resourceName: "elysium_disk1_557a7572648b494bb31b135726187544",
                         type: "Disk",
+                        product: "premium ssd managed disks - p10 - us east",
                         resourceInfo: [],
                         resourceUsage: [],
                         consumption: 50000,
