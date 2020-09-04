@@ -10,6 +10,9 @@ const useStyles = makeStyles((theme) => ({
         display:'flex',
         justifyContent: 'space-between'
     },
+    SearchBarContainer: {
+        width: 600
+    },
     linksContainer: {
         display: "flex",
     },
@@ -29,7 +32,7 @@ const Navbar = () => {
                     {NavbarRoutes.title}
                 </Typography>
                 
-                <div>
+                <div className={styles.SearchBarContainer}>
                     <SearchBar/>
                 </div>
 
