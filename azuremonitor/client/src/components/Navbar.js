@@ -3,10 +3,12 @@ import NavbarRoutes from '../routes';
 import { makeStyles } from '@material-ui/core/styles';
 import {Link} from "react-router-dom"
 import {AppBar, Toolbar, Typography} from '@material-ui/core'
+import SearchBar from './SearchBar'
 
 const useStyles = makeStyles((theme) => ({
-    title:{
-        flexGrow: 1
+    toolBarContainer: {
+        display:'flex',
+        justifyContent: 'space-between'
     },
     linksContainer: {
         display: "flex",
@@ -22,11 +24,15 @@ const Navbar = () => {
 
     return (
         <AppBar position="static">
-            <Toolbar>
-                <Typography color="inherit" variant="h5" className={styles.title}>
+            <Toolbar className={styles.toolBarContainer}>
+                <Typography color="inherit" variant="h5">
                     {NavbarRoutes.title}
                 </Typography>
                 
+                <div>
+                    <SearchBar/>
+                </div>
+
                 <div className={styles.linksContainer}>
                     {NavbarRoutes.routes.map((menuItem, index) => (
                         !menuItem.hidden && (
