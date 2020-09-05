@@ -31,120 +31,87 @@ var ActualCostManagementPayload = "{\"type\":\"ActualCost\",\"dataSet\":{\"granu
 	"{\"from\":\"{{startdate}}T00:00:00+00:00\"," +
 	"\"to\":\"{{enddate}}T23:59:59+00:00\"}}"
 
-var StorageStorageAccountPayload = "{\"requests\": [{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+var StorageStorageAccountPayload = "{\"requests\":[{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T20:00:00.000Z/{{enddate}}T20:00:00.000Z&interval=FULL&metricnames=Egress&aggregation=average&" +
-	"metricNamespace=microsoft.storage%2Fstorageaccounts&validatedimensions=false&api-version=2019-07-01\"}, " +
-	"{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T20:00:00.000Z/{{enddate}}T20:00:00.000Z&interval=FULL&metricnames=Egress&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T20:00:00.000Z/{{enddate}}T20:00:00.000Z&interval=FULL&metricnames=Ingress&aggregation=average&" +
-	"metricNamespace=microsoft.storage%2Fstorageaccounts&validatedimensions=false&api-version=2019-07-01\"}, " +
-	"{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T20:00:00.000Z/{{enddate}}T20:00:00.000Z&interval=FULL&metricnames=Ingress&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T20:00:00.000Z/{{enddate}}T20:00:00.000Z&interval=FULL&metricnames=Transactions&" +
-	"aggregation=total&metricNamespace=microsoft.storage%2Fstorageaccounts&validatedimensions=false&api-version=2019-07-01\"}, " +
-	"{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
-	"{{subscriptionid}}/resourceGroups/" +
-	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
-	"{{resourceid}}/blobServices/default/providers/microsoft.Insights/metrics?" +
-	"timespan={{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=Ingress&" +
-	"aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Fblobservices&validatedimensions=false&api-version=2019-07-01\"}, " +
-	"{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
-	"{{subscriptionid}}/resourceGroups/" +
-	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
-	"{{resourceid}}/blobServices/default/providers/microsoft.Insights/metrics?" +
-	"timespan={{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&" +
-	"metricnames=Transactions&aggregation=total&metricNamespace=microsoft.storage%2Fstorageaccounts%2Fblobservices&" +
-	"validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T20:00:00.000Z/{{enddate}}T20:00:00.000Z&interval=FULL&metricnames=Transactions&aggregation=total&metricNamespace=microsoft.storage%2Fstorageaccounts&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/blobServices/default/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T20:15:00.000Z/{{enddate}}T20:15:00.000Z&interval=FULL&metricnames=BlobCount&" +
-	"aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Fblobservices&" +
-	"validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=Egress&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Fblobservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
+	"{{resourceid}}/blobServices/default/providers/microsoft.Insights/metrics?timespan=" +
+	"{{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=Ingress&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Fblobservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
+	"{{resourceid}}/blobServices/default/providers/microsoft.Insights/metrics?timespan=" +
+	"{{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=Transactions&aggregation=total&metricNamespace=microsoft.storage%2Fstorageaccounts%2Fblobservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
+	"{{resourceid}}/blobServices/default/providers/microsoft.Insights/metrics?timespan=" +
+	"{{startdate}}T20:15:00.000Z/{{enddate}}T20:15:00.000Z&interval=FULL&metricnames=BlobCount&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Fblobservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/fileServices/default/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=FileCount&aggregation=average&" +
-	"metricNamespace=microsoft.storage%2Fstorageaccounts%2Ffileservices&validatedimensions=false&api-version=2019-07-01\"}," +
-	"{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=FileCount&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ffileservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/fileServices/default/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T20:15:00.000Z/{{enddate}}T20:15:00.000Z&interval=FULL&metricnames=Egress&" +
-	"aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ffileservices&validatedimensions=false&api-version=2019-07-01\"}," +
-	" {\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T20:15:00.000Z/{{enddate}}T20:15:00.000Z&interval=FULL&metricnames=Egress&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ffileservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/fileServices/default/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T20:15:00.000Z/{{enddate}}T20:15:00.000Z&interval=FULL&metricnames=Ingress&" +
-	"aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ffileservices&validatedimensions=false&api-version=2019-07-01\"}," +
-	"{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
-	"{{subscriptionid}}/resourceGroups/{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
+	"{{startdate}}T20:15:00.000Z/{{enddate}}T20:15:00.000Z&interval=FULL&metricnames=Ingress&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ffileservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
+	"{{subscriptionid}}/resourceGroups/" +
+	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/fileServices/default/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T20:15:00.000Z/{{enddate}}T20:15:00.000Z&interval=FULL&" +
-	"metricnames=Transactions&aggregation=total&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ffileservices&" +
-	"validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T20:15:00.000Z/{{enddate}}T20:15:00.000Z&interval=FULL&metricnames=Transactions&aggregation=total&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ffileservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/queueServices/default/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=QueueCount&" +
-	"aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Fqueueservices&" +
-	"validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=QueueCount&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Fqueueservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/queueServices/default/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T20:15:00.000Z/{{enddate}}T20:15:00.000Z&interval=FULL&metricnames=Egress&aggregation=average&" +
-	"metricNamespace=microsoft.storage%2Fstorageaccounts%2Fqueueservices&validatedimensions=false&" +
-	"api-version=2019-07-01\"}, {\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T20:15:00.000Z/{{enddate}}T20:15:00.000Z&interval=FULL&metricnames=Egress&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Fqueueservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/queueServices/default/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T20:15:00.000Z/{{enddate}}T20:15:00.000Z&interval=FULL&" +
-	"metricnames=Ingress&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Fqueueservices&" +
-	"validatedimensions=false&api-version=2019-07-01\"}, {\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T20:15:00.000Z/{{enddate}}T20:15:00.000Z&interval=FULL&metricnames=Ingress&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Fqueueservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/queueServices/default/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T20:15:00.000Z/{{enddate}}T20:15:00.000Z&interval=FULL&metricnames=Transactions&" +
-	"aggregation=total&metricNamespace=microsoft.storage%2Fstorageaccounts%2Fqueueservices&" +
-	"validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T20:15:00.000Z/{{enddate}}T20:15:00.000Z&interval=FULL&metricnames=Transactions&aggregation=total&metricNamespace=microsoft.storage%2Fstorageaccounts%2Fqueueservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/tableServices/default/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=TableCount&" +
-	"aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ftableservices&validatedimensions=false&api-version=2019-07-01\"}, " +
-	"{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=TableCount&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ftableservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/tableServices/default/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=TableEntityCount&" +
-	"aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ftableservices&validatedimensions=false&api-version=2019-07-01\"}," +
-	"{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T22:00:00.000Z/{{enddate}}T22:00:00.000Z&interval=FULL&metricnames=TableEntityCount&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ftableservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/tableServices/default/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T08:25:00.000Z/{{enddate}}T20:25:00.000Z&interval=FULL&" +
-	"metricnames=Egress&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ftableservices&" +
-	"validatedimensions=false&api-version=2019-07-01\"}, {\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T08:25:00.000Z/{{enddate}}T20:25:00.000Z&interval=FULL&metricnames=Egress&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ftableservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/tableServices/default/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T08:25:00.000Z/{{enddate}}T20:25:00.000Z&interval=FULL&" +
-	"metricnames=Ingress&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ftableservices&" +
-	"validatedimensions=false&api-version=2019-07-01\"}, {\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
+	"{{startdate}}T08:25:00.000Z/{{enddate}}T20:25:00.000Z&interval=FULL&metricnames=Ingress&aggregation=average&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ftableservices&validatedimensions=false&api-version=2019-07-01\"},{\"httpMethod\":\"GET\",\"relativeUrl\":\"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
 	"{{resourcegroup}}/providers/Microsoft.Storage/storageAccounts/" +
 	"{{resourceid}}/tableServices/default/providers/microsoft.Insights/metrics?timespan=" +
-	"{{startdate}}T08:25:00.000Z/{{enddate}}T20:25:00.000Z&interval=FULL&metricnames=Transactions&" +
-	"aggregation=total&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ftableservices&" +
-	"validatedimensions=false&api-version=2019-07-01\"}]}"
+	"{{startdate}}T08:25:00.000Z/{{enddate}}T20:25:00.000Z&interval=FULL&metricnames=Transactions&aggregation=total&metricNamespace=microsoft.storage%2Fstorageaccounts%2Ftableservices&validatedimensions=false&api-version=2019-07-01\"}]}"
 
 var LogicAppUsagePayload = "{\"requests\": [{\"httpMethod\": \"GET\",\"relativeUrl\": \"/subscriptions/" +
 	"{{subscriptionid}}/resourceGroups/" +
