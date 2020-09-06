@@ -80,7 +80,7 @@ func (sd *StorageDisk) GetHeader() http.Header {
 func (sd *StorageDisk) Print() {
 
 	if len(Storage_Disks) > 0 {
-		fmt.Printf("Usage Report Storage Disk:\n")
+		fmt.Printf("\nUsage Report Storage Disk- from: [%s]  to: [%s]\n", StartDate, EndDate)
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 		fmt.Println("Resource Group," +
 			"ResourceID," +

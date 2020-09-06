@@ -11,6 +11,7 @@ var (
 	csvStorageDiskReport = "storage_disk.csv"
 	csvVirtualMachineReport = "virtual_machine.csv"
 	csvLogicAppWorkflowReport = "logicapp_workflow.csv"
+	csvStorageAccountReport = "storage_account.csv"
 )
 
 func (rgu *ResourceGroupUsage) RunAll() {
@@ -29,6 +30,11 @@ func (rgu *ResourceGroupUsage) RunAll() {
 
 	// logicapps workflow
 	rgu.logicAppWorkflows()
+
+	// storage storageaccounts (files, blog, queue)
+	rgu.storageStorageAccount()
+
+
 }
 
 func (rgu *ResourceGroupUsage) virtualMachines() {
@@ -50,6 +56,16 @@ func (rgu *ResourceGroupUsage) storageDisk() {
 		filesystem.RemoveFile(csvStorageDiskReport)
 		sd.WriteCSV(csvStorageDiskReport)
 		fmt.Printf("Done. report was generated - %s\n\n\n\n\n", csvStorageDiskReport)
+	}
+}
+func (rgu *ResourceGroupUsage) storageStorageAccount() {
+	st := StorageAccount{}
+	st.ExecuteRequest(&st)
+	st.Print()
+	if SaveCsv {
+		filesystem.RemoveFile(csvStorageAccountReport)
+		st.WriteCSV(csvStorageAccountReport)
+		fmt.Printf("Done. report was generated - %s\n\n\n\n\n", csvStorageAccountReport)
 	}
 }
 

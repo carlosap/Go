@@ -3,12 +3,11 @@ package costmanagement
 import (
 	"encoding/json"
 	"fmt"
-	str "github.com/Go/azuremonitor/common/strings"
 	"github.com/Go/azuremonitor/azure"
 	"github.com/Go/azuremonitor/azure/oauth2"
-	"github.com/Go/azuremonitor/azure/subscription"
 	"github.com/Go/azuremonitor/common/csv"
 	"github.com/Go/azuremonitor/common/httpclient"
+	str "github.com/Go/azuremonitor/common/strings"
 	"net/http"
 	"strings"
 )
@@ -19,6 +18,7 @@ type StorageAccountResponse struct {
 
 type StorageAccount struct {
 	Resource azure.Resource `json:"resource"`
+
 	EgressAvg     float64 `json:"egress_avg"`
 	IngressAvg     float64 `json:"ingress_avg"`
 	TransactionTotal         float64 `json:"transaction_total"`
@@ -57,11 +57,11 @@ var (
 
 func (st *StorageAccount) ExecuteRequest(r httpclient.IRequest) {
 
-	//1-Filters Storage Disk only
+	//1-Filters Storage Accounts only
 	requests := st.getRequests()
 	requests.Execute()
 
-	//2-Serializes All Storage Disks and Sets Metrics
+	//2-Serializes All Storage Accounts and Sets Metrics
 	Storage_StorageAccounts = st.parseRequests(requests)
 
 }
@@ -98,7 +98,7 @@ func (st *StorageAccount) GetHeader() http.Header {
 func (st *StorageAccount) Print() {
 
 	if len(Storage_StorageAccounts) > 0 {
-		fmt.Printf("Usage Report Storage Disk:\n")
+		fmt.Printf("\nUsage Report Storage Accounts- from: [%s]  to: [%s]\n", StartDate, EndDate)
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 		fmt.Println("Resource Group," +
 			"ResourceID," +
@@ -216,11 +216,11 @@ func (st *StorageAccount) getRequests() httpclient.Requests {
 }
 func (st *StorageAccount) parseRequests(requests httpclient.Requests) StorageAccounts {
 	staccounts := StorageAccounts{}
-	var sdResponse BatchResponse
+	var stResponse BatchResponse
 	for _, item := range requests {
 		bData := item.GetResponse()
 		if len(bData) > 0 {
-			err := json.Unmarshal(bData, &sdResponse)
+			err := json.Unmarshal(bData, &stResponse)
 			if err != nil {
 				fmt.Printf("error: failed to unmarshal - %v\n\n", err)
 			}
@@ -228,7 +228,7 @@ func (st *StorageAccount) parseRequests(requests httpclient.Requests) StorageAcc
 			stRef, hasKey := mapStorageAccount[item.Name]
 			if hasKey {
 				st.Resource = stRef.Resource
-				st.Responses = sdResponse.Responses
+				st.Responses = stResponse.Responses
 				st.setUsageValue()
 				staccounts = append(staccounts, *st)
 			}
@@ -236,6 +236,7 @@ func (st *StorageAccount) parseRequests(requests httpclient.Requests) StorageAcc
 	}
 	return staccounts
 }
+
 func (st *StorageAccount) setUsageValue() {
 
 	if len(st.Responses) > 0 {
@@ -311,7 +312,7 @@ func getTotalValue(timeseries []Timeseries) float64 {
 
 func (st *StorageAccount) WriteCSV(filepath string) {
 
-	if len(Storage_Disks) > 0 {
+	if len(Storage_StorageAccounts) > 0 {
 		var matrix [][]string
 		rec := []string{
 			"Resource Group",
@@ -332,13 +333,28 @@ func (st *StorageAccount) WriteCSV(filepath string) {
 			"Currency",
 			"UsageQuantity",
 			"PreTaxCostUSD",
-			"Disk Read Bytes/sec Avg",
-			"Disk Write Bytes/sec Avg",
-			"Disk Read Operations/Sec Avg",
-			"Disk Write Operations/Sec Avg",
-			"Disk Queue Depth"}
+			"StorageAccountEgressAvg",
+				"StorageAccountIngressAvg",
+				"StorageAccountTransactionTotal",
+				"BlobEgressAvg",
+				"BlobIngressAvg",
+				"BlobTransactionTotal",
+				"BlobCountAvg",
+				"FileCountAvg",
+				"FileEgressAvg",
+				"FileIngressAvg",
+				"FileTransactionTotal",
+				"QueueCountAvg",
+				"QueueEgressAvg",
+				"QueueIngress",
+				"QueueTransactionTotal",
+				"TableCountAvg",
+				"TableEntityCountAvg",
+				"TableEgressAvg",
+				"TableIngressAvg",
+				"TableTransactionsTotal"}
 		matrix = append(matrix, rec)
-		for _, item := range Storage_Disks {
+		for _, item := range Storage_StorageAccounts {
 			var rec []string
 			rec = append(rec, item.Resource.ResourceGroupName)
 			rec = append(rec, item.Resource.ResourceID)
@@ -358,11 +374,30 @@ func (st *StorageAccount) WriteCSV(filepath string) {
 			rec = append(rec, item.Resource.Currency)
 			rec = append(rec, fmt.Sprintf("%f", item.Resource.UsageQuantity))
 			rec = append(rec, fmt.Sprintf("%f", item.Resource.PreTaxCostUSD))
-			rec = append(rec, fmt.Sprintf("%f",item.DiskReads))
-			rec = append(rec, fmt.Sprintf("%f",item.DiskWrite))
-			rec = append(rec, fmt.Sprintf("%f",item.DiskReadOperations))
-			rec = append(rec, fmt.Sprintf("%f",item.DiskWriteOperations))
-			rec = append(rec, fmt.Sprintf("%f",item.QueueDepth))
+
+			rec = append(rec, fmt.Sprintf("%f",item.EgressAvg))
+			rec = append(rec, fmt.Sprintf("%f",item.IngressAvg))
+			rec = append(rec, fmt.Sprintf("%f",item.TransactionTotal))
+			rec = append(rec, fmt.Sprintf("%f",item.BlobEgressAvg))
+			rec = append(rec, fmt.Sprintf("%f",item.BlobIngressAvg))
+			rec = append(rec, fmt.Sprintf("%f",item.BlobTransactionTotal))
+			rec = append(rec, fmt.Sprintf("%f",item.BlobCountAvg))
+			rec = append(rec, fmt.Sprintf("%f",item.FileCountAvg))
+			rec = append(rec, fmt.Sprintf("%f",item.FileEgressAvg))
+			rec = append(rec, fmt.Sprintf("%f",item.FileIngressAvg))
+			rec = append(rec, fmt.Sprintf("%f",item.FileTransactionTotal))
+			rec = append(rec, fmt.Sprintf("%f",item.QueueCountAvg))
+
+			rec = append(rec, fmt.Sprintf("%f",item.QueueEgressAvg))
+			rec = append(rec, fmt.Sprintf("%f",item.QueueIngress))
+			rec = append(rec, fmt.Sprintf("%f",item.QueueTransactionTotal))
+			rec = append(rec, fmt.Sprintf("%f",item.TableCountAvg))
+			rec = append(rec, fmt.Sprintf("%f",item.TableEntityCountAvg))
+			rec = append(rec, fmt.Sprintf("%f",item.TableEgressAvg))
+			rec = append(rec, fmt.Sprintf("%f",item.TableIngressAvg))
+			rec = append(rec, fmt.Sprintf("%f",item.TableTransactionsTotal))
+
+
 			matrix = append(matrix, rec)
 		}
 		csv.SaveMatrixToFile(filepath, matrix)

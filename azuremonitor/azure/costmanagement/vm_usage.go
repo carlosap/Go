@@ -72,7 +72,7 @@ func (vm *VirtualMachine) GetHeader() http.Header {
 }
 func (vm *VirtualMachine) Print() {
 	if len(Virtual_Machines) > 0 {
-		fmt.Printf("VM Usage Report:\n")
+		fmt.Printf("\nVM Usage Report- from: [%s]  to: [%s]\n", StartDate, EndDate)
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 		fmt.Println("Resource Group," +
 			"ResourceID," +

@@ -89,7 +89,7 @@ func (rgc *ResourceGroupCost) GetHeader() http.Header {
 }
 func (rgc *ResourceGroupCost) Print() {
 	if len(Resources) > 0 {
-		fmt.Println("Consumption Report:")
+		fmt.Printf("\nConsumption Report- from: [%s]  to: [%s]\n", StartDate, EndDate)
 		fmt.Println("-------------------------------------------------------------------------------------------------------------------------------")
 		fmt.Println("Resource Group," +
 			"ResourceID," +

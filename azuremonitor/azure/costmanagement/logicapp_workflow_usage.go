@@ -74,7 +74,7 @@ func (lg *LogicAppWorkFlow) GetHeader() http.Header {
 func (lg *LogicAppWorkFlow) Print() {
 
 	if len(LogicApp_Workflows) > 0 {
-		fmt.Printf("Usage Report Logic App Workflow:\n")
+		fmt.Printf("\nUsage Report Logic App Workflow- from: [%s]  to: [%s]\n", StartDate, EndDate)
 		fmt.Println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 		fmt.Println("Resource Group," +
 			"ResourceID," +
