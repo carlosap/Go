@@ -38,6 +38,17 @@ func RemoveFile(path string) bool {
 	}
 	return true
 }
+
+func ReadFile(path string) []byte {
+	var retval []byte
+	retval, err := ioutil.ReadFile("foo.txt")
+if err != nil {
+    log.Fatalf("ioutil.ReadFile failed with '%s'\n", err)
+}
+
+ return retval
+}
+
 func RemoveDirectory(path string) {
 	err := os.RemoveAll(path)
 	if err != nil {
