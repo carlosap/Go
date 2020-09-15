@@ -24,7 +24,7 @@ const MoreVert = (props) => {
             resource: resourceName,
             amount: amount
         }
-
+        console.log(payload)
         dispatch({type: 'SET_SAVINGS', payload: payload})
         handleClose()
     }
