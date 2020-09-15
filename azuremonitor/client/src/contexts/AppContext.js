@@ -14,7 +14,8 @@ const AppContextProvider = (props) => {
         return {
             Resources: Resources,
             Questions: VMQuestions,
-            tableState: []
+            tableState: [],
+            searchFilter: ''
         }
     })
 

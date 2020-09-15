@@ -1,4 +1,5 @@
-import React from "react"; 
+import React, {useContext} from "react"; 
+import { AppContext } from "../contexts/AppContext"
 import { InputBase } from "@material-ui/core"
 import { fade, makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
@@ -39,8 +40,13 @@ const useStyles = makeStyles((theme) => ({
 
 function SearchBar(props) {
     const classes = useStyles();
+    const {state, dispatch} = useContext(AppContext)
+    const handleChange = (event) => {
+        const {value} = event.target
+        dispatch({type: 'UPDATE_SEARCH_FILTER', payload: value})
+    }  
 
-    return (
+    return (    
         <div className={classes.search}>
             <div className={classes.searchIcon}>
                 <SearchIcon />
@@ -52,6 +58,7 @@ function SearchBar(props) {
                 input: classes.inputInput,
                 }}
                 inputProps={{ 'aria-label': 'search' }}
+                onChange={handleChange}
             />
         </div>
     )

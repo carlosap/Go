@@ -109,6 +109,11 @@ const appReducer = (state, action) => {
         tableState: state.tableState.filter(name => name !== action.payload)
       }
 
+    case 'UPDATE_SEARCH_FILTER' :
+      return {
+        ...state,
+        searchFilter: action.payload
+      }
     default:
       return state;
   }
