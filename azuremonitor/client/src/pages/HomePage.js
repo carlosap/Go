@@ -8,6 +8,7 @@ import {Grid, Typography} from '@material-ui/core'
 // Import Componets
 import AnalyticsWidget from '../components/AnalyticsWidget'
 import ResourcesTable from '../components/ResourcesTable'
+import FilteredTable from '../components/FilteredTable'
 import LineGraph from '../components/LineGraph'
 import PieChart from '../components/PieChart'
 import Logo from '../assets/images/logo.png'
@@ -67,11 +68,18 @@ const HomePage = () => {
             </Grid>
 
             <Grid style={{padding:'30px'}} item sm={12}>
+                {state.searchFilter === ''  ? 
                 <ResourcesTable 
                     tableState={state.tableState} 
                     data={state.Resources} 
                     dispatch={dispatch}
-                />
+                /> : 
+                    <FilteredTable
+                        data={state.Resources}
+                        filter={state.searchFilter}
+                    />
+                }
+                
             </Grid>
 
             <Grid style={{paddingLeft:'30px', paddingRight:'30px'}} container item sm={12} spacing={2}>

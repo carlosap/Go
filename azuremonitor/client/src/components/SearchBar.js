@@ -40,7 +40,8 @@ const useStyles = makeStyles((theme) => ({
 
 function SearchBar(props) {
     const classes = useStyles();
-    const {state, dispatch} = useContext(AppContext)
+    const {dispatch} = useContext(AppContext)
+    
     const handleChange = (event) => {
         const {value} = event.target
         dispatch({type: 'UPDATE_SEARCH_FILTER', payload: value})

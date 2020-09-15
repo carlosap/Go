@@ -91,8 +91,12 @@ const Usages = (props) => {
 						icon={<ComputerIcon color="primary" style={{marginRight: 5}}/>}
 					/>
 
-					{resource.resourceInfo.map((info) => (
-						<InfoLine name={info.displayName} value={info.displayValue}/>
+					{resource.resourceInfo.map((info, idx) => (
+						<InfoLine 
+							key={idx}
+							name={info.displayName} 
+							value={info.displayValue}
+						/>
 					))}
 				</div>
 
@@ -102,8 +106,12 @@ const Usages = (props) => {
 						icon={<InfoIcon color="primary" style={{marginRight: 5}}/>}
 					/>
 
-					{resource.resourceUsage.map((info) => (
-						<InfoLine name={info.displayName} value={info.displayValue}/>
+					{resource.resourceUsage.map((info, idx) => (
+						<InfoLine 
+							key={idx} 
+							name={info.displayName} 
+							value={info.displayValue}
+						/>
 					))}
 				</div>
 			</DialogContent>
